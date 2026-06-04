@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Joblog Teknisi</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot,
+  query, orderBy, doc, setDoc, getDoc, getDocs,
+  deleteDoc, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ════════════════════════════════════════════════
+// ⚠️  GANTI BAGIAN INI DENGAN KONFIGURASI FIREBASE
+// ════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyC2nl6YOKHxdFdLY-70k7tl0mkYP6wfstg",
+  authDomain:        "jobtek-etc.firebaseapp.com",
+  projectId:         "jobtek-etc",
+  storageBucket:     "jobtek-etc.firebasestorage.app",
+  messagingSenderId: "839429742203",
+  appId:             "1:839429742203:web:cbbe55d4acec56aa968cde"
+};
+// ════════════════════════════════════════════════
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+window._fb = { db, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, getDocs, deleteDoc, writeBatch };
+window._fbReady = true;
+window.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+:root{
+  --bg:#F4F2ED;--surface:#fff;--border:#D8D5CE;--text:#1A1A1A;
+  --muted:#6B6861;--accent:#1A4FBE;
+  --ok:#1A7A4A;--ok-light:#E6F4ED;
+  --warn:#B85E00;--warn-light:#FDF0E0;
+  --danger:#C0392B;--danger-light:#FDECEA;
+  --purple:#6B21A8;--purple-light:#F3E8FF;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --nav-h:60px;--header-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100%;font-size:14px;line-height:1.6;padding-bottom:var(--nav-h)}
+
+/* LOADING */
+#loading-screen{position:fixed;inset:0;background:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+#loading-screen .ll{font-family:var(--mono);font-size:18px;font-weight:500;color:#fff;letter-spacing:.05em}
+#loading-screen .ll span{color:#6B9BFF}
+#loading-screen .lsub{font-family:var(--mono);font-size:12px;color:#888}
+.spinner{width:28px;height:28px;border:2px solid #444;border-top-color:#6B9BFF;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CONFIG BANNER */
+#config-banner{display:none;background:#FDECEA;border:1px solid #F5C0BB;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:13px;color:var(--danger);line-height:1.6}
+#config-banner strong{display:block;margin-bottom:4px}
+#config-banner code{font-family:var(--mono);background:#fff;padding:1px 5px;border-radius:3px;font-size:12px}
+#rules-banner{display:none;background:#FDF0E0;border:1px solid #F5D59E;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:13px;color:var(--warn);line-height:1.6}
+#rules-banner strong{display:block;margin-bottom:4px}
+#rules-banner code{font-family:var(--mono);background:#fff;padding:1px 5px;border-radius:3px;font-size:11px;display:block;margin-top:6px;color:#333;white-space:pre}
+
+/* HEADER */
+header{background:var(--text);color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:var(--header-h);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.03em}
+.logo span{color:#6B9BFF}
+.header-right{display:flex;align-items:center;gap:10px}
+.header-date{font-family:var(--mono);font-size:10px;color:#888;display:none}
+.user-chip{font-family:var(--mono);font-size:11px;color:#ccc;display:none;align-items:center;gap:6px}
+.user-chip strong{color:#fff}
+.btn-logout-user{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 9px;cursor:pointer;white-space:nowrap}
+.btn-logout-user:hover{border-color:#888;color:#fff}
+.btn-admin-logout{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 9px;cursor:pointer;display:none;white-space:nowrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:#4ADE80}
+.sync-dot.syncing{background:#FACC15;animation:pulse 1s infinite}
+.sync-dot.err{background:#F87171}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:var(--sans);font-size:11px;font-weight:500;padding:8px 4px;transition:color .15s}
+.nav-btn svg{width:22px;height:22px}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active svg{stroke:var(--accent)}
+
+/* TOP TABS */
+.top-tabs{background:var(--surface);border-bottom:1px solid var(--border);display:none;padding:0 1.5rem}
+.tab-btn{padding:13px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.02em;transition:color .15s;display:inline-flex;align-items:center;gap:6px}
+.tab-btn svg{width:15px;height:15px}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* LAYOUT */
+.container{max-width:960px;margin:0 auto;padding:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-family:var(--mono)}
+input,select{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:7px;font-family:var(--sans);font-size:15px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--accent);background:#fff}
+input[type="date"]{font-family:var(--mono);font-size:14px}
+input[type="password"]{font-family:var(--mono);letter-spacing:.1em}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6861' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.form-row{display:grid;gap:12px}
+.form-row.cols2{grid-template-columns:1fr 1fr}
+.form-row.cols3{grid-template-columns:1fr 1fr 1fr}
+
+/* BUTTONS */
+.btn{padding:11px 18px;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;font-family:var(--sans);letter-spacing:.01em;white-space:nowrap}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:active{background:#1340A0}
+.btn-primary:disabled{background:#8BA8E0;border-color:#8BA8E0;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text)}
+.btn-ghost:active{background:var(--bg)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border-color:#F5C0BB}
+.btn-danger-solid{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-export{background:var(--ok-light);color:var(--ok);border-color:#AADEC3;font-family:var(--mono);font-size:12px}
+.btn-sm{padding:7px 13px;font-size:13px}
+.btn-xs{padding:5px 10px;font-size:12px}
+.btn-block{width:100%}
+.btn-row{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.metric-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.metric-value{font-size:24px;font-weight:600;color:var(--text);line-height:1}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;display:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:8px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg)}
+tbody td{padding:10px 12px;border-bottom:1px solid #F0EDE8;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FAFAF8}
+.sr-code{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.nama-cell{font-weight:500}
+.submit-date{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* MOBILE ADMIN CARDS */
+.jl-cards{display:flex;flex-direction:column;gap:8px}
+.jl-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.jl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px}
+.jl-nama{font-weight:600;font-size:14px}
+.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.jl-job{font-size:13px;color:var(--text);margin-bottom:5px}
+.jl-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.jl-submit{font-family:var(--mono);font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+/* MY LOG LIST */
+.log-list{display:flex;flex-direction:column;gap:8px}
+.log-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.log-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.log-sr{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.log-job{font-size:13px;font-weight:500;margin-bottom:5px}
+.log-meta{display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap}
+.badge-ok{background:var(--ok-light);color:var(--ok)}
+.badge-wip{background:var(--warn-light);color:var(--warn)}
+.badge-perbaikan{background:#EEF2FF;color:#3730A3}
+.badge-part{background:#FFF7ED;color:#9A3412}
+.badge-project{background:var(--purple-light);color:var(--purple)}
+
+/* SUB TABS */
+.sub-tabs{display:flex;margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+.sub-tab{flex:1;padding:10px 4px;font-size:11px;font-weight:500;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:all .15s;text-align:center;border-right:1px solid var(--border)}
+.sub-tab:last-child{border-right:none}
+.sub-tab.active{background:var(--surface);color:var(--accent)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.filter-row{display:flex;gap:8px}
+.filter-row select,.filter-row input[type="date"]{flex:1}
+/* EXPORT SECTION */
+.export-section{display:flex;flex-direction:column;gap:8px}
+.export-quick-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.export-range-row{display:flex;flex-direction:column;gap:6px;background:var(--ok-light);border:1px solid #AADEC3;border-radius:8px;padding:10px 12px}
+.export-range-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ok)}
+.export-range-inputs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.export-range-inputs input[type="date"]{flex:1;min-width:120px;background:#fff;border-color:#AADEC3;font-size:13px;padding:8px 10px}
+.export-range-inputs input[type="date"]:focus{border-color:var(--ok)}
+.export-range-sep{font-family:var(--mono);font-size:12px;color:var(--ok);flex-shrink:0;font-weight:500}
+.export-range-btn{background:var(--ok);color:#fff;border-color:var(--ok);flex-shrink:0}
+.export-range-btn:hover{background:#155f3a}
+
+/* TEKNISI / USER LIST */
+.user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.user-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;gap:8px}
+.user-info{flex:1;min-width:0}
+.user-name{font-weight:500;font-size:14px}
+.user-idx{font-family:var(--mono);font-size:11px;color:var(--muted);margin-right:8px}
+.user-actions{display:flex;gap:6px;flex-shrink:0}
+.add-row{display:flex;gap:8px}
+.add-row input{flex:1}
+
+/* DANGER ZONE */
+.danger-zone{border:1px solid #F5C0BB;border-radius:8px;padding:1.25rem;background:#FFF8F7}
+.danger-zone-title{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--danger);margin-bottom:.75rem}
+.danger-zone p{font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.5}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.75rem;width:100%;max-width:360px}
+.modal-logo{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);margin-bottom:4px}
+.modal-logo span{color:var(--accent)}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
+.modal-title{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);margin-bottom:1rem}
+.pw-error{font-size:12px;color:var(--danger);margin-top:6px;display:none;font-family:var(--mono)}
+.modal-hint{margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--mono);text-align:center}
+.modal-footer{margin-top:12px;display:flex;gap:8px}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(var(--nav-h)+12px);left:50%;transform:translateX(-50%);padding:11px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;display:none;font-family:var(--mono);box-shadow:0 4px 20px rgba(0,0,0,.2);white-space:nowrap;max-width:90vw;text-overflow:ellipsis;overflow:hidden}
+.toast-ok{background:var(--ok);color:#fff}
+.toast-warn{background:var(--warn);color:#fff}
+
+/* POPUP NOTIFIKASI */
+#notif-popup{position:fixed;top:calc(var(--header-h)+16px);left:50%;transform:translateX(-50%);z-index:500;display:none;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.notif-box{border-radius:12px;padding:16px 20px;min-width:280px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.18);font-family:var(--sans);display:flex;gap:14px;align-items:flex-start}
+.notif-icon{font-size:22px;flex-shrink:0;line-height:1.2}
+.notif-content{flex:1;min-width:0}
+.notif-title{font-weight:600;font-size:14px;margin-bottom:4px}
+.notif-msg{font-size:13px;line-height:1.5;opacity:.9}
+.notif-close{background:none;border:none;cursor:pointer;font-size:18px;opacity:.6;padding:0;line-height:1;flex-shrink:0;color:inherit}
+.notif-close:hover{opacity:1}
+.notif-ok .notif-box{background:#1A7A4A;color:#fff}
+.notif-err .notif-box{background:#C0392B;color:#fff}
+@media(min-width:640px){
+  #notif-popup{top:calc(var(--header-h)+20px);right:20px;left:auto;transform:none}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+  .notif-box{min-width:320px}
+}
+
+.empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:13px;font-family:var(--mono)}
+.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* JENIS LIST */
+.jenis-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.jenis-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;gap:8px}
+.jenis-item-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.jenis-idx{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0}
+.jenis-name{font-weight:500;font-size:14px}
+.jenis-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* DESKTOP */
+@media(min-width:640px){
+  body{padding-bottom:0}
+  .bottom-nav{display:none}
+  .top-tabs{display:block}
+  .header-date{display:block}
+  .container{padding:1.5rem 2rem}
+  .metrics{grid-template-columns:repeat(4,1fr)}
+  .form-row.cols2{grid-template-columns:1fr 1fr}
+  .form-row.cols3{grid-template-columns:1fr 1fr 1fr}
+  .filter-bar{flex-direction:row;align-items:flex-start;flex-wrap:wrap}
+  .filter-row{flex:1;min-width:0}
+  .export-section{flex-shrink:0}
+  .export-quick-row{grid-template-columns:auto auto auto;width:auto}
+  .export-range-inputs{flex-wrap:nowrap}
+  .jl-cards{display:none}
+  .table-wrap{display:block}
+  #toast{bottom:24px;left:auto;right:24px;transform:none}
+  .user-chip{display:flex}
+}
+@media(max-width:639px){
+  .form-row.cols2{grid-template-columns:1fr}
+  .form-row.cols3{grid-template-columns:1fr 1fr}
+  .form-row.cols3 .field:last-child{grid-column:span 2}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="ll">JOBLOG<span>.</span>TEKNISI</div>
+  <div class="spinner"></div>
+  <div class="lsub" id="loading-msg">Menghubungkan ke database...</div>
+  <div class="lsub" id="loading-hint" style="margin-top:4px;font-size:10px;color:#555;display:none">Pastikan Firestore Security Rules mengizinkan akses read/write</div>
+</div>
+
+<!-- MODAL: LOGIN TEKNISI -->
+<div class="overlay" id="modal-login-teknisi">
+  <div class="modal">
+    <div class="modal-logo">JOBLOG<span>.</span>TEKNISI</div>
+    <div class="modal-sub" id="login-sub">Pilih nama dan masukkan password untuk mulai input joblog.</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Nama Teknisi</label>
+      <select id="login-nama"></select>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLoginTeknisi()">
+      <div class="pw-error" id="login-error">Nama atau password salah.</div>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="doLoginTeknisi()">Masuk</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-login-teknisi')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LOGIN ADMIN -->
+<div class="overlay" id="modal-login-admin">
+  <div class="modal">
+    <div class="modal-logo">JOBLOG<span>.</span>ADMIN</div>
+    <div class="modal-sub">Masukkan password untuk mengakses Dashboard Admin.</div>
+    <div class="field">
+      <label>Password Admin</label>
+      <input type="password" id="pw-admin-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLoginAdmin()">
+      <div class="pw-error" id="pw-admin-error">Password salah.</div>
+    </div>
+    <div style="margin-top:1rem">
+      <button class="btn btn-primary btn-block" onclick="doLoginAdmin()">Masuk Dashboard</button>
+    </div>
+    <div class="modal-hint">Default: <strong>admin123</strong> · Bisa diubah di Settings</div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT PASSWORD TEKNISI -->
+<div class="overlay" id="modal-edit-pw">
+  <div class="modal">
+    <div class="modal-title" id="edit-pw-title">Ubah Password Teknisi</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Password Baru</label>
+      <input type="password" id="edit-pw-new" placeholder="••••••••" onkeydown="if(event.key==='Enter')saveEditPw()">
+    </div>
+    <div class="field">
+      <label>Konfirmasi Password</label>
+      <input type="password" id="edit-pw-confirm" placeholder="••••••••" onkeydown="if(event.key==='Enter')saveEditPw()">
+    </div>
+    <div class="pw-error" id="edit-pw-error" style="margin-top:6px">Password tidak cocok atau terlalu pendek.</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="saveEditPw()">Simpan</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-pw')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TAMBAH TEKNISI -->
+<div class="overlay" id="modal-add-user">
+  <div class="modal">
+    <div class="modal-title">Tambah Teknisi Baru</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Nama Teknisi</label>
+      <input type="text" id="add-user-nama" placeholder="Nama lengkap teknisi">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="add-user-pw" placeholder="Minimal 4 karakter" onkeydown="if(event.key==='Enter')saveAddUser()">
+    </div>
+    <div class="pw-error" id="add-user-error" style="margin-top:6px">Nama sudah ada atau password terlalu pendek.</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="saveAddUser()">Tambah</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-user')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TAMBAH JENIS PEKERJAAN -->
+<div class="overlay" id="modal-add-jenis">
+  <div class="modal">
+    <div class="modal-title" id="add-jenis-title">Tambah Jenis Pekerjaan</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Nama Jenis</label>
+      <input type="text" id="add-jenis-nama" placeholder="Contoh: Maintenance" onkeydown="if(event.key==='Enter')saveAddJenis()">
+    </div>
+    <div class="field" style="margin-bottom:4px">
+      <label>Warna Badge</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px" id="color-picker">
+        <button class="color-opt active" data-bg="#EEF2FF" data-color="#3730A3" onclick="selectColor(this)" style="background:#EEF2FF;color:#3730A3;border:2px solid #3730A3;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Biru</button>
+        <button class="color-opt" data-bg="#FFF7ED" data-color="#9A3412" onclick="selectColor(this)" style="background:#FFF7ED;color:#9A3412;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Oranye</button>
+        <button class="color-opt" data-bg="#F3E8FF" data-color="#6B21A8" onclick="selectColor(this)" style="background:#F3E8FF;color:#6B21A8;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Ungu</button>
+        <button class="color-opt" data-bg="#E6F4ED" data-color="#1A7A4A" onclick="selectColor(this)" style="background:#E6F4ED;color:#1A7A4A;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Hijau</button>
+        <button class="color-opt" data-bg="#FEF2F2" data-color="#991B1B" onclick="selectColor(this)" style="background:#FEF2F2;color:#991B1B;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Merah</button>
+        <button class="color-opt" data-bg="#F0FDF4" data-color="#166534" onclick="selectColor(this)" style="background:#F0FDF4;color:#166534;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Teal</button>
+        <button class="color-opt" data-bg="#FDF4FF" data-color="#86198F" onclick="selectColor(this)" style="background:#FDF4FF;color:#86198F;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Pink</button>
+        <button class="color-opt" data-bg="#FFFBEB" data-color="#92400E" onclick="selectColor(this)" style="background:#FFFBEB;color:#92400E;border:2px solid transparent;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--mono)">Kuning</button>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono)">Preview: <span id="jenis-preview" style="display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;background:#EEF2FF;color:#3730A3">Contoh</span></div>
+    <div class="pw-error" id="add-jenis-error" style="margin-top:8px">Nama wajib diisi atau sudah ada.</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" id="add-jenis-save-btn" onclick="saveAddJenis()">Tambah</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-jenis')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONFIRMASI HAPUS -->
+<div class="overlay" id="modal-confirm-delete">
+  <div class="modal">
+    <div class="modal-title" id="confirm-delete-title">Konfirmasi Hapus</div>
+    <p id="confirm-delete-msg" style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem"></p>
+    <div class="modal-footer">
+      <button class="btn btn-danger-solid" style="flex:1" id="confirm-delete-btn">Ya, Hapus</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-delete')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">JOBLOG<span>.</span>TEKNISI</div>
+  <div class="header-right">
+    <div class="sync-dot" id="sync-dot" title="Status koneksi"></div>
+    <div class="header-date" id="header-date"></div>
+    <div class="user-chip" id="user-chip">
+      Halo, <strong id="user-chip-name"></strong>
+      <button class="btn-logout-user" onclick="logoutTeknisi()">Keluar</button>
+    </div>
+    <button class="btn-admin-logout" id="btn-admin-logout" onclick="logoutAdmin()">↩ Logout Admin</button>
+  </div>
+</header>
+
+<!-- TOP TABS (desktop) -->
+<nav class="top-tabs">
+  <button class="tab-btn active" id="desk-tab-input" onclick="switchTab('input',this,'desk')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Input Joblog
+  </button>
+  <button class="tab-btn" id="desk-tab-admin" onclick="tryAdmin(this,'desk')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard Admin
+  </button>
+</nav>
+
+<!-- INPUT TAB -->
+<div id="tab-input" class="container">
+  <div id="config-banner">
+    <strong>⚠️ Firebase belum dikonfigurasi</strong>
+    Buka file dengan Notepad, isi bagian <code>firebaseConfig</code> dengan data dari Firebase Console.
+  </div>
+  <div id="rules-banner">
+    <strong>⚠️ Firestore Security Rules perlu diupdate</strong>
+    Daftar teknisi tidak bisa dimuat karena akses ditolak Firebase. Buka <strong>Firestore → Rules</strong> di Firebase Console dan set:
+    <code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</code>
+    Catatan: Rules di atas untuk development. Untuk production, gunakan autentikasi.
+  </div>
+  <div class="card">
+    <div class="card-title">Form Input Pekerjaan Harian</div>
+    <div class="form-row cols2" style="margin-bottom:12px">
+      <div class="field"><label>Nama Teknisi</label><input type="text" id="f-nama" readonly style="background:var(--bg);color:var(--accent);font-weight:500"></div>
+      <div class="field"><label>No. SR *</label><input type="text" id="f-sr" placeholder="SR-2024-001"></div>
+    </div>
+    <div class="form-row cols2" style="margin-bottom:12px">
+      <div class="field"><label>Nama/Kode Mesin *</label><input type="text" id="f-mesin" placeholder="Contoh: CNC-01"></div>
+      <div class="field">
+        <label>Jenis Pekerjaan *</label>
+        <select id="f-jenis">
+          <option value="">-- Pilih Jenis --</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Pekerjaan *</label>
+      <input type="text" id="f-job" placeholder="Deskripsi singkat pekerjaan">
+    </div>
+    <div class="form-row cols3">
+      <div class="field"><label>Tanggal *</label><input type="date" id="f-date"></div>
+      <div class="field"><label>Waktu Mulai *</label><input type="text" id="f-start" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
+      <div class="field"><label>Waktu Selesai</label><input type="text" id="f-end" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-submit" onclick="submitJob()" style="flex:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Submit Joblog
+      </button>
+      <button class="btn btn-ghost" onclick="resetForm()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">3 Joblog Terakhir Saya</div>
+    <div id="my-logs"><div class="empty-state">Login dulu untuk melihat joblog.</div></div>
+  </div>
+</div>
+
+<!-- ADMIN TAB -->
+<div id="tab-admin" class="container" style="display:none">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="switchSubTab('data',this)">Data</button>
+    <button class="sub-tab" onclick="switchSubTab('teknisi',this)">Teknisi</button>
+    <button class="sub-tab" onclick="switchSubTab('jenis',this)">Jenis</button>
+    <button class="sub-tab" onclick="switchSubTab('settings',this)">Settings</button>
+  </div>
+
+  <!-- SUB: DATA -->
+  <div id="sub-data">
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">Total Joblog</div><div class="metric-value" id="m-total">0</div><div class="metric-sub">semua waktu</div></div>
+      <div class="metric-card"><div class="metric-label">Teknisi Aktif</div><div class="metric-value" id="m-tek">0</div><div class="metric-sub">bulan ini</div></div>
+      <div class="metric-card"><div class="metric-label">Rata-rata Durasi</div><div class="metric-value" id="m-dur">—</div><div class="metric-sub">per pekerjaan</div></div>
+      <div class="metric-card"><div class="metric-label">SR Selesai</div><div class="metric-value" id="m-sr">0</div><div class="metric-sub">on progress: <span id="m-wip">0</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Semua Data Joblog</div>
+      <div class="filter-bar">
+        <div class="filter-row">
+          <select id="ff-nama" onchange="renderAdmin()"><option value="">Semua teknisi</option></select>
+          <select id="ff-jenis" onchange="renderAdmin()">
+            <option value="">Semua jenis</option>
+          </select>
+        </div>
+        <div class="filter-row">
+          <input type="date" id="ff-date" onchange="renderAdmin()">
+          <button class="btn btn-ghost btn-sm" onclick="clearFilter()">✕ Reset</button>
+        </div>
+        <div class="export-section">
+          <div class="export-quick-row">
+            <button class="btn btn-export btn-sm" onclick="exportExcel('hari')">↓ Hari Ini</button>
+            <button class="btn btn-export btn-sm" onclick="exportExcel('minggu')">↓ Minggu Ini</button>
+            <button class="btn btn-export btn-sm" onclick="exportExcel('bulan')">↓ Bulan Ini</button>
+          </div>
+          <div class="export-range-row">
+            <div class="export-range-label">↓ Rekap Periode</div>
+            <div class="export-range-inputs">
+              <input type="date" id="exp-from" title="Dari tanggal">
+              <span class="export-range-sep">s/d</span>
+              <input type="date" id="exp-to" title="Sampai tanggal">
+              <button class="btn btn-export btn-sm export-range-btn" onclick="exportExcelRange()">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Mobile -->
+      <div class="jl-cards" id="admin-cards"></div>
+      <!-- Desktop -->
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
+            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Tgl Submit</th><th>Hapus</th>
+          </tr></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="admin-empty" style="display:none">Belum ada data.</div>
+    </div>
+
+    <!-- HAPUS HISTORY -->
+    <div class="danger-zone">
+      <div class="danger-zone-title">⚠ Hapus Data</div>
+      <p>Hapus semua data joblog sekaligus. Tindakan ini <strong>tidak bisa dibatalkan</strong>. Gunakan saat pergantian periode atau setelah uji coba.</p>
+      <button class="btn btn-danger-solid btn-sm" onclick="confirmDeleteAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        Hapus Semua Joblog
+      </button>
+    </div>
+  </div>
+
+  <!-- SUB: TEKNISI -->
+  <div id="sub-teknisi" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Daftar Teknisi & Password</span>
+        <button class="btn btn-primary btn-sm" onclick="openAddUser()">+ Tambah Teknisi</button>
+      </div>
+      <div class="user-list" id="user-list"><div class="empty-state">Memuat...</div></div>
+    </div>
+  </div>
+
+  <!-- SUB: JENIS PEKERJAAN -->
+  <div id="sub-jenis" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Jenis Pekerjaan</span>
+        <button class="btn btn-primary btn-sm" onclick="openAddJenis()">+ Tambah Jenis</button>
+      </div>
+      <div class="jenis-list" id="jenis-list"><div class="empty-state">Memuat...</div></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Jenis pekerjaan akan tersedia di dropdown saat input joblog dan filter data.</p>
+    </div>
+  </div>
+
+  <!-- SUB: SETTINGS -->
+  <div id="sub-settings" style="display:none">
+    <div class="card">
+      <div class="card-title">Ubah Password Admin</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label>Password Saat Ini</label><input type="password" id="pw-old" placeholder="••••••••"></div>
+        <div class="field"><label>Password Baru</label><input type="password" id="pw-new" placeholder="••••••••"></div>
+        <div class="field"><label>Konfirmasi Password Baru</label><input type="password" id="pw-confirm" placeholder="••••••••"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary btn-block" onclick="changeAdminPassword()">Simpan Password Admin</button></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-title">Ubah Password Saya (Teknisi)</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Untuk mengubah password login teknisi, gunakan menu <strong>Teknisi</strong> di atas.</p>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="mob-tab-input" onclick="switchTab('input',this,'mob')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Input
+  </button>
+  <button class="nav-btn" id="mob-tab-admin" onclick="tryAdmin(this,'mob')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Admin
+  </button>
+</nav>
+
+<!-- POPUP NOTIFIKASI -->
+<div id="notif-popup">
+  <div class="notif-box" id="notif-box">
+    <div class="notif-icon" id="notif-icon">✅</div>
+    <div class="notif-content">
+      <div class="notif-title" id="notif-title">Berhasil</div>
+      <div class="notif-msg" id="notif-msg"></div>
+    </div>
+    <button class="notif-close" onclick="closeNotif()">✕</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+let joblogDB   = [];
+let teknisisDB = [];   // [{id, nama, password}] dari Firestore
+let jenisDB    = [];   // [{id, nama, bg, color}] dari Firestore — jenis pekerjaan
+let adminPw    = 'admin123';
+let adminIn    = false;
+let currentUser = null;  // {id, nama} teknisi yang sedang login
+let fbConfigOk  = false;
+let _pendingAdminEl, _pendingAdminType;
+let _editPwUserId = null;
+let _editJenisId  = null;
+let _selectedBg   = '#EEF2FF';
+let _selectedColor= '#3730A3';
+
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function nowTs()   { return new Date().toISOString(); }
+
+// ── FIREBASE INIT ──────────────────────────────────────────────
+let _teknisiLoaded = false;
+let _pendingLoginShow = false; // flag: show login modal setelah teknisi loaded
+
+window.addEventListener('fb-ready', async () => {
+  const { db, collection, onSnapshot, query, orderBy, doc, getDoc } = window._fb;
+
+  if(document.querySelector('script[type="module"]').textContent.includes('GANTI_DENGAN')){
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('config-banner').style.display  = 'block';
+    setSyncDot('err');
+    return;
+  }
+
+  fbConfigOk = true;
+  setSyncDot('syncing');
+
+  // Load admin password
+  try {
+    const s = await getDoc(doc(db,'settings','admin'));
+    if(s.exists() && s.data().password) adminPw = s.data().password;
+  } catch(e){}
+
+  // Listen: teknisi list (real-time)
+  onSnapshot(collection(db,'teknisis'), snap => {
+    teknisisDB = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                          .sort((a,b) => a.nama.localeCompare(b.nama));
+    buildLoginDropdown();
+    buildFilterDropdown();
+    renderUserList();
+
+    if(!_teknisiLoaded){
+      _teknisiLoaded = true;
+      document.getElementById('loading-screen').style.display = 'none';
+      setSyncDot('ok');
+      // Tampilkan login modal setelah data teknisi siap
+      if(!currentUser){
+        showLoginTeknisi();
+      }
+    } else {
+      // Update realtime: rebuild dropdown dan jika modal login sedang terbuka, rebuild juga
+      if(document.getElementById('modal-login-teknisi').classList.contains('show')){
+        buildLoginDropdown();
+      }
+      setSyncDot('ok');
+    }
+  }, err => {
+    setSyncDot('err');
+    document.getElementById('loading-screen').style.display = 'none';
+    console.error('Gagal memuat teknisi:', err);
+    // Coba tampilkan pesan khusus jika permission denied
+    if(err.code === 'permission-denied'){
+      document.getElementById('rules-banner').style.display='block';
+      toast('Akses ditolak Firebase. Lihat petunjuk di atas.','warn');
+    } else {
+      toast('Gagal memuat data teknisi. Cek koneksi.','warn');
+    }
+  });
+
+  // Listen: jenis pekerjaan (real-time)
+  let _jenisSeedDone = false;
+  onSnapshot(query(collection(db,'jenis'), orderBy('nama','asc')), async snap => {
+    jenisDB = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    buildJenisDropdowns();
+    renderJenisList();
+    // Seed default jenis pertama kali jika kosong
+    if(!_jenisSeedDone && jenisDB.length === 0){
+      _jenisSeedDone = true;
+      const defaults = [
+        {nama:'Perbaikan',       bg:'#EEF2FF', color:'#3730A3'},
+        {nama:'Penggantian Part',bg:'#FFF7ED', color:'#9A3412'},
+        {nama:'Project',         bg:'#F3E8FF', color:'#6B21A8'},
+      ];
+      try{
+        const {db:fdb, collection:fcol, addDoc:fadd} = window._fb;
+        for(const d of defaults) await fadd(fcol(fdb,'jenis'), d);
+      }catch(e){}
+    } else {
+      _jenisSeedDone = true;
+    }
+  }, err => {
+    console.error('Gagal memuat jenis:', err);
+  });
+
+  // Listen: joblogs (real-time)
+  const q = query(collection(db,'joblogs'), orderBy('submittedAt','desc'));
+  onSnapshot(q, snap => {
+    joblogDB = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    setSyncDot('ok');
+    document.getElementById('loading-screen').style.display = 'none';
+    renderMyLogs();
+    renderAdmin();
+    updateMetrics();
+  }, err => {
+    setSyncDot('err');
+    document.getElementById('loading-screen').style.display = 'none';
+    if(err.code === 'permission-denied'){
+      toast('Akses ditolak Firebase. Cek Security Rules Firestore.','warn');
+    } else {
+      toast('Gagal terhubung ke database.','warn');
+    }
+  });
+});
+
+setTimeout(()=>{
+  if(document.getElementById('loading-screen').style.display !== 'none'){
+    document.getElementById('loading-hint').style.display='block';
+  }
+},3000);
+setTimeout(()=>{
+  if(document.getElementById('loading-screen').style.display !== 'none'){
+    document.getElementById('loading-msg').textContent = 'Gagal terhubung. Cek konfigurasi Firebase & Security Rules.';
+    setSyncDot('err');
+    setTimeout(()=>{ document.getElementById('loading-screen').style.display='none'; },2500);
+  }
+},10000);
+
+// INIT
+(function init(){
+  document.getElementById('f-date').value = todayStr();
+  document.getElementById('header-date').textContent =
+    new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Login teknisi hanya dipanggil saat mau submit, bukan saat load
+})();
+
+function setSyncDot(s){
+  const d = document.getElementById('sync-dot');
+  d.className = 'sync-dot '+s;
+  d.title = s==='ok'?'Terhubung — real-time':s==='syncing'?'Menyinkronkan...':'Tidak terhubung';
+}
+
+// ── DROPDOWN BUILDERS ──────────────────────────────────────────
+function buildLoginDropdown(){
+  const sel = document.getElementById('login-nama');
+  const prevVal = sel.value;
+  if(teknisisDB.length === 0){
+    sel.innerHTML = '<option value="">-- Belum ada teknisi --</option>';
+  } else {
+    sel.innerHTML =
+      '<option value="">-- Pilih Nama --</option>' +
+      teknisisDB.map(t=>`<option value="${t.id}">${t.nama}</option>`).join('');
+    if(prevVal && teknisisDB.some(t=>t.id===prevVal)){
+      sel.value = prevVal;
+    }
+  }
+  const sub = document.getElementById('login-sub');
+  if(sub){
+    if(teknisisDB.length === 0){
+      sub.textContent = 'Belum ada teknisi terdaftar. Hubungi admin untuk mendaftarkan akun.';
+    } else {
+      sub.textContent = 'Pilih nama dan masukkan password untuk mulai input joblog.';
+    }
+  }
+}
+function buildFilterDropdown(){
+  document.getElementById('ff-nama').innerHTML =
+    '<option value="">Semua teknisi</option>' +
+    teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+}
+
+// ── BUILD JENIS DROPDOWNS ──────────────────────────────────────
+function buildJenisDropdowns(){
+  // Kumpulkan semua jenis: dari jenisDB (dinamis) + fallback untuk data lama
+  const opts = jenisDB.length > 0
+    ? jenisDB
+    : [{nama:'Perbaikan'},{nama:'Penggantian Part'},{nama:'Project'}];
+
+  // Dropdown form input
+  const fJenis = document.getElementById('f-jenis');
+  const prevF = fJenis.value;
+  fJenis.innerHTML = '<option value="">-- Pilih Jenis --</option>' +
+    opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
+  if(prevF) fJenis.value = prevF;
+
+  // Dropdown filter admin
+  const ffJenis = document.getElementById('ff-jenis');
+  const prevFF = ffJenis.value;
+  ffJenis.innerHTML = '<option value="">Semua jenis</option>' +
+    opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
+  if(prevFF) ffJenis.value = prevFF;
+}
+
+// ── LOGIN TEKNISI ──────────────────────────────────────────────
+function showLoginTeknisi(){
+  // Jika Firebase belum siap, tampilkan loading message
+  if(!fbConfigOk){
+    toast('Menghubungkan ke server, harap tunggu...','warn');
+    return;
+  }
+  // Rebuild dropdown dengan data terbaru dari Firestore
+  buildLoginDropdown();
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-pw').value = '';
+  // Jangan reset nama jika sudah ada pilihan
+  if(!document.getElementById('login-nama').value){
+    document.getElementById('login-nama').value = '';
+  }
+  document.getElementById('modal-login-teknisi').classList.add('show');
+  setTimeout(()=>{
+    // Focus ke password jika nama sudah dipilih, ke nama jika belum
+    const namaVal = document.getElementById('login-nama').value;
+    if(namaVal){
+      document.getElementById('login-pw').focus();
+    } else {
+      document.getElementById('login-nama').focus();
+    }
+  },200);
+}
+function doLoginTeknisi(){
+  const selId = document.getElementById('login-nama').value;
+  const pw    = document.getElementById('login-pw').value;
+  const user  = teknisisDB.find(t => t.id === selId);
+  if(!user || user.password !== pw){
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    return;
+  }
+  currentUser = { id: user.id, nama: user.nama };
+  document.getElementById('modal-login-teknisi').classList.remove('show');
+  document.getElementById('f-nama').value = user.nama;
+  document.getElementById('user-chip-name').textContent = user.nama;
+  document.getElementById('user-chip').style.display = 'flex';
+  renderMyLogs();
+  toast(`Selamat datang, ${user.nama}!`);
+}
+function logoutTeknisi(){
+  currentUser = null;
+  document.getElementById('f-nama').value = '';
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('my-logs').innerHTML = '<div class="empty-state">Login dulu untuk melihat joblog.</div>';
+  showLoginTeknisi();
+}
+
+// ── LOGIN ADMIN ────────────────────────────────────────────────
+function tryAdmin(el, type){
+  if(adminIn){ switchTab('admin',el,type); return; }
+  _pendingAdminEl=el; _pendingAdminType=type;
+  document.getElementById('pw-admin-error').style.display='none';
+  document.getElementById('pw-admin-input').value='';
+  document.getElementById('modal-login-admin').classList.add('show');
+  setTimeout(()=>document.getElementById('pw-admin-input').focus(),150);
+}
+function doLoginAdmin(){
+  if(document.getElementById('pw-admin-input').value === adminPw){
+    adminIn = true;
+    document.getElementById('modal-login-admin').classList.remove('show');
+    document.getElementById('btn-admin-logout').style.display = 'block';
+    switchTab('admin',_pendingAdminEl,_pendingAdminType);
+  } else {
+    document.getElementById('pw-admin-error').style.display='block';
+    document.getElementById('pw-admin-input').value='';
+    document.getElementById('pw-admin-input').focus();
+  }
+}
+function logoutAdmin(){
+  adminIn=false;
+  document.getElementById('btn-admin-logout').style.display='none';
+  const mob=window.innerWidth<640;
+  switchTab('input',document.getElementById(mob?'mob-tab-input':'desk-tab-input'),mob?'mob':'desk');
+  toast('Logout admin berhasil.');
+}
+
+// ── CHANGE ADMIN PASSWORD ──────────────────────────────────────
+async function changeAdminPassword(){
+  const old=document.getElementById('pw-old').value;
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  if(old!==adminPw){toast('Password saat ini salah.','warn');return;}
+  if(nw.length<4){toast('Minimal 4 karakter.','warn');return;}
+  if(nw!==cf){toast('Konfirmasi tidak cocok.','warn');return;}
+  adminPw=nw;
+  if(fbConfigOk){
+    try{
+      const {db,doc,setDoc}=window._fb;
+      await setDoc(doc(db,'settings','admin'),{password:nw});
+    }catch(e){}
+  }
+  ['pw-old','pw-new','pw-confirm'].forEach(id=>document.getElementById(id).value='');
+  toast('Password admin berhasil diubah!');
+}
+
+// ── TABS ───────────────────────────────────────────────────────
+function switchTab(t,el,type){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const mirror=type==='mob'
+    ?document.getElementById('desk-tab-'+(t==='input'?'input':'admin'))
+    :document.getElementById('mob-tab-'+(t==='input'?'input':'admin'));
+  if(mirror) mirror.classList.add('active');
+  document.getElementById('tab-input').style.display=t==='input'?'block':'none';
+  document.getElementById('tab-admin').style.display=t==='admin'?'block':'none';
+  if(t==='admin'){renderAdmin();updateMetrics();renderUserList();}
+}
+function switchSubTab(s,el){
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['data','teknisi','jenis','settings'].forEach(id=>
+    document.getElementById('sub-'+id).style.display=id===s?'block':'none');
+  if(s==='teknisi') renderUserList();
+  if(s==='jenis')   renderJenisList();
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+// ── SUBMIT JOBLOG ──────────────────────────────────────────────
+async function submitJob(){
+  if(!currentUser){ toast('Login dulu sebelum input joblog.','warn'); showLoginTeknisi(); return; }
+  const sr    = document.getElementById('f-sr').value.trim();
+  const mesin = document.getElementById('f-mesin').value.trim();
+  const jenis = document.getElementById('f-jenis').value;
+  const job   = document.getElementById('f-job').value.trim();
+  const start = getTimeVal('f-start');
+  const end   = getTimeVal('f-end');
+  const date  = document.getElementById('f-date').value;
+
+  // Validasi dengan pesan spesifik
+  if(!date){ showNotif('error','Validasi Gagal','Tanggal wajib diisi.'); return; }
+  if(!sr)  { showNotif('error','Validasi Gagal','No. SR wajib diisi.'); return; }
+  if(!mesin){ showNotif('error','Validasi Gagal','Nama/Kode Mesin wajib diisi.'); return; }
+  if(!jenis){ showNotif('error','Validasi Gagal','Jenis Pekerjaan wajib dipilih.'); return; }
+  if(!job)  { showNotif('error','Validasi Gagal','Deskripsi Pekerjaan wajib diisi.'); return; }
+  if(start === null){ showNotif('error','Format Waktu Salah','Waktu mulai tidak valid. Gunakan format HH:MM (contoh: 08:30).'); return; }
+  if(!start){ showNotif('error','Validasi Gagal','Waktu Mulai wajib diisi.'); return; }
+  if(end === null){ showNotif('error','Format Waktu Salah','Waktu selesai tidak valid. Gunakan format HH:MM (contoh: 17:00).'); return; }
+  if(end && end < start){ showNotif('error','Waktu Tidak Valid','Waktu selesai tidak boleh sebelum waktu mulai.'); return; }
+  if(!fbConfigOk){ showNotif('error','Koneksi Gagal','Firebase belum dikonfigurasi. Hubungi admin.'); return; }
+
+  const record = {
+    nama:currentUser.nama, sr, mesin, jenis, job, start, end, date,
+    dur:(end&&start)?durMins(start,end):null,
+    submittedAt:nowTs()
+  };
+
+  const btn=document.getElementById('btn-submit');
+  btn.disabled=true;
+  btn.textContent='Menyimpan...';
+  setSyncDot('syncing');
+  try {
+    const {db,collection,addDoc}=window._fb;
+    await addDoc(collection(db,'joblogs'),record);
+    showNotif('success','Joblog Berhasil Disimpan!',`SR ${sr} — ${job} telah tersinkron ke database.`);
+    resetForm();
+  } catch(e) {
+    let errMsg = 'Terjadi kesalahan saat menyimpan data.';
+    if(e.code === 'permission-denied'){
+      errMsg = 'Akses ditolak oleh Firebase. Security Rules Firestore perlu diperbarui.';
+    } else if(e.code === 'unavailable' || e.message?.includes('network')){
+      errMsg = 'Tidak ada koneksi internet. Periksa jaringan dan coba lagi.';
+    } else if(e.code === 'deadline-exceeded'){
+      errMsg = 'Koneksi timeout. Server tidak merespons, coba beberapa saat lagi.';
+    } else if(e.message){
+      errMsg = `Error: ${e.message}`;
+    }
+    showNotif('error','Gagal Menyimpan Joblog', errMsg);
+    setSyncDot('err');
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg> Submit Joblog`;
+  }
+}
+function resetForm(){
+  ['f-sr','f-mesin','f-jenis','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-date').value=todayStr();
+}
+
+// ── RENDER MY LOGS ─────────────────────────────────────────────
+function renderMyLogs(){
+  if(!currentUser){return;}
+  // Ambil 3 joblog terakhir milik user (sudah diurutkan desc dari Firestore)
+  const rows = joblogDB.filter(r => r.nama === currentUser.nama).slice(0, 3);
+  const el = document.getElementById('my-logs');
+  if(!rows.length){
+    el.innerHTML='<div class="empty-state">Belum ada joblog. Mulai input pekerjaan pertama kamu!</div>';
+    return;
+  }
+  el.innerHTML = '<div class="log-list">'+rows.map(r=>{
+    const isToday = r.date === todayStr();
+    return `
+    <div class="log-item">
+      <div class="log-item-top">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="log-sr">${r.sr}</span>${jenisBadge(r.jenis)}
+        </div>
+        <span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span>
+      </div>
+      <div class="log-job">${r.job}</div>
+      <div class="log-meta">
+        ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
+        <span>📅 ${isToday?'Hari ini':r.date}</span>
+        <span>🕐 ${fmt24(r.start)} — ${r.end?fmt24(r.end):'...'}</span>
+        <span>⏱ ${fmtDur(r.dur)}</span>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// ── RENDER ADMIN ───────────────────────────────────────────────
+function renderAdmin(){
+  const fn=document.getElementById('ff-nama').value;
+  const fd=document.getElementById('ff-date').value;
+  const fj=document.getElementById('ff-jenis').value;
+  let rows=[...joblogDB];
+  if(fn) rows=rows.filter(r=>r.nama===fn);
+  if(fd) rows=rows.filter(r=>r.date===fd);
+  if(fj) rows=rows.filter(r=>r.jenis===fj);
+  const empty=document.getElementById('admin-empty');
+  if(!rows.length){
+    document.getElementById('admin-tbody').innerHTML='';
+    document.getElementById('admin-cards').innerHTML='';
+    empty.style.display='block';return;
+  }
+  empty.style.display='none';
+
+  document.getElementById('admin-tbody').innerHTML=rows.map(r=>`<tr>
+    <td class="nama-cell">${r.nama}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
+    <td class="sr-code">${r.sr}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
+    <td>${jenisBadge(r.jenis)}</td>
+    <td>${r.job}</td>
+    <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${fmtDur(r.dur)}</td>
+    <td><span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span></td>
+    <td><span class="submit-date">${fmtSubmitDate(r.submittedAt)}</span></td>
+    <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
+  </tr>`).join('');
+
+  document.getElementById('admin-cards').innerHTML=rows.map(r=>`
+    <div class="jl-card">
+      <div class="jl-top">
+        <div><div class="jl-nama">${r.nama}</div><div class="jl-sr">${r.sr}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span>
+          ${jenisBadge(r.jenis)}
+        </div>
+      </div>
+      <div class="jl-job">${r.job}</div>
+      <div class="jl-meta">
+        <span>📅 ${r.date}</span>
+        ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
+        <span>🕐 ${fmt24(r.start)}${r.end?' — '+fmt24(r.end):''}</span>
+        <span>⏱ ${fmtDur(r.dur)}</span>
+      </div>
+      <div class="jl-submit">
+        <span>Submit: ${fmtSubmitDate(r.submittedAt)}</span>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+function clearFilter(){
+  ['ff-nama','ff-jenis','ff-date'].forEach(id=>document.getElementById(id).value='');
+  renderAdmin();
+}
+
+// ── METRICS ────────────────────────────────────────────────────
+function updateMetrics(){
+  const m=todayStr().slice(0,7);
+  const tek=new Set(joblogDB.filter(r=>r.date.startsWith(m)).map(r=>r.nama)).size;
+  const durs=joblogDB.filter(r=>r.dur).map(r=>r.dur);
+  const avg=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):null;
+  document.getElementById('m-total').textContent=joblogDB.length;
+  document.getElementById('m-tek').textContent=tek;
+  document.getElementById('m-dur').textContent=avg!==null?fmtDur(avg):'—';
+  document.getElementById('m-sr').textContent=joblogDB.filter(r=>r.end).length;
+  document.getElementById('m-wip').textContent=joblogDB.filter(r=>!r.end).length;
+}
+
+// ── HAPUS JOBLOG ───────────────────────────────────────────────
+function confirmDeleteOne(id, label){
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Joblog';
+  document.getElementById('confirm-delete-msg').textContent = `Hapus joblog "${label}"? Tindakan ini tidak bisa dibatalkan.`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc}=window._fb;
+      await deleteDoc(doc(db,'joblogs',id));
+      toast('Joblog berhasil dihapus.');
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+function confirmDeleteAll(){
+  document.getElementById('confirm-delete-title').textContent = 'Hapus SEMUA Joblog';
+  document.getElementById('confirm-delete-msg').innerHTML =
+    `Ini akan menghapus <strong>seluruh ${joblogDB.length} data joblog</strong>.<br>Tindakan ini TIDAK BISA dibatalkan.`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    setSyncDot('syncing');
+    try {
+      const {db,collection,getDocs,writeBatch,doc}=window._fb;
+      const snap = await getDocs(collection(db,'joblogs'));
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(doc(db,'joblogs',d.id)));
+      await batch.commit();
+      toast('Semua joblog berhasil dihapus.');
+    } catch(e){ toast('Gagal menghapus semua data.','warn'); setSyncDot('err'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── MANAJEMEN TEKNISI ──────────────────────────────────────────
+function renderUserList(){
+  const el=document.getElementById('user-list');
+  if(!teknisisDB.length){el.innerHTML='<div class="empty-state">Belum ada teknisi. Klik "+ Tambah Teknisi".</div>';return;}
+  el.innerHTML=teknisisDB.map((t,i)=>`
+    <div class="user-item">
+      <div class="user-info">
+        <span class="user-idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="user-name">${t.nama}</span>
+      </div>
+      <div class="user-actions">
+        <button class="btn btn-ghost btn-xs" onclick="openEditPw('${t.id}','${t.nama}')">🔑 Password</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser('${t.id}','${t.nama}')">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddUser(){
+  document.getElementById('add-user-nama').value='';
+  document.getElementById('add-user-pw').value='';
+  document.getElementById('add-user-error').style.display='none';
+  document.getElementById('modal-add-user').classList.add('show');
+  setTimeout(()=>document.getElementById('add-user-nama').focus(),150);
+}
+async function saveAddUser(){
+  const nama = document.getElementById('add-user-nama').value.trim();
+  const pw   = document.getElementById('add-user-pw').value;
+  const err  = document.getElementById('add-user-error');
+  if(!nama || pw.length < 4){err.style.display='block';err.textContent='Nama wajib diisi dan password minimal 4 karakter.';return;}
+  if(teknisisDB.some(t=>t.nama.toLowerCase()===nama.toLowerCase())){err.style.display='block';err.textContent='Nama sudah ada.';return;}
+  try {
+    const {db,collection,addDoc}=window._fb;
+    await addDoc(collection(db,'teknisis'),{nama,password:pw});
+    closeModal('modal-add-user');
+    toast(`Teknisi "${nama}" berhasil ditambahkan!`);
+  } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+}
+
+function openEditPw(id, nama){
+  _editPwUserId = id;
+  document.getElementById('edit-pw-title').textContent = `Ubah Password — ${nama}`;
+  document.getElementById('edit-pw-new').value='';
+  document.getElementById('edit-pw-confirm').value='';
+  document.getElementById('edit-pw-error').style.display='none';
+  document.getElementById('modal-edit-pw').classList.add('show');
+  setTimeout(()=>document.getElementById('edit-pw-new').focus(),150);
+}
+async function saveEditPw(){
+  const nw = document.getElementById('edit-pw-new').value;
+  const cf = document.getElementById('edit-pw-confirm').value;
+  const err= document.getElementById('edit-pw-error');
+  if(nw.length<4||nw!==cf){err.style.display='block';return;}
+  try {
+    const {db,doc,setDoc,getDoc}=window._fb;
+    const ref = doc(db,'teknisis',_editPwUserId);
+    const snap = await getDoc(ref);
+    if(snap.exists()) await setDoc(ref,{...snap.data(),password:nw});
+    closeModal('modal-edit-pw');
+    toast('Password berhasil diubah!');
+  } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Coba lagi.'; }
+}
+
+function confirmDeleteUser(id, nama){
+  const inUse = joblogDB.some(r=>r.nama===nama);
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Teknisi';
+  document.getElementById('confirm-delete-msg').innerHTML =
+    `Hapus teknisi <strong>${nama}</strong>?${inUse?' <span style="color:var(--warn)">Teknisi ini memiliki data joblog yang akan tetap tersimpan.</span>':''}`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc}=window._fb;
+      await deleteDoc(doc(db,'teknisis',id));
+      toast(`Teknisi "${nama}" dihapus.`);
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── MANAJEMEN JENIS PEKERJAAN ─────────────────────────────────
+function renderJenisList(){
+  const el = document.getElementById('jenis-list');
+  if(!jenisDB.length){
+    el.innerHTML='<div class="empty-state">Belum ada jenis pekerjaan. Klik "+ Tambah Jenis".</div>';
+    return;
+  }
+  el.innerHTML = jenisDB.map((j,i)=>`
+    <div class="jenis-item">
+      <div class="jenis-item-left">
+        <span class="jenis-idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="jenis-color-dot" style="background:${j.color}"></span>
+        <span class="jenis-name">
+          <span style="display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;font-family:var(--mono);background:${j.bg};color:${j.color}">${j.nama}</span>
+        </span>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-ghost btn-xs" onclick="openEditJenis('${j.id}','${j.nama.replace(/'/g,"\'")}','${j.bg}','${j.color}')">✏ Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteJenis('${j.id}','${j.nama.replace(/'/g,"\'")}')">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectColor(btn){
+  document.querySelectorAll('#color-picker .color-opt').forEach(b=>{
+    b.style.border='2px solid transparent';
+  });
+  btn.style.border=`2px solid ${btn.dataset.color}`;
+  _selectedBg    = btn.dataset.bg;
+  _selectedColor = btn.dataset.color;
+  // Update preview
+  const nm = document.getElementById('add-jenis-nama').value||'Contoh';
+  const prev = document.getElementById('jenis-preview');
+  prev.style.background = _selectedBg;
+  prev.style.color      = _selectedColor;
+  prev.textContent      = nm;
+}
+
+function openAddJenis(){
+  _editJenisId = null;
+  _selectedBg    = '#EEF2FF';
+  _selectedColor = '#3730A3';
+  document.getElementById('add-jenis-title').textContent = 'Tambah Jenis Pekerjaan';
+  document.getElementById('add-jenis-save-btn').textContent = 'Tambah';
+  document.getElementById('add-jenis-nama').value = '';
+  document.getElementById('add-jenis-error').style.display = 'none';
+  // Reset color selection
+  document.querySelectorAll('#color-picker .color-opt').forEach((b,i)=>{
+    b.style.border = i===0 ? `2px solid ${b.dataset.color}` : '2px solid transparent';
+  });
+  const prev = document.getElementById('jenis-preview');
+  prev.style.background = _selectedBg;
+  prev.style.color      = _selectedColor;
+  prev.textContent      = 'Contoh';
+  document.getElementById('modal-add-jenis').classList.add('show');
+  setTimeout(()=>document.getElementById('add-jenis-nama').focus(),150);
+  // live preview
+  document.getElementById('add-jenis-nama').oninput = function(){
+    document.getElementById('jenis-preview').textContent = this.value||'Contoh';
+  };
+}
+
+function openEditJenis(id, nama, bg, color){
+  _editJenisId   = id;
+  _selectedBg    = bg;
+  _selectedColor = color;
+  document.getElementById('add-jenis-title').textContent = 'Edit Jenis Pekerjaan';
+  document.getElementById('add-jenis-save-btn').textContent = 'Simpan';
+  document.getElementById('add-jenis-nama').value = nama;
+  document.getElementById('add-jenis-error').style.display = 'none';
+  // Set color picker highlight
+  document.querySelectorAll('#color-picker .color-opt').forEach(b=>{
+    b.style.border = (b.dataset.bg===bg && b.dataset.color===color)
+      ? `2px solid ${color}` : '2px solid transparent';
+  });
+  const prev = document.getElementById('jenis-preview');
+  prev.style.background = bg;
+  prev.style.color      = color;
+  prev.textContent      = nama;
+  document.getElementById('modal-add-jenis').classList.add('show');
+  setTimeout(()=>document.getElementById('add-jenis-nama').focus(),150);
+  document.getElementById('add-jenis-nama').oninput = function(){
+    document.getElementById('jenis-preview').textContent = this.value||'Contoh';
+  };
+}
+
+async function saveAddJenis(){
+  const nama = document.getElementById('add-jenis-nama').value.trim();
+  const err  = document.getElementById('add-jenis-error');
+  if(!nama){ err.style.display='block'; err.textContent='Nama wajib diisi.'; return; }
+
+  if(_editJenisId){
+    // MODE EDIT
+    try {
+      const {db,doc,setDoc,getDoc}=window._fb;
+      const ref = doc(db,'jenis',_editJenisId);
+      const snap = await getDoc(ref);
+      await setDoc(ref,{...( snap.exists()?snap.data():{} ), nama, bg:_selectedBg, color:_selectedColor});
+      closeModal('modal-add-jenis');
+      toast(`Jenis "${nama}" berhasil diubah!`);
+    } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+  } else {
+    // MODE TAMBAH
+    if(jenisDB.some(j=>j.nama.toLowerCase()===nama.toLowerCase())){
+      err.style.display='block'; err.textContent='Nama sudah ada.'; return;
+    }
+    try {
+      const {db,collection,addDoc}=window._fb;
+      await addDoc(collection(db,'jenis'),{nama, bg:_selectedBg, color:_selectedColor});
+      closeModal('modal-add-jenis');
+      toast(`Jenis "${nama}" berhasil ditambahkan!`);
+    } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+  }
+}
+
+function confirmDeleteJenis(id, nama){
+  const inUse = joblogDB.some(r=>r.jenis===nama);
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Jenis Pekerjaan';
+  document.getElementById('confirm-delete-msg').innerHTML =
+    `Hapus jenis <strong>${nama}</strong>?${inUse
+      ? ' <span style="color:var(--warn)">Jenis ini digunakan di beberapa joblog yang akan tetap tersimpan.</span>'
+      : ''}`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc}=window._fb;
+      await deleteDoc(doc(db,'jenis',id));
+      toast(`Jenis "${nama}" dihapus.`);
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────
+function exportExcel(periode){
+  const today=new Date(); let rows=[...joblogDB],label='';
+  if(periode==='hari'){const t=todayStr();rows=rows.filter(r=>r.date===t);label=t;}
+  else if(periode==='minggu'){const d=new Date(today);d.setDate(d.getDate()-6);rows=rows.filter(r=>r.date>=d.toISOString().split('T')[0]);label=`minggu-${todayStr()}`;}
+  else{const m=todayStr().slice(0,7);rows=rows.filter(r=>r.date.startsWith(m));label=`bulan-${m}`;}
+  if(!rows.length){toast('Tidak ada data untuk periode ini','warn');return;}
+  _doExport(rows, label);
+}
+
+function exportExcelRange(){
+  const from = document.getElementById('exp-from').value;
+  const to   = document.getElementById('exp-to').value;
+  if(!from || !to){ toast('Pilih tanggal mulai dan tanggal akhir terlebih dahulu','warn'); return; }
+  if(from > to){ toast('Tanggal mulai tidak boleh lebih besar dari tanggal akhir','warn'); return; }
+  const rows = joblogDB.filter(r => r.date >= from && r.date <= to);
+  if(!rows.length){ toast('Tidak ada data untuk periode yang dipilih','warn'); return; }
+  // Format label: "2025-06-01_sd_2025-06-30"
+  const label = `${from}_sd_${to}`;
+  _doExport(rows, label);
+}
+
+function _doExport(rows, label){
+  const wb=XLSX.utils.book_new();
+  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Submit']];
+  rows.forEach((r,i)=>{
+    const rn=i+2;
+    wsData.push([
+      r.nama,r.date,r.sr,r.mesin||'',r.jenis||'',r.job,
+      r.start?fmt24(r.start):'',
+      r.end?fmt24(r.end):'',
+      r.end&&r.start?{f:`IF(H${rn}<>"",IFERROR((TIMEVALUE(H${rn})-TIMEVALUE(G${rn}))*24*60,""),"")`}:'',
+      r.end?'Selesai':'On Progress',
+      fmtSubmitDate(r.submittedAt)
+    ]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[18,13,14,16,18,38,12,12,14,13,14].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'Joblog');
+  XLSX.writeFile(wb,`Joblog_${label}.xlsx`);
+  toast(`Joblog_${label}.xlsx diunduh`);
+}
+
+// ── HELPERS ────────────────────────────────────────────────────
+function jenisBadge(j){
+  if(!j)return '';
+  // Cari di jenisDB dulu untuk warna dinamis
+  const found = jenisDB.find(x=>x.nama===j);
+  if(found){
+    return `<span class="badge" style="background:${found.bg};color:${found.color}">${j}</span>`;
+  }
+  // Fallback untuk data lama dengan jenis statis
+  const map={'Perbaikan':'badge-perbaikan','Penggantian Part':'badge-part','Project':'badge-project'};
+  return `<span class="badge ${map[j]||'badge-wip'}">${j}</span>`;
+}
+function fmtSubmitDate(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function formatTimeInput(el){
+  let v=el.value.replace(/[^0-9]/g,'');
+  if(v.length>4)v=v.slice(0,4);
+  if(v.length>=3)v=v.slice(0,2)+':'+v.slice(2);
+  el.value=v;
+  el.style.borderColor='';
+  if(v.length===5){const[h,m]=v.split(':').map(Number);if(h>23||m>59)el.style.borderColor='var(--danger)';}
+}
+function getTimeVal(id){
+  const v=document.getElementById(id).value.trim();
+  if(!v)return '';
+  if(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(v)){const[h,m]=v.split(':');return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+  return null;
+}
+function fmt24(t){if(!t)return '';const[h,m]=t.split(':');return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;}
+function durMins(s,e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);return(eh*60+em)-(sh*60+sm);}
+function fmtDur(m){if(!m&&m!==0)return '—';const h=Math.floor(m/60),mn=m%60;return h>0?`${h}j ${mn}m`:`${mn}m`;}
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  el.className=type==='warn'?'toast-warn':'toast-ok';
+  el.textContent=msg;el.style.display='block';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3500);
+}
+
+// ── POPUP NOTIFIKASI ───────────────────────────────────────────
+let _notifTimer = null;
+function showNotif(type, title, msg){
+  const popup  = document.getElementById('notif-popup');
+  const box    = document.getElementById('notif-box');
+  const icon   = document.getElementById('notif-icon');
+  const elTitle= document.getElementById('notif-title');
+  const elMsg  = document.getElementById('notif-msg');
+
+  // Reset class
+  popup.className = '';
+  box.parentElement.className = '';
+
+  if(type === 'success'){
+    popup.className = 'notif-ok';
+    icon.textContent = '✅';
+  } else {
+    popup.className = 'notif-err';
+    icon.textContent = '❌';
+  }
+  elTitle.textContent = title;
+  elMsg.textContent   = msg;
+  popup.style.display = 'block';
+
+  // Auto close
+  clearTimeout(_notifTimer);
+  const delay = type === 'success' ? 4000 : 6000;
+  _notifTimer = setTimeout(closeNotif, delay);
+}
+function closeNotif(){
+  clearTimeout(_notifTimer);
+  document.getElementById('notif-popup').style.display = 'none';
+}
+</script>
+</body>
+</html>
