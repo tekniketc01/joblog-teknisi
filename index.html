@@ -144,7 +144,8 @@ tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#FAFAF8}
 .sr-code{font-family:var(--mono);font-size:12px;color:var(--accent)}
 .nama-cell{font-weight:500}
-.submit-date{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.submit-date{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.submit-time{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.75}
 
 /* MOBILE ADMIN CARDS */
 .jl-cards{display:flex;flex-direction:column;gap:8px}
@@ -177,6 +178,18 @@ tbody tr:hover td{background:#FAFAF8}
 .sub-tab{flex:1;padding:10px 4px;font-size:11px;font-weight:500;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:all .15s;text-align:center;border-right:1px solid var(--border)}
 .sub-tab:last-child{border-right:none}
 .sub-tab.active{background:var(--surface);color:var(--accent)}
+
+/* STATUS DOT (badge helper) */
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot-progress{background:var(--warn)}
+.dot-selesai{background:var(--ok)}
+
+/* SEARCH BAR */
+.search-bar{position:relative;margin-bottom:8px}
+.search-bar input{padding-left:36px;background:var(--bg)}
+.search-bar input:focus{background:#fff}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
 
 /* FILTER BAR */
 .filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
@@ -476,10 +489,22 @@ service cloud.firestore {
       <label>Pekerjaan *</label>
       <input type="text" id="f-job" placeholder="Deskripsi singkat pekerjaan">
     </div>
-    <div class="form-row cols3">
-      <div class="field"><label>Tanggal *</label><input type="date" id="f-date"></div>
+    <div class="form-row cols2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Tanggal *</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="field">
+        <label>Status Pekerjaan *</label>
+        <select id="f-status" onchange="updateEndFieldVisibility()">
+          <option value="progress">⏳ Belum Selesai</option>
+          <option value="selesai">✅ Sudah Selesai</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row cols2" id="row-waktu">
       <div class="field"><label>Waktu Mulai *</label><input type="text" id="f-start" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
-      <div class="field"><label>Waktu Selesai</label><input type="text" id="f-end" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
+      <div class="field" id="field-end"><label>Waktu Selesai</label><input type="text" id="f-end" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-submit" onclick="submitJob()" style="flex:1">
@@ -518,10 +543,19 @@ service cloud.firestore {
     <div class="card">
       <div class="card-title">Semua Data Joblog</div>
       <div class="filter-bar">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="ff-sr" placeholder="Cari No. SR... (contoh: SR-001)" oninput="renderAdmin()" autocomplete="off" style="width:100%">
+        </div>
         <div class="filter-row">
           <select id="ff-nama" onchange="renderAdmin()"><option value="">Semua teknisi</option></select>
           <select id="ff-jenis" onchange="renderAdmin()">
             <option value="">Semua jenis</option>
+          </select>
+          <select id="ff-status" onchange="renderAdmin()">
+            <option value="">Semua status</option>
+            <option value="selesai">Selesai</option>
+            <option value="progress">On Progress</option>
           </select>
         </div>
         <div class="filter-row">
@@ -552,7 +586,7 @@ service cloud.firestore {
         <table>
           <thead><tr>
             <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
-            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Tgl Submit</th><th>Hapus</th>
+            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Input (Tgl & Jam)</th><th>Hapus</th>
           </tr></thead>
           <tbody id="admin-tbody"></tbody>
         </table>
@@ -719,6 +753,28 @@ window.addEventListener('fb-ready', async () => {
   let _jenisSeedDone = false;
   onSnapshot(query(collection(db,'jenis'), orderBy('nama','asc')), async snap => {
     jenisDB = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // ── DEDUPLICATION: hapus entri duplikat (case-insensitive), pertahankan yang pertama ──
+    const seen = {};
+    const duplicateIds = [];
+    for(const j of jenisDB){
+      const key = j.nama.trim().toLowerCase();
+      if(seen[key]){
+        duplicateIds.push(j.id); // tandai sebagai duplikat untuk dihapus
+      } else {
+        seen[key] = true;
+      }
+    }
+    if(duplicateIds.length){
+      // Hapus duplikat dari Firestore tanpa menghapus joblog yang menggunakannya
+      try{
+        const {db:fdb, doc:fdoc, deleteDoc:fdel} = window._fb;
+        for(const did of duplicateIds) await fdel(fdoc(fdb,'jenis',did));
+      }catch(e){ console.warn('Gagal hapus duplikat jenis:',e); }
+      // onSnapshot akan terpanggil lagi setelah penghapusan, skip proses di bawah
+      return;
+    }
+
     buildJenisDropdowns();
     renderJenisList();
     // Seed default jenis pertama kali jika kosong
@@ -778,7 +834,6 @@ setTimeout(()=>{
   document.getElementById('f-date').value = todayStr();
   document.getElementById('header-date').textContent =
     new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  // Login teknisi hanya dipanggil saat mau submit, bukan saat load
 })();
 
 function setSyncDot(s){
@@ -963,13 +1018,25 @@ function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 // ── SUBMIT JOBLOG ──────────────────────────────────────────────
 async function submitJob(){
   if(!currentUser){ toast('Login dulu sebelum input joblog.','warn'); showLoginTeknisi(); return; }
-  const sr    = document.getElementById('f-sr').value.trim();
-  const mesin = document.getElementById('f-mesin').value.trim();
-  const jenis = document.getElementById('f-jenis').value;
-  const job   = document.getElementById('f-job').value.trim();
-  const start = getTimeVal('f-start');
-  const end   = getTimeVal('f-end');
-  const date  = document.getElementById('f-date').value;
+  const sr     = document.getElementById('f-sr').value.trim();
+  const mesin  = document.getElementById('f-mesin').value.trim();
+  const jenis  = document.getElementById('f-jenis').value;
+  const job    = document.getElementById('f-job').value.trim();
+  const start  = getTimeVal('f-start');
+  const date   = document.getElementById('f-date').value;
+  const status = document.getElementById('f-status').value; // 'progress' | 'selesai'
+
+  // Waktu selesai hanya wajib jika status = selesai
+  let end = '';
+  if(status === 'selesai'){
+    end = getTimeVal('f-end');
+    if(end === null){ showNotif('error','Format Waktu Salah','Waktu selesai tidak valid. Gunakan format HH:MM (contoh: 17:00).'); return; }
+    if(!end){ showNotif('error','Validasi Gagal','Waktu Selesai wajib diisi jika status Sudah Selesai.'); return; }
+  } else {
+    const rawEnd = getTimeVal('f-end');
+    if(rawEnd === null){ showNotif('error','Format Waktu Salah','Waktu selesai tidak valid. Gunakan format HH:MM (contoh: 17:00).'); return; }
+    end = rawEnd; // boleh kosong
+  }
 
   // Validasi dengan pesan spesifik
   if(!date){ showNotif('error','Validasi Gagal','Tanggal wajib diisi.'); return; }
@@ -979,12 +1046,12 @@ async function submitJob(){
   if(!job)  { showNotif('error','Validasi Gagal','Deskripsi Pekerjaan wajib diisi.'); return; }
   if(start === null){ showNotif('error','Format Waktu Salah','Waktu mulai tidak valid. Gunakan format HH:MM (contoh: 08:30).'); return; }
   if(!start){ showNotif('error','Validasi Gagal','Waktu Mulai wajib diisi.'); return; }
-  if(end === null){ showNotif('error','Format Waktu Salah','Waktu selesai tidak valid. Gunakan format HH:MM (contoh: 17:00).'); return; }
   if(end && end < start){ showNotif('error','Waktu Tidak Valid','Waktu selesai tidak boleh sebelum waktu mulai.'); return; }
   if(!fbConfigOk){ showNotif('error','Koneksi Gagal','Firebase belum dikonfigurasi. Hubungi admin.'); return; }
 
   const record = {
     nama:currentUser.nama, sr, mesin, jenis, job, start, end, date,
+    status, // 'progress' | 'selesai'
     dur:(end&&start)?durMins(start,end):null,
     submittedAt:nowTs()
   };
@@ -1019,6 +1086,15 @@ async function submitJob(){
 function resetForm(){
   ['f-sr','f-mesin','f-jenis','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-date').value=todayStr();
+  document.getElementById('f-status').value='progress';
+  updateEndFieldVisibility();
+}
+
+// Tampilkan/sembunyikan label "wajib" pada field waktu selesai sesuai status
+function updateEndFieldVisibility(){
+  const selesai = document.getElementById('f-status').value === 'selesai';
+  const lbl = document.querySelector('#field-end label');
+  if(lbl) lbl.textContent = selesai ? 'Waktu Selesai *' : 'Waktu Selesai';
 }
 
 // ── RENDER MY LOGS ─────────────────────────────────────────────
@@ -1039,7 +1115,7 @@ function renderMyLogs(){
         <div style="display:flex;align-items:center;gap:8px">
           <span class="log-sr">${r.sr}</span>${jenisBadge(r.jenis)}
         </div>
-        <span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span>
+        <span class="badge ${isSelesai(r)?'badge-ok':'badge-wip'}">${isSelesai(r)?'Selesai':'On Progress'}</span>
       </div>
       <div class="log-job">${r.job}</div>
       <div class="log-meta">
@@ -1053,43 +1129,66 @@ function renderMyLogs(){
 }
 
 // ── RENDER ADMIN ───────────────────────────────────────────────
+function highlightSR(text, query){
+  if(!query) return text;
+  const esc = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return text.replace(new RegExp(esc,'gi'), m=>`<span class="search-highlight">${m}</span>`);
+}
+function isSelesai(r){
+  // Support data lama (status field belum ada) maupun data baru
+  if(r.status) return r.status === 'selesai';
+  return !!r.end; // backward compat
+}
 function renderAdmin(){
-  const fn=document.getElementById('ff-nama').value;
-  const fd=document.getElementById('ff-date').value;
-  const fj=document.getElementById('ff-jenis').value;
-  let rows=[...joblogDB];
-  if(fn) rows=rows.filter(r=>r.nama===fn);
-  if(fd) rows=rows.filter(r=>r.date===fd);
-  if(fj) rows=rows.filter(r=>r.jenis===fj);
-  const empty=document.getElementById('admin-empty');
+  const fn  = document.getElementById('ff-nama').value;
+  const fd  = document.getElementById('ff-date').value;
+  const fj  = document.getElementById('ff-jenis').value;
+  const fsr = document.getElementById('ff-sr').value.trim().toLowerCase();
+  const fst = document.getElementById('ff-status').value; // '' | 'selesai' | 'progress'
+  let rows  = [...joblogDB];
+  if(fn)  rows = rows.filter(r=>r.nama===fn);
+  if(fd)  rows = rows.filter(r=>r.date===fd);
+  if(fj)  rows = rows.filter(r=>r.jenis===fj);
+  if(fsr) rows = rows.filter(r=>r.sr.toLowerCase().includes(fsr));
+  if(fst === 'selesai')  rows = rows.filter(r=> isSelesai(r));
+  if(fst === 'progress') rows = rows.filter(r=>!isSelesai(r));
+
+  const empty = document.getElementById('admin-empty');
   if(!rows.length){
     document.getElementById('admin-tbody').innerHTML='';
     document.getElementById('admin-cards').innerHTML='';
-    empty.style.display='block';return;
+    empty.style.display='block'; return;
   }
   empty.style.display='none';
 
-  document.getElementById('admin-tbody').innerHTML=rows.map(r=>`<tr>
+  document.getElementById('admin-tbody').innerHTML=rows.map(r=>{
+    const selesai = isSelesai(r);
+    const srHtml  = highlightSR(r.sr, fsr);
+    return `<tr>
     <td class="nama-cell">${r.nama}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
-    <td class="sr-code">${r.sr}</td>
+    <td class="sr-code">${srHtml}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
     <td>${jenisBadge(r.jenis)}</td>
     <td>${r.job}</td>
     <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
     <td style="font-family:var(--mono);font-size:12px">${fmtDur(r.dur)}</td>
-    <td><span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span></td>
-    <td><span class="submit-date">${fmtSubmitDate(r.submittedAt)}</span></td>
+    <td><span class="badge ${selesai?'badge-ok':'badge-wip'}">${selesai?'Selesai':'On Progress'}</span></td>
+    <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
     <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 
-  document.getElementById('admin-cards').innerHTML=rows.map(r=>`
+  document.getElementById('admin-cards').innerHTML=rows.map(r=>{
+    const selesai = isSelesai(r);
+    const srHtml  = highlightSR(r.sr, fsr);
+    return `
     <div class="jl-card">
       <div class="jl-top">
-        <div><div class="jl-nama">${r.nama}</div><div class="jl-sr">${r.sr}</div></div>
+        <div><div class="jl-nama">${r.nama}</div><div class="jl-sr">${srHtml}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span class="badge ${r.end?'badge-ok':'badge-wip'}">${r.end?'Selesai':'On Progress'}</span>
+          <span class="badge ${selesai?'badge-ok':'badge-wip'}">${selesai?'Selesai':'On Progress'}</span>
           ${jenisBadge(r.jenis)}
         </div>
       </div>
@@ -1101,13 +1200,15 @@ function renderAdmin(){
         <span>⏱ ${fmtDur(r.dur)}</span>
       </div>
       <div class="jl-submit">
-        <span>Submit: ${fmtSubmitDate(r.submittedAt)}</span>
+        <span>🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
         <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function clearFilter(){
-  ['ff-nama','ff-jenis','ff-date'].forEach(id=>document.getElementById(id).value='');
+  ['ff-nama','ff-jenis','ff-date','ff-status'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ff-sr').value='';
   renderAdmin();
 }
 
@@ -1120,8 +1221,8 @@ function updateMetrics(){
   document.getElementById('m-total').textContent=joblogDB.length;
   document.getElementById('m-tek').textContent=tek;
   document.getElementById('m-dur').textContent=avg!==null?fmtDur(avg):'—';
-  document.getElementById('m-sr').textContent=joblogDB.filter(r=>r.end).length;
-  document.getElementById('m-wip').textContent=joblogDB.filter(r=>!r.end).length;
+  document.getElementById('m-sr').textContent=joblogDB.filter(r=>isSelesai(r)).length;
+  document.getElementById('m-wip').textContent=joblogDB.filter(r=>!isSelesai(r)).length;
 }
 
 // ── HAPUS JOBLOG ───────────────────────────────────────────────
@@ -1326,6 +1427,17 @@ async function saveAddJenis(){
   const err  = document.getElementById('add-jenis-error');
   if(!nama){ err.style.display='block'; err.textContent='Nama wajib diisi.'; return; }
 
+  // Cek duplikat — kecualikan diri sendiri saat mode edit
+  const isDuplicate = jenisDB.some(j =>
+    j.nama.trim().toLowerCase() === nama.toLowerCase() &&
+    j.id !== _editJenisId
+  );
+  if(isDuplicate){
+    err.style.display='block';
+    err.textContent=`Jenis "${nama}" sudah ada dalam daftar.`;
+    return;
+  }
+
   if(_editJenisId){
     // MODE EDIT
     try {
@@ -1338,9 +1450,6 @@ async function saveAddJenis(){
     } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
   } else {
     // MODE TAMBAH
-    if(jenisDB.some(j=>j.nama.toLowerCase()===nama.toLowerCase())){
-      err.style.display='block'; err.textContent='Nama sudah ada.'; return;
-    }
     try {
       const {db,collection,addDoc}=window._fb;
       await addDoc(collection(db,'jenis'),{nama, bg:_selectedBg, color:_selectedColor});
@@ -1392,20 +1501,21 @@ function exportExcelRange(){
 
 function _doExport(rows, label){
   const wb=XLSX.utils.book_new();
-  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Submit']];
+  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Input','Jam Input']];
   rows.forEach((r,i)=>{
     const rn=i+2;
     wsData.push([
-      r.nama,r.date,r.sr,r.mesin||'',r.jenis||'',r.job,
+      r.nama, r.date, r.sr, r.mesin||'', r.jenis||'', r.job,
       r.start?fmt24(r.start):'',
       r.end?fmt24(r.end):'',
       r.end&&r.start?{f:`IF(H${rn}<>"",IFERROR((TIMEVALUE(H${rn})-TIMEVALUE(G${rn}))*24*60,""),"")`}:'',
-      r.end?'Selesai':'On Progress',
-      fmtSubmitDate(r.submittedAt)
+      isSelesai(r)?'Selesai':'On Progress',
+      fmtSubmitDate(r.submittedAt),
+      fmtSubmitTimeOnly(r.submittedAt)
     ]);
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[18,13,14,16,18,38,12,12,14,13,14].map(w=>({wch:w}));
+  ws['!cols']=[18,13,14,16,18,38,12,12,14,13,13,10].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'Joblog');
   XLSX.writeFile(wb,`Joblog_${label}.xlsx`);
   toast(`Joblog_${label}.xlsx diunduh`);
@@ -1426,6 +1536,17 @@ function jenisBadge(j){
 function fmtSubmitDate(ts){
   if(!ts)return '—';
   return new Date(ts).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function fmtSubmitDateTime(ts){
+  if(!ts)return '—';
+  const d = new Date(ts);
+  const tgl = d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const jam = d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false});
+  return `${tgl} ${jam}`;
+}
+function fmtSubmitTimeOnly(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
 }
 function formatTimeInput(el){
   let v=el.value.replace(/[^0-9]/g,'');
