@@ -10,7 +10,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getFirestore, collection, addDoc, onSnapshot,
   query, orderBy, doc, setDoc, getDoc, getDocs,
-  deleteDoc, writeBatch
+  deleteDoc, writeBatch, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ════════════════════════════════════════════════
@@ -28,7 +28,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
-window._fb = { db, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, getDocs, deleteDoc, writeBatch };
+window._fb = { db, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, getDocs, deleteDoc, writeBatch, updateDoc };
 window._fbReady = true;
 window.dispatchEvent(new Event('fb-ready'));
 </script>
@@ -191,12 +191,18 @@ tbody tr:hover td{background:#FAFAF8}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
 .search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
 
-/* FILTER BAR */
-.filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
-.filter-row{display:flex;gap:8px}
-.filter-row select,.filter-row input[type="date"]{flex:1}
+/* FILTER BAR — mobile: stack; desktop: row */
+.filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
+.filter-group{display:grid;gap:8px}
+.filter-group.g2{grid-template-columns:1fr 1fr}
+.filter-group.g3{grid-template-columns:1fr 1fr 1fr}
+.filter-group select,.filter-group input[type="date"]{flex:1;min-width:0}
+.filter-label-wrap{display:flex;flex-direction:column;gap:3px}
+.filter-label-wrap label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.filter-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
 /* EXPORT SECTION */
-.export-section{display:flex;flex-direction:column;gap:8px}
+.export-section{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--border)}
 .export-quick-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .export-range-row{display:flex;flex-direction:column;gap:6px;background:var(--ok-light);border:1px solid #AADEC3;border-radius:8px;padding:10px 12px}
 .export-range-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ok)}
@@ -207,7 +213,113 @@ tbody tr:hover td{background:#FAFAF8}
 .export-range-btn{background:var(--ok);color:#fff;border-color:var(--ok);flex-shrink:0}
 .export-range-btn:hover{background:#155f3a}
 
-/* TEKNISI / USER LIST */
+/* EDIT JENIS INLINE */
+.btn-edit-jenis{background:var(--bg);color:var(--accent);border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-edit-jenis:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.modal-jenis-current{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:1rem;padding:8px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
+.modal-jenis-current strong{color:var(--text)}
+
+/* MOBILE ADMIN CARDS — redesigned */
+.jl-cards{display:flex;flex-direction:column;gap:10px}
+.jl-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.jl-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
+.jl-card-header-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.jl-nama{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent);white-space:nowrap}
+.jl-card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.jl-card-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.jl-job{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.jl-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.jl-info-item{display:flex;align-items:baseline;gap:4px;font-family:var(--mono);font-size:11px}
+.jl-info-key{color:var(--muted);flex-shrink:0}
+.jl-info-val{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-card-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg)}
+.jl-submit-ts{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* MY LOG LIST */
+.log-list{display:flex;flex-direction:column;gap:8px}
+.log-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.log-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.log-sr{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.log-job{font-size:13px;font-weight:500;margin-bottom:5px}
+.log-meta{display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap}
+.badge-ok{background:var(--ok-light);color:var(--ok)}
+.badge-wip{background:var(--warn-light);color:var(--warn)}
+.badge-perbaikan{background:#EEF2FF;color:#3730A3}
+.badge-part{background:#FFF7ED;color:#9A3412}
+.badge-project{background:var(--purple-light);color:var(--purple)}
+
+/* SUB TABS */
+.sub-tabs{display:flex;margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+.sub-tab{flex:1;padding:10px 4px;font-size:11px;font-weight:500;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:all .15s;text-align:center;border-right:1px solid var(--border)}
+.sub-tab:last-child{border-right:none}
+.sub-tab.active{background:var(--surface);color:var(--accent)}
+
+/* STATUS DOT */
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot-progress{background:var(--warn)}
+.dot-selesai{background:var(--ok)}
+
+/* SEARCH BAR */
+.search-bar{position:relative}
+.search-bar input{padding-left:36px;background:var(--bg)}
+.search-bar input:focus{background:#fff}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
+
+/* PERFORMA */
+.perf-filter-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.perf-grid{display:flex;flex-direction:column;gap:14px}
+.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
+.perf-card-name{font-weight:600;font-size:15px;color:var(--text)}
+.perf-card-total{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.perf-sections{display:flex;flex-direction:column}
+.perf-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.perf-section:last-child{border-bottom:none}
+.perf-section-title{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.perf-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Jenis bars — now with avg duration column */
+.perf-jenis-table{width:100%;border-collapse:collapse}
+.perf-jenis-table td{padding:4px 0;vertical-align:middle}
+.perf-jenis-table td:first-child{width:36px;font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;padding-right:6px}
+.perf-jenis-name-cell{font-size:12px;font-weight:500;padding-right:8px;white-space:nowrap}
+.perf-bar-cell{width:100%}
+.perf-bar-wrap{background:var(--bg);border-radius:100px;height:7px;overflow:hidden}
+.perf-bar{height:100%;border-radius:100px}
+.perf-jenis-count-cell{font-family:var(--mono);font-size:11px;color:var(--text);font-weight:500;padding:0 8px;white-space:nowrap}
+.perf-jenis-avg-cell{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;text-align:right}
+/* Durasi stats */
+.perf-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.perf-stat-box{background:var(--bg);border-radius:8px;padding:10px 12px;text-align:center}
+.perf-stat-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);line-height:1.2}
+.perf-stat-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:3px}
+/* Kedisiplinan */
+.perf-disip-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.perf-disip-pct{font-size:32px;font-weight:700;line-height:1;flex-shrink:0}
+.perf-disip-pct.good{color:var(--ok)}
+.perf-disip-pct.mid{color:var(--warn)}
+.perf-disip-pct.bad{color:var(--danger)}
+.perf-disip-detail{display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:11px;color:var(--muted);flex:1}
+.perf-disip-detail strong{color:var(--text);font-size:12px}
+/* Status summary */
+.perf-status-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.perf-status-box{background:var(--bg);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.perf-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.perf-status-info{display:flex;flex-direction:column}
+.perf-status-val{font-family:var(--mono);font-size:20px;font-weight:600;line-height:1.1}
+.perf-status-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+/* 2-col layout on desktop for perf sections */
+@media(min-width:640px){
+  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .perf-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .perf-section:nth-child(2n){border-right:none}
+  .perf-section:nth-last-child(-n+2){border-bottom:none}
+}
 .user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
 .user-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;gap:8px}
 .user-info{flex:1;min-width:0}
@@ -268,6 +380,45 @@ tbody tr:hover td{background:#FAFAF8}
 .jenis-name{font-weight:500;font-size:14px}
 .jenis-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
+/* PERFORMA DASHBOARD */
+.perf-filter-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.perf-grid{display:flex;flex-direction:column;gap:12px}
+.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border)}
+.perf-card-name{font-weight:600;font-size:15px}
+.perf-card-total{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.perf-body{display:grid;grid-template-columns:1fr;gap:0}
+.perf-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.perf-section:last-child{border-bottom:none}
+.perf-section-title{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+/* Jenis bars */
+.perf-jenis-list{display:flex;flex-direction:column;gap:7px}
+.perf-jenis-row{display:flex;align-items:center;gap:8px}
+.perf-jenis-label{font-size:12px;width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perf-bar-wrap{flex:1;background:var(--bg);border-radius:100px;height:8px;overflow:hidden;min-width:40px}
+.perf-bar{height:100%;border-radius:100px;transition:width .4s ease}
+.perf-jenis-count{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;min-width:28px;text-align:right}
+/* Durasi stats */
+.perf-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.perf-stat-box{background:var(--bg);border-radius:8px;padding:10px 12px;text-align:center}
+.perf-stat-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);line-height:1.2}
+.perf-stat-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:3px}
+/* Kedisiplinan */
+.perf-disip-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.perf-disip-pct{font-size:28px;font-weight:600;line-height:1}
+.perf-disip-pct.good{color:var(--ok)}
+.perf-disip-pct.mid{color:var(--warn)}
+.perf-disip-pct.bad{color:var(--danger)}
+.perf-disip-detail{display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.perf-disip-detail strong{color:var(--text);font-size:12px}
+/* Status summary */
+.perf-status-row{display:flex;gap:10px}
+.perf-status-box{flex:1;background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+.perf-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.perf-status-info{display:flex;flex-direction:column}
+.perf-status-val{font-family:var(--mono);font-size:16px;font-weight:500;line-height:1.1}
+.perf-status-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+
 /* DESKTOP */
 @media(min-width:640px){
   body{padding-bottom:0}
@@ -278,20 +429,30 @@ tbody tr:hover td{background:#FAFAF8}
   .metrics{grid-template-columns:repeat(4,1fr)}
   .form-row.cols2{grid-template-columns:1fr 1fr}
   .form-row.cols3{grid-template-columns:1fr 1fr 1fr}
-  .filter-bar{flex-direction:row;align-items:flex-start;flex-wrap:wrap}
-  .filter-row{flex:1;min-width:0}
-  .export-section{flex-shrink:0}
-  .export-quick-row{grid-template-columns:auto auto auto;width:auto}
+  /* filter bar: grid 2-col, export di sisi kanan */
+  .filter-bar{display:grid;grid-template-columns:1fr 260px;column-gap:16px;row-gap:10px;align-items:start}
+  .filter-bar .search-bar{grid-column:1}
+  .filter-bar .filter-group{grid-column:1}
+  .filter-bar .export-section{grid-column:2;grid-row:1 / span 3}
+  .export-quick-row{grid-template-columns:1fr 1fr 1fr}
   .export-range-inputs{flex-wrap:nowrap}
   .jl-cards{display:none}
   .table-wrap{display:block}
   #toast{bottom:24px;left:auto;right:24px;transform:none}
   .user-chip{display:flex}
+  /* performa */
+  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .perf-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .perf-section:nth-child(2n){border-right:none}
+  .perf-section:nth-last-child(-n+2){border-bottom:none}
 }
 @media(max-width:639px){
   .form-row.cols2{grid-template-columns:1fr}
   .form-row.cols3{grid-template-columns:1fr 1fr}
   .form-row.cols3 .field:last-child{grid-column:span 2}
+  .filter-group.g3{grid-template-columns:1fr 1fr}
+  .filter-group.g3>:last-child{grid-column:span 2}
 }
 </style>
 </head>
@@ -529,6 +690,7 @@ service cloud.firestore {
     <button class="sub-tab active" onclick="switchSubTab('data',this)">Data</button>
     <button class="sub-tab" onclick="switchSubTab('teknisi',this)">Teknisi</button>
     <button class="sub-tab" onclick="switchSubTab('jenis',this)">Jenis</button>
+    <button class="sub-tab" onclick="switchSubTab('performa',this)">Performa</button>
     <button class="sub-tab" onclick="switchSubTab('settings',this)">Settings</button>
   </div>
 
@@ -543,25 +705,42 @@ service cloud.firestore {
     <div class="card">
       <div class="card-title">Semua Data Joblog</div>
       <div class="filter-bar">
+        <!-- Baris 1: Search SR -->
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" id="ff-sr" placeholder="Cari No. SR... (contoh: SR-001)" oninput="renderAdmin()" autocomplete="off" style="width:100%">
+          <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="renderAdmin()" autocomplete="off" style="width:100%">
         </div>
-        <div class="filter-row">
-          <select id="ff-nama" onchange="renderAdmin()"><option value="">Semua teknisi</option></select>
-          <select id="ff-jenis" onchange="renderAdmin()">
-            <option value="">Semua jenis</option>
-          </select>
-          <select id="ff-status" onchange="renderAdmin()">
-            <option value="">Semua status</option>
-            <option value="selesai">Selesai</option>
-            <option value="progress">On Progress</option>
-          </select>
+        <!-- Baris 2: Teknisi + Jenis -->
+        <div class="filter-group g2">
+          <div class="filter-label-wrap">
+            <label>Teknisi</label>
+            <select id="ff-nama" onchange="renderAdmin()"><option value="">Semua Teknisi</option></select>
+          </div>
+          <div class="filter-label-wrap">
+            <label>Jenis</label>
+            <select id="ff-jenis" onchange="renderAdmin()"><option value="">Semua Jenis</option></select>
+          </div>
         </div>
-        <div class="filter-row">
-          <input type="date" id="ff-date" onchange="renderAdmin()">
-          <button class="btn btn-ghost btn-sm" onclick="clearFilter()">✕ Reset</button>
+        <!-- Baris 3: Status + Tanggal + Reset -->
+        <div class="filter-group g3">
+          <div class="filter-label-wrap">
+            <label>Status</label>
+            <select id="ff-status" onchange="renderAdmin()">
+              <option value="">Semua Status</option>
+              <option value="selesai">✅ Selesai</option>
+              <option value="progress">⏳ On Progress</option>
+            </select>
+          </div>
+          <div class="filter-label-wrap">
+            <label>Tgl Kerja</label>
+            <input type="date" id="ff-date" onchange="renderAdmin()">
+          </div>
+          <div class="filter-label-wrap" style="justify-content:flex-end">
+            <label style="opacity:0">–</label>
+            <button class="btn btn-ghost btn-sm" onclick="clearFilter()" style="width:100%">✕ Reset</button>
+          </div>
         </div>
+        <!-- Baris 4: Export -->
         <div class="export-section">
           <div class="export-quick-row">
             <button class="btn btn-export btn-sm" onclick="exportExcel('hari')">↓ Hari Ini</button>
@@ -628,6 +807,30 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- SUB: PERFORMA -->
+  <div id="sub-performa" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Performa Teknisi</span>
+      </div>
+      <div class="perf-filter-row">
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Teknisi</label>
+          <select id="pf-nama" onchange="renderPerforma()">
+            <option value="">Semua Teknisi</option>
+          </select>
+        </div>
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Bulan</label>
+          <input type="month" id="pf-bulan" onchange="renderPerforma()">
+        </div>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPerformaFilter()">✕ Reset</button>
+      </div>
+    </div>
+    <div id="perf-cards"></div>
+    <div class="empty-state" id="perf-empty" style="display:none">Tidak ada data untuk periode ini.</div>
+  </div>
+
   <!-- SUB: SETTINGS -->
   <div id="sub-settings" style="display:none">
     <div class="card">
@@ -670,6 +873,23 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- MODAL: EDIT JENIS JOBLOG -->
+<div class="overlay" id="modal-edit-jenis-joblog">
+  <div class="modal">
+    <div class="modal-title">✏️ Ubah Jenis Pekerjaan</div>
+    <div class="modal-jenis-current" id="edit-jenis-joblog-info">—</div>
+    <div class="field" style="margin-bottom:1rem">
+      <label>Jenis Pekerjaan Baru *</label>
+      <select id="edit-jenis-joblog-select"></select>
+    </div>
+    <div class="pw-error" id="edit-jenis-joblog-err"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeModal('modal-edit-jenis-joblog')">Batal</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveEditJenisJoblog()">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -684,6 +904,7 @@ let fbConfigOk  = false;
 let _pendingAdminEl, _pendingAdminType;
 let _editPwUserId = null;
 let _editJenisId  = null;
+let _editJenisJoblogId = null;
 let _selectedBg   = '#EEF2FF';
 let _selectedColor= '#3730A3';
 
@@ -805,6 +1026,7 @@ window.addEventListener('fb-ready', async () => {
     renderMyLogs();
     renderAdmin();
     updateMetrics();
+    if(document.getElementById('sub-performa').style.display !== 'none') renderPerforma();
   }, err => {
     setSyncDot('err');
     document.getElementById('loading-screen').style.display = 'none';
@@ -834,6 +1056,8 @@ setTimeout(()=>{
   document.getElementById('f-date').value = todayStr();
   document.getElementById('header-date').textContent =
     new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Set default bulan performa ke bulan ini
+  document.getElementById('pf-bulan').value = todayStr().slice(0,7);
 })();
 
 function setSyncDot(s){
@@ -866,9 +1090,13 @@ function buildLoginDropdown(){
   }
 }
 function buildFilterDropdown(){
-  document.getElementById('ff-nama').innerHTML =
-    '<option value="">Semua teknisi</option>' +
+  const opts = '<option value="">Semua teknisi</option>' +
     teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+  document.getElementById('ff-nama').innerHTML = opts;
+
+  const pfOpts = '<option value="">Semua Teknisi</option>' +
+    teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+  document.getElementById('pf-nama').innerHTML = pfOpts;
 }
 
 // ── BUILD JENIS DROPDOWNS ──────────────────────────────────────
@@ -1008,10 +1236,11 @@ function switchTab(t,el,type){
 function switchSubTab(s,el){
   document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  ['data','teknisi','jenis','settings'].forEach(id=>
+  ['data','teknisi','jenis','performa','settings'].forEach(id=>
     document.getElementById('sub-'+id).style.display=id===s?'block':'none');
-  if(s==='teknisi') renderUserList();
-  if(s==='jenis')   renderJenisList();
+  if(s==='teknisi')  renderUserList();
+  if(s==='jenis')    renderJenisList();
+  if(s==='performa') renderPerforma();
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
@@ -1169,7 +1398,7 @@ function renderAdmin(){
     <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
     <td class="sr-code">${srHtml}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
-    <td>${jenisBadge(r.jenis)}</td>
+    <td>${jenisBadge(r.jenis)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
     <td>${r.job}</td>
     <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
@@ -1185,22 +1414,27 @@ function renderAdmin(){
     const srHtml  = highlightSR(r.sr, fsr);
     return `
     <div class="jl-card">
-      <div class="jl-top">
-        <div><div class="jl-nama">${r.nama}</div><div class="jl-sr">${srHtml}</div></div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div class="jl-card-header">
+        <div class="jl-card-header-left">
+          <div class="jl-nama">${r.nama}</div>
+          <div class="jl-sr">${srHtml}</div>
+        </div>
+        <div class="jl-card-badges">
           <span class="badge ${selesai?'badge-ok':'badge-wip'}">${selesai?'Selesai':'On Progress'}</span>
-          ${jenisBadge(r.jenis)}
+          <span style="display:flex;align-items:center;gap:4px">${jenisBadge(r.jenis)}<button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></span>
         </div>
       </div>
-      <div class="jl-job">${r.job}</div>
-      <div class="jl-meta">
-        <span>📅 ${r.date}</span>
-        ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
-        <span>🕐 ${fmt24(r.start)}${r.end?' — '+fmt24(r.end):''}</span>
-        <span>⏱ ${fmtDur(r.dur)}</span>
+      <div class="jl-card-body">
+        <div class="jl-job">${r.job}</div>
+        <div class="jl-info-grid">
+          <div class="jl-info-item"><span class="jl-info-key">📅</span><span class="jl-info-val">${r.date}</span></div>
+          <div class="jl-info-item"><span class="jl-info-key">⚙</span><span class="jl-info-val">${r.mesin||'—'}</span></div>
+          <div class="jl-info-item"><span class="jl-info-key">🕐</span><span class="jl-info-val">${fmt24(r.start)}${r.end?' → '+fmt24(r.end):' → ...'}</span></div>
+          <div class="jl-info-item"><span class="jl-info-key">⏱</span><span class="jl-info-val">${fmtDur(r.dur)}</span></div>
+        </div>
       </div>
-      <div class="jl-submit">
-        <span>🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
+      <div class="jl-card-footer">
+        <span class="jl-submit-ts">🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
         <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
       </div>
     </div>`;
@@ -1210,6 +1444,38 @@ function clearFilter(){
   ['ff-nama','ff-jenis','ff-date','ff-status'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ff-sr').value='';
   renderAdmin();
+}
+
+// ── EDIT JENIS JOBLOG ──────────────────────────────────────────
+function openEditJenisJoblog(joblogId, currentJenis, sr){
+  _editJenisJoblogId = joblogId;
+  document.getElementById('edit-jenis-joblog-info').innerHTML =
+    `SR: <strong>${sr}</strong> &nbsp;|&nbsp; Jenis saat ini: <strong>${currentJenis||'—'}</strong>`;
+  const sel = document.getElementById('edit-jenis-joblog-select');
+  sel.innerHTML = jenisDB.map(j =>
+    `<option value="${j.nama}" ${j.nama===currentJenis?'selected':''}>${j.nama}</option>`
+  ).join('');
+  document.getElementById('edit-jenis-joblog-err').style.display = 'none';
+  document.getElementById('modal-edit-jenis-joblog').classList.add('show');
+}
+
+async function saveEditJenisJoblog(){
+  const newJenis = document.getElementById('edit-jenis-joblog-select').value;
+  const err = document.getElementById('edit-jenis-joblog-err');
+  if(!newJenis){ err.style.display='block'; err.textContent='Pilih jenis pekerjaan.'; return; }
+  if(!_editJenisJoblogId){ return; }
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db,'joblogs',_editJenisJoblogId), { jenis: newJenis });
+    closeModal('modal-edit-jenis-joblog');
+    toast(`Jenis pekerjaan diubah ke "${newJenis}"`);
+  } catch(e){
+    console.error('saveEditJenisJoblog error:', e);
+    err.style.display='block';
+    err.textContent = e.code==='permission-denied'
+      ? 'Akses ditolak. Periksa Firestore Security Rules.'
+      : `Gagal menyimpan: ${e.message||e.code||'error tidak dikenal'}`;
+  }
 }
 
 // ── METRICS ────────────────────────────────────────────────────
@@ -1475,6 +1741,159 @@ function confirmDeleteJenis(id, nama){
     } catch(e){ toast('Gagal menghapus.','warn'); }
   };
   document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── PERFORMA TEKNISI ───────────────────────────────────────────
+function resetPerformaFilter(){
+  document.getElementById('pf-nama').value  = '';
+  document.getElementById('pf-bulan').value = '';
+  renderPerforma();
+}
+
+function renderPerforma(){
+  const filterNama  = document.getElementById('pf-nama').value;
+  const filterBulan = document.getElementById('pf-bulan').value; // "YYYY-MM" or ""
+
+  // Filter data
+  let rows = [...joblogDB];
+  if(filterBulan) rows = rows.filter(r => r.date && r.date.startsWith(filterBulan));
+
+  const empty = document.getElementById('perf-empty');
+  const cont  = document.getElementById('perf-cards');
+
+  if(!rows.length){ empty.style.display='block'; cont.innerHTML=''; return; }
+  empty.style.display='none';
+
+  // Kelompokkan per teknisi
+  const namaList = filterNama
+    ? [filterNama]
+    : [...new Set(rows.map(r=>r.nama))].sort();
+
+  const html = '<div class="perf-grid">' + namaList.map(nama => {
+    const data = rows.filter(r => r.nama === nama);
+    if(!data.length) return '';
+    return buildPerfCard(nama, data);
+  }).filter(Boolean).join('') + '</div>';
+
+  cont.innerHTML = html;
+}
+
+function buildPerfCard(nama, data){
+  const total = data.length;
+
+  // ── 1. REKAP JENIS + rata-rata durasi per jenis ──────────────
+  const jenisMap = {}; // { nama: { count, totalDur, durCount } }
+  data.forEach(r => {
+    const j = r.jenis || 'Lainnya';
+    if(!jenisMap[j]) jenisMap[j] = {count:0, totalDur:0, durCount:0};
+    jenisMap[j].count++;
+    if(r.dur && r.dur > 0){ jenisMap[j].totalDur += r.dur; jenisMap[j].durCount++; }
+  });
+  const maxCount = Math.max(...Object.values(jenisMap).map(v=>v.count), 1);
+  const jenisRows = Object.entries(jenisMap)
+    .sort((a,b) => b[1].count - a[1].count)
+    .map(([j, v], idx) => {
+      const found     = jenisDB.find(x=>x.nama===j);
+      const barColor  = found ? found.color  : 'var(--accent)';
+      const barBg     = found ? found.bg     : 'var(--bg)';
+      const pct       = Math.round((v.count/maxCount)*100);
+      const avgDur    = v.durCount > 0 ? fmtDur(Math.round(v.totalDur/v.durCount)) : '—';
+      return `<tr>
+        <td class="perf-jenis-table-idx">${String(idx+1).padStart(2,'0')}</td>
+        <td class="perf-jenis-name-cell">
+          <span style="display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;font-family:var(--mono);background:${barBg};color:${barColor}">${j}</span>
+        </td>
+        <td class="perf-bar-cell"><div class="perf-bar-wrap"><div class="perf-bar" style="width:${pct}%;background:${barColor}"></div></div></td>
+        <td class="perf-jenis-count-cell">${v.count}x</td>
+        <td class="perf-jenis-avg-cell">⌀ ${avgDur}</td>
+      </tr>`;
+    }).join('');
+  const jenisHtml = `<table class="perf-jenis-table">${jenisRows}</table>`;
+
+  // ── 2. DURASI KESELURUHAN ─────────────────────────────────────
+  const durs = data.filter(r=>r.dur&&r.dur>0).map(r=>r.dur);
+  let durHtml = '';
+  if(durs.length){
+    const avg = Math.round(durs.reduce((a,b)=>a+b,0)/durs.length);
+    const mn  = Math.min(...durs);
+    const mx  = Math.max(...durs);
+    durHtml = `<div class="perf-stats-row">
+      <div class="perf-stat-box"><div class="perf-stat-val">${fmtDur(avg)}</div><div class="perf-stat-lbl">Rata-rata</div></div>
+      <div class="perf-stat-box"><div class="perf-stat-val">${fmtDur(mn)}</div><div class="perf-stat-lbl">Tercepat</div></div>
+      <div class="perf-stat-box"><div class="perf-stat-val">${fmtDur(mx)}</div><div class="perf-stat-lbl">Terlama</div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px">dari ${durs.length} pekerjaan dengan data waktu</div>`;
+  } else {
+    durHtml = '<div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Belum ada data durasi.</div>';
+  }
+
+  // ── 3. KEDISIPLINAN PENGISIAN ─────────────────────────────────
+  let tepatHari=0, totalWithTs=0, totalLambatDays=0, lambatCount=0;
+  data.forEach(r => {
+    if(!r.submittedAt||!r.date) return;
+    totalWithTs++;
+    const kerja      = new Date(r.date+'T00:00:00');
+    const submit     = new Date(r.submittedAt);
+    const submitDate = new Date(submit.getFullYear(), submit.getMonth(), submit.getDate());
+    const diffDays   = Math.round((submitDate - kerja)/86400000);
+    if(diffDays<=0){ tepatHari++; } else { lambatCount++; totalLambatDays+=diffDays; }
+  });
+  let disipHtml = '';
+  if(totalWithTs>0){
+    const pct      = Math.round((tepatHari/totalWithTs)*100);
+    const pctClass = pct>=80?'good':pct>=50?'mid':'bad';
+    const rataLambat = lambatCount>0?(totalLambatDays/lambatCount).toFixed(1):null;
+    disipHtml = `<div class="perf-disip-row">
+      <div class="perf-disip-pct ${pctClass}">${pct}%</div>
+      <div class="perf-disip-detail">
+        <strong>${tepatHari} dari ${totalWithTs} diisi tepat hari</strong>
+        ${rataLambat
+          ? `<span>Rata-rata terlambat <strong>${rataLambat} hari</strong>&nbsp;(${lambatCount} entri)</span>`
+          : `<span style="color:var(--ok)">✓ Semua diisi tepat hari</span>`}
+      </div>
+    </div>`;
+  } else {
+    disipHtml = '<div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Data tidak cukup.</div>';
+  }
+
+  // ── 4. STATUS SUMMARY ─────────────────────────────────────────
+  const selesaiCount  = data.filter(r=> isSelesai(r)).length;
+  const progressCount = data.filter(r=>!isSelesai(r)).length;
+  const statusHtml = `<div class="perf-status-row">
+    <div class="perf-status-box">
+      <div class="perf-status-dot" style="background:var(--ok)"></div>
+      <div class="perf-status-info"><div class="perf-status-val">${selesaiCount}</div><div class="perf-status-lbl">Selesai</div></div>
+    </div>
+    <div class="perf-status-box">
+      <div class="perf-status-dot" style="background:var(--warn)"></div>
+      <div class="perf-status-info"><div class="perf-status-val">${progressCount}</div><div class="perf-status-lbl">On Progress</div></div>
+    </div>
+  </div>`;
+
+  return `<div class="perf-card">
+    <div class="perf-card-header">
+      <div class="perf-card-name">👤 ${nama}</div>
+      <div class="perf-card-total">${total} joblog periode ini</div>
+    </div>
+    <div class="perf-sections">
+      <div class="perf-section">
+        <div class="perf-section-title">Rekap Jenis Pekerjaan</div>
+        ${jenisHtml}
+      </div>
+      <div class="perf-section">
+        <div class="perf-section-title">Durasi Keseluruhan</div>
+        ${durHtml}
+      </div>
+      <div class="perf-section">
+        <div class="perf-section-title">Kedisiplinan Pengisian</div>
+        ${disipHtml}
+      </div>
+      <div class="perf-section">
+        <div class="perf-section-title">Status Pekerjaan</div>
+        ${statusHtml}
+      </div>
+    </div>
+  </div>`;
 }
 
 // ── EXPORT ─────────────────────────────────────────────────────
