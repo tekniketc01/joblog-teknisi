@@ -184,14 +184,50 @@ tbody tr:hover td{background:#FAFAF8}
 .dot-progress{background:var(--warn)}
 .dot-selesai{background:var(--ok)}
 
+/* WIP BAR & LANJUT FORM */
+.wip-bar{background:var(--surface);border:1px solid var(--warn);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.wip-bar-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;gap:8px}
+.wip-bar-title{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--warn)}
+.wip-bar-count{background:var(--warn);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;min-width:24px;text-align:center}
+.wip-bar-chevron{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.wip-bar-chevron.open{transform:rotate(180deg)}
+.wip-bar-body{display:none;border-top:1px solid var(--warn)}
+.wip-bar-body.open{display:block}
+.wip-list{display:flex;flex-direction:column}
+.wip-item{border-bottom:1px solid var(--border)}
+.wip-item:last-child{border-bottom:none}
+.wip-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:12px 16px 8px}
+.wip-item-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wip-item-nama{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.wip-item-sr{font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600}
+.wip-item-job{font-size:13px;color:var(--text);line-height:1.4;padding:0 16px 4px}
+.wip-item-meta{display:flex;gap:10px;font-family:var(--mono);font-size:10px;color:var(--muted);flex-wrap:wrap;padding:0 16px 10px}
+.btn-lanjut{background:var(--warn-light);color:var(--warn);border:1px solid var(--warn);font-size:11px;font-family:var(--mono);font-weight:500;padding:5px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.btn-lanjut:hover{background:var(--warn);color:#fff}
+.lanjut-form{background:var(--bg);border-top:1px solid var(--border);padding:14px 16px;display:none}
+.lanjut-form.open{display:block}
+.lanjut-form-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-bottom:10px}
+.lanjut-readonly-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.lanjut-ro-field{display:flex;flex-direction:column;gap:3px}
+.lanjut-ro-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.lanjut-ro-val{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lanjut-err{color:var(--danger);font-family:var(--mono);font-size:11px;margin-top:6px;display:none}
+/* Edit job button in admin */
+.btn-edit-job{background:var(--bg);color:var(--accent);border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:5px;cursor:pointer;white-space:nowrap;transition:all .15s;margin-left:4px}
+.btn-edit-job:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Toggle status button */
+.btn-toggle-status{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:5px;cursor:pointer;white-space:nowrap;transition:all .15s;border-width:1px;border-style:solid;margin-left:4px}
+.btn-toggle-status.wip{background:var(--warn-light);color:var(--warn);border-color:var(--warn)}
+.btn-toggle-status.wip:hover{background:var(--warn);color:#fff}
+.btn-toggle-status.done{background:var(--ok-light);color:var(--ok);border-color:var(--ok)}
+.btn-toggle-status.done:hover{background:var(--ok);color:#fff}
+
 /* SEARCH BAR */
 .search-bar{position:relative;margin-bottom:8px}
 .search-bar input{padding-left:36px;background:var(--bg)}
 .search-bar input:focus{background:#fff}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
-.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
-
-/* FILTER BAR — mobile: stack; desktop: row */
+.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600} — mobile: stack; desktop: row */
 .filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
 .filter-group{display:grid;gap:8px}
 .filter-group.g2{grid-template-columns:1fr 1fr}
@@ -312,15 +348,72 @@ tbody tr:hover td{background:#FAFAF8}
 .perf-status-info{display:flex;flex-direction:column}
 .perf-status-val{font-family:var(--mono);font-size:20px;font-weight:600;line-height:1.1}
 .perf-status-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
-/* 2-col layout on desktop for perf sections */
+/* SR Analysis */
+.perf-sr-row{display:flex;flex-direction:column;gap:10px}
+.perf-sr-item{background:var(--bg);border-radius:8px;padding:11px 14px}
+.perf-sr-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.perf-sr-jenis-badge{display:inline-block;padding:2px 10px;border-radius:100px;font-size:10px;font-weight:500;font-family:var(--mono)}
+.perf-sr-pct-big{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:var(--accent)}
+.perf-sr-bar-wrap{background:var(--border);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px}
+.perf-sr-bar{height:100%;border-radius:100px;transition:width .5s ease}
+.perf-sr-detail{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.perf-sr-detail strong{color:var(--text)}
+/* Rekap Tabel Semua Teknisi */
+.rekap-table-wrap{overflow-x:auto;margin-top:4px}
+.rekap-table{width:100%;border-collapse:collapse;font-size:12px}
+.rekap-table th{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg)}
+.rekap-table th.num{text-align:right}
+.rekap-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.rekap-table td.num{text-align:right;font-family:var(--mono)}
+.rekap-table tr:last-child td{border-bottom:none}
+.rekap-table tr:hover td{background:var(--bg)}
+.rekap-rank{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted)}
+.rekap-rank.r1{color:#F59E0B}
+.rekap-rank.r2{color:#94A3B8}
+.rekap-rank.r3{color:#B45309}
+.rekap-nama{font-weight:600;font-size:13px}
+.rekap-pct-pill{display:inline-block;padding:2px 8px;border-radius:100px;font-family:var(--mono);font-size:11px;font-weight:600}
+.rekap-pct-pill.kerja{background:var(--ok-light);color:var(--ok)}
+.rekap-pct-pill.standby{background:var(--warn-light);color:var(--warn)}
+.rekap-pct-pill.unknown{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.rekap-pct-pill.selesai{background:#EEF2FF;color:#3730A3}
+.rekap-pct-pill.disiplin{background:var(--ok-light);color:var(--ok)}
+.rekap-pct-pill.disiplin.mid{background:var(--warn-light);color:var(--warn)}
+.rekap-pct-pill.disiplin.bad{background:#FEE2E2;color:var(--danger)}
+.rekap-jam-detail{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px}
+/* Peringkat toggle button */
+.btn-peringkat{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);width:100%;transition:all .15s;margin-bottom:12px}
+.btn-peringkat:hover{border-color:var(--accent);background:#EEF3FD}
+.btn-peringkat-icon{font-size:16px}
+.btn-peringkat-label{flex:1;text-align:left}
+.btn-peringkat-chevron{font-size:11px;color:var(--muted);transition:transform .2s}
+.btn-peringkat-chevron.open{transform:rotate(180deg)}
+.peringkat-wrap{display:none;margin-bottom:16px}
+.peringkat-wrap.open{display:block}
+.rekap-skor-pill{display:inline-block;padding:2px 8px;border-radius:100px;font-family:var(--mono);font-size:12px;font-weight:700;background:#F5F3FF;color:#5B21B6;min-width:46px;text-align:center}
+.rekap-skor-bar-wrap{width:80px;background:var(--border);border-radius:100px;height:5px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px}
+.rekap-skor-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--accent),#7C3AED)}
+.perf-jam-wrap{display:flex;flex-direction:column;gap:10px}
+.perf-jam-stacked-bar{height:12px;border-radius:100px;overflow:hidden;display:flex;margin-bottom:4px}
+.perf-jam-bar-kerja{height:100%;background:var(--ok);transition:width .5s ease}
+.perf-jam-bar-standby{height:100%;background:var(--warn);transition:width .5s ease}
+.perf-jam-bar-sisa{height:100%;background:var(--border)}
+.perf-jam-legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.perf-jam-legend-item{display:flex;align-items:center;gap:4px}
+.perf-jam-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.perf-jam-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px}
+.perf-jam-box{background:var(--bg);border-radius:8px;padding:10px 12px;text-align:center;border:1px solid var(--border)}
+.perf-jam-val{font-family:var(--mono);font-size:15px;font-weight:600;line-height:1.2}
+.perf-jam-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:3px}
+.perf-jam-pct-note{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:6px}
 @media(min-width:640px){
   .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto}
   .perf-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
-  .perf-section:nth-child(2n){border-right:none}
-  .perf-section:nth-last-child(-n+2){border-bottom:none}
-}
-.user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+  .perf-section:nth-child(2n):not(.perf-section-full){border-right:none}
+  .perf-section-full{grid-column:1 / -1;border-right:none!important;border-bottom:none!important}
+  .perf-section:nth-last-child(-n+2):not(.perf-section-full){border-bottom:none}
+}{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
 .user-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;gap:8px}
 .user-info{flex:1;min-width:0}
 .user-name{font-weight:500;font-size:14px}
@@ -678,6 +771,22 @@ service cloud.firestore {
       </button>
     </div>
   </div>
+
+  <!-- WIP BAR: Pekerjaan Belum Selesai -->
+  <div class="wip-bar" id="wip-bar" style="display:none">
+    <div class="wip-bar-header" onclick="toggleWipBar()">
+      <div class="wip-bar-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Pekerjaan Belum Selesai
+        <span class="wip-bar-count" id="wip-count">0</span>
+      </div>
+      <span class="wip-bar-chevron" id="wip-chevron">▼</span>
+    </div>
+    <div class="wip-bar-body" id="wip-bar-body">
+      <div class="wip-list" id="wip-list"></div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">3 Joblog Terakhir Saya</div>
     <div id="my-logs"><div class="empty-state">Login dulu untuk melihat joblog.</div></div>
@@ -827,6 +936,14 @@ service cloud.firestore {
         <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPerformaFilter()">✕ Reset</button>
       </div>
     </div>
+    <button class="btn-peringkat" onclick="togglePeringkat()" id="btn-peringkat" style="display:none">
+      <span class="btn-peringkat-icon">🏆</span>
+      <span class="btn-peringkat-label">Lihat Peringkat Teknisi</span>
+      <span class="btn-peringkat-chevron" id="peringkat-chevron">▼</span>
+    </button>
+    <div class="peringkat-wrap" id="peringkat-wrap">
+      <div id="perf-rekap"></div>
+    </div>
     <div id="perf-cards"></div>
     <div class="empty-state" id="perf-empty" style="display:none">Tidak ada data untuk periode ini.</div>
   </div>
@@ -873,6 +990,23 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- MODAL: EDIT DESKRIPSI PEKERJAAN -->
+<div class="overlay" id="modal-edit-job">
+  <div class="modal">
+    <div class="modal-title">✏️ Ubah Deskripsi Pekerjaan</div>
+    <div class="modal-jenis-current" id="edit-job-info">—</div>
+    <div class="field" style="margin-bottom:1rem">
+      <label>Deskripsi Pekerjaan *</label>
+      <textarea id="edit-job-text" rows="4" style="resize:vertical;font-family:var(--sans);font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;width:100%;box-sizing:border-box;background:var(--bg)"></textarea>
+    </div>
+    <div class="pw-error" id="edit-job-err"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeModal('modal-edit-job')">Batal</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveEditJob()">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: EDIT JENIS JOBLOG -->
 <div class="overlay" id="modal-edit-jenis-joblog">
   <div class="modal">
@@ -902,10 +1036,11 @@ let adminIn    = false;
 let currentUser = null;  // {id, nama} teknisi yang sedang login
 let fbConfigOk  = false;
 let _pendingAdminEl, _pendingAdminType;
-let _editPwUserId = null;
-let _editJenisId  = null;
-let _editJenisJoblogId = null;
-let _selectedBg   = '#EEF2FF';
+let _editPwUserId     = null;
+let _editJenisId      = null;
+let _editJenisJoblogId= null;
+let _editJobId        = null;
+let _selectedBg       = '#EEF2FF';
 let _selectedColor= '#3730A3';
 
 function todayStr(){ return new Date().toISOString().split('T')[0]; }
@@ -1026,6 +1161,7 @@ window.addEventListener('fb-ready', async () => {
     renderMyLogs();
     renderAdmin();
     updateMetrics();
+    renderWipBar();
     if(document.getElementById('sub-performa').style.display !== 'none') renderPerforma();
   }, err => {
     setSyncDot('err');
@@ -1162,12 +1298,14 @@ function doLoginTeknisi(){
   document.getElementById('user-chip-name').textContent = user.nama;
   document.getElementById('user-chip').style.display = 'flex';
   renderMyLogs();
+  renderWipBar();
   toast(`Selamat datang, ${user.nama}!`);
 }
 function logoutTeknisi(){
   currentUser = null;
   document.getElementById('f-nama').value = '';
   document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('wip-bar').style.display = 'none';
   document.getElementById('my-logs').innerHTML = '<div class="empty-state">Login dulu untuk melihat joblog.</div>';
   showLoginTeknisi();
 }
@@ -1399,11 +1537,16 @@ function renderAdmin(){
     <td class="sr-code">${srHtml}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
     <td>${jenisBadge(r.jenis)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
-    <td>${r.job}</td>
+    <td>${r.job}<button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></td>
     <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
     <td style="font-family:var(--mono);font-size:12px">${fmtDur(r.dur)}</td>
-    <td><span class="badge ${selesai?'badge-ok':'badge-wip'}">${selesai?'Selesai':'On Progress'}</span></td>
+    <td>
+      <span class="badge ${selesai?'badge-ok':'badge-wip'}">${selesai?'Selesai':'On Progress'}</span>
+      <button class="btn-toggle-status ${selesai?'done':'wip'}" onclick="toggleStatus('${r._id}',${selesai})" title="${selesai?'Ubah ke On Progress':'Tandai Selesai'}">
+        ${selesai?'↩ Buka':'✓ Selesai'}
+      </button>
+    </td>
     <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
     <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
   </tr>`;
@@ -1425,7 +1568,7 @@ function renderAdmin(){
         </div>
       </div>
       <div class="jl-card-body">
-        <div class="jl-job">${r.job}</div>
+        <div class="jl-job">${r.job} <button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></div>
         <div class="jl-info-grid">
           <div class="jl-info-item"><span class="jl-info-key">📅</span><span class="jl-info-val">${r.date}</span></div>
           <div class="jl-info-item"><span class="jl-info-key">⚙</span><span class="jl-info-val">${r.mesin||'—'}</span></div>
@@ -1435,7 +1578,10 @@ function renderAdmin(){
       </div>
       <div class="jl-card-footer">
         <span class="jl-submit-ts">🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
-        <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn-toggle-status ${selesai?'done':'wip'}" onclick="toggleStatus('${r._id}',${selesai})">${selesai?'↩ Buka':'✓ Selesai'}</button>
+          <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1444,6 +1590,191 @@ function clearFilter(){
   ['ff-nama','ff-jenis','ff-date','ff-status'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ff-sr').value='';
   renderAdmin();
+}
+
+// ── TOGGLE STATUS JOBLOG (ADMIN) ───────────────────────────────
+async function toggleStatus(joblogId, currentlySelesai){
+  const newStatus = currentlySelesai ? 'progress' : 'selesai';
+  const label     = currentlySelesai ? 'On Progress' : 'Selesai';
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    // Jika diubah ke selesai tapi belum ada jam selesai, biarkan kosong —
+    // admin bisa edit jam selesai secara terpisah jika diperlukan.
+    await updateDoc(doc(db,'joblogs',joblogId), { status: newStatus });
+    toast(`Status diubah ke "${label}".`);
+  } catch(e){
+    toast(
+      e.code==='permission-denied'
+        ? 'Akses ditolak. Periksa Firestore Security Rules.'
+        : `Gagal mengubah status: ${e.message||e.code||'error'}`,
+      'warn'
+    );
+  }
+}
+
+// ── EDIT DESKRIPSI PEKERJAAN (ADMIN) ──────────────────────────
+function openEditJob(joblogId, sr, btnEl){
+  _editJobId = joblogId;
+  const r = joblogDB.find(x => x._id === joblogId);
+  document.getElementById('edit-job-info').innerHTML =
+    `SR: <strong>${sr}</strong> &nbsp;|&nbsp; Teknisi: <strong>${r ? r.nama : '—'}</strong>`;
+  document.getElementById('edit-job-text').value = r ? r.job : '';
+  document.getElementById('edit-job-err').style.display = 'none';
+  document.getElementById('modal-edit-job').classList.add('show');
+}
+async function saveEditJob(){
+  const newJob = document.getElementById('edit-job-text').value.trim();
+  const err    = document.getElementById('edit-job-err');
+  if(!newJob){ err.style.display='block'; err.textContent='Deskripsi tidak boleh kosong.'; return; }
+  if(!_editJobId) return;
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db,'joblogs',_editJobId), { job: newJob });
+    closeModal('modal-edit-job');
+    toast('Deskripsi pekerjaan berhasil diubah.');
+  } catch(e){
+    err.style.display='block';
+    err.textContent = e.code==='permission-denied'
+      ? 'Akses ditolak. Periksa Firestore Security Rules.'
+      : `Gagal menyimpan: ${e.message||e.code||'error'}`;
+  }
+}
+
+// ── WIP BAR ────────────────────────────────────────────────────
+function toggleWipBar(){
+  const body    = document.getElementById('wip-bar-body');
+  const chevron = document.getElementById('wip-chevron');
+  const open    = body.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+}
+
+function renderWipBar(){
+  const wipRows = joblogDB.filter(r => !isSelesai(r));
+  const bar     = document.getElementById('wip-bar');
+  const list    = document.getElementById('wip-list');
+  const cnt     = document.getElementById('wip-count');
+
+  if(!wipRows.length || !currentUser){
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'block';
+  cnt.textContent   = wipRows.length;
+
+  list.innerHTML = wipRows.map(r => {
+    const safe = (s='') => s.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return `<div class="wip-item" id="wip-item-${r._id}">
+      <div class="wip-item-top">
+        <div class="wip-item-left">
+          <div class="wip-item-nama">${r.nama}</div>
+          <div class="wip-item-sr">${r.sr}</div>
+        </div>
+        <button class="btn-lanjut" onclick="toggleLanjutForm('${r._id}')">+ Lanjutkan</button>
+      </div>
+      <div class="wip-item-job">${r.job}</div>
+      <div class="wip-item-meta">
+        <span>📅 ${r.date}</span>
+        ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
+        ${jenisBadge(r.jenis)}
+        <span>🕐 ${fmt24(r.start)}</span>
+      </div>
+      <div class="lanjut-form" id="lanjut-form-${r._id}">
+        <div class="lanjut-form-title">📝 Input Pekerjaan Lanjutan — atas nama: ${currentUser.nama}</div>
+        <div class="lanjut-readonly-row">
+          <div class="lanjut-ro-field"><div class="lanjut-ro-label">No. SR</div><div class="lanjut-ro-val">${r.sr}</div></div>
+          <div class="lanjut-ro-field"><div class="lanjut-ro-label">Mesin</div><div class="lanjut-ro-val">${r.mesin||'—'}</div></div>
+          <div class="lanjut-ro-field"><div class="lanjut-ro-label">Jenis</div><div class="lanjut-ro-val">${r.jenis||'—'}</div></div>
+        </div>
+        <div class="field" style="margin-bottom:8px">
+          <label>Deskripsi Pekerjaan Lanjutan *</label>
+          <input type="text" id="lanjut-job-${r._id}" placeholder="Apa yang dikerjakan?">
+        </div>
+        <div class="form-row cols2" style="margin-bottom:8px">
+          <div class="field">
+            <label>Tanggal *</label>
+            <input type="date" id="lanjut-date-${r._id}" value="${todayStr()}">
+          </div>
+          <div class="field">
+            <label>Status *</label>
+            <select id="lanjut-status-${r._id}" onchange="updateLanjutEndLabel('${r._id}')">
+              <option value="progress">⏳ Belum Selesai</option>
+              <option value="selesai">✅ Sudah Selesai</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols2" style="margin-bottom:8px">
+          <div class="field">
+            <label>Jam Mulai *</label>
+            <input type="text" id="lanjut-start-${r._id}" placeholder="HH:MM" maxlength="5" inputmode="numeric" oninput="formatTimeInput(this)">
+          </div>
+          <div class="field">
+            <label id="lanjut-end-lbl-${r._id}">Jam Selesai</label>
+            <input type="text" id="lanjut-end-${r._id}" placeholder="HH:MM" maxlength="5" inputmode="numeric" oninput="formatTimeInput(this)">
+          </div>
+        </div>
+        <div class="lanjut-err" id="lanjut-err-${r._id}"></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-primary btn-sm" style="flex:1" onclick="submitLanjut('${r._id}','${safe(r.sr)}','${safe(r.mesin||'')}','${safe(r.jenis||'')}')">Submit</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleLanjutForm('${r._id}')">Batal</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleLanjutForm(id){
+  const form = document.getElementById('lanjut-form-'+id);
+  if(!form) return;
+  form.classList.toggle('open');
+}
+
+function updateLanjutEndLabel(id){
+  const sel = document.getElementById('lanjut-status-'+id);
+  const lbl = document.getElementById('lanjut-end-lbl-'+id);
+  if(lbl) lbl.textContent = sel.value==='selesai' ? 'Jam Selesai *' : 'Jam Selesai';
+}
+
+async function submitLanjut(refId, sr, mesin, jenis){
+  if(!currentUser){ toast('Login dulu.','warn'); return; }
+  const job    = (document.getElementById('lanjut-job-'+refId)?.value||'').trim();
+  const date   = document.getElementById('lanjut-date-'+refId)?.value||'';
+  const status = document.getElementById('lanjut-status-'+refId)?.value||'progress';
+  const start  = getTimeVal('lanjut-start-'+refId);
+  const err    = document.getElementById('lanjut-err-'+refId);
+
+  let end = '';
+  if(status==='selesai'){
+    end = getTimeVal('lanjut-end-'+refId);
+    if(!end){ err.style.display='block'; err.textContent='Jam Selesai wajib diisi jika status Sudah Selesai.'; return; }
+  } else {
+    end = getTimeVal('lanjut-end-'+refId)||'';
+  }
+
+  if(!job)  { err.style.display='block'; err.textContent='Deskripsi pekerjaan wajib diisi.'; return; }
+  if(!date) { err.style.display='block'; err.textContent='Tanggal wajib diisi.'; return; }
+  if(start===null){ err.style.display='block'; err.textContent='Format jam mulai tidak valid (HH:MM).'; return; }
+  if(!start){ err.style.display='block'; err.textContent='Jam Mulai wajib diisi.'; return; }
+  if(end && end < start){ err.style.display='block'; err.textContent='Jam selesai tidak boleh sebelum jam mulai.'; return; }
+  err.style.display='none';
+
+  const record = {
+    nama: currentUser.nama,
+    sr, mesin, jenis, job,
+    start, end, date, status,
+    dur: (end&&start) ? durMins(start,end) : null,
+    submittedAt: nowTs(),
+    refId  // referensi ke joblog asal
+  };
+
+  try {
+    const { db, collection, addDoc } = window._fb;
+    await addDoc(collection(db,'joblogs'), record);
+    toggleLanjutForm(refId);
+    toast(`Pekerjaan lanjutan SR ${sr} berhasil disimpan.`);
+  } catch(e){
+    err.style.display='block';
+    err.textContent = `Gagal menyimpan: ${e.message||e.code||'error'}`;
+  }
 }
 
 // ── EDIT JENIS JOBLOG ──────────────────────────────────────────
@@ -1750,27 +2081,186 @@ function resetPerformaFilter(){
   renderPerforma();
 }
 
+function calcPerfStats(nama, data){
+  const STANDBY_RE    = /standby/i;
+  const JAM_KERJA_MIN = 420;
+
+  // Jam kerja vs standby per hari
+  const hariKerja = {}, hariStandby = {};
+  data.forEach(r => {
+    if(!r.dur || r.dur<=0 || !r.date) return;
+    if(STANDBY_RE.test(r.jenis||'')) hariStandby[r.date] = (hariStandby[r.date]||0)+r.dur;
+    else hariKerja[r.date] = (hariKerja[r.date]||0)+r.dur;
+  });
+  const semuaHari   = new Set([...Object.keys(hariKerja),...Object.keys(hariStandby)]);
+  const jmlHari     = semuaHari.size;
+  const totKerja    = Object.values(hariKerja).reduce((a,b)=>a+b,0);
+  const totStandby  = Object.values(hariStandby).reduce((a,b)=>a+b,0);
+  const rataKerja   = jmlHari ? totKerja/jmlHari   : 0;
+  const rataStandby = jmlHari ? totStandby/jmlHari : 0;
+  const rataUnknown = Math.max(0, JAM_KERJA_MIN - rataKerja - rataStandby);
+  const pctKerja    = Math.round(rataKerja   / JAM_KERJA_MIN * 100);
+  const pctStandby  = Math.round(rataStandby / JAM_KERJA_MIN * 100);
+  const pctUnknown  = Math.max(0, 100 - pctKerja - pctStandby);
+
+  // % selesai
+  const selesaiCount = data.filter(r=>isSelesai(r)).length;
+  const pctSelesai   = data.length ? Math.round(selesaiCount/data.length*100) : 0;
+
+  // Disiplin input
+  let tepatHari=0, totalWithTs=0;
+  data.forEach(r=>{
+    if(!r.submittedAt||!r.date) return;
+    totalWithTs++;
+    const kerja  = new Date(r.date+'T00:00:00');
+    const sub    = new Date(r.submittedAt);
+    const subDay = new Date(sub.getFullYear(),sub.getMonth(),sub.getDate());
+    if(Math.round((subDay-kerja)/86400000)<=0) tepatHari++;
+  });
+  const pctDisiplin = totalWithTs ? Math.round(tepatHari/totalWithTs*100) : null;
+
+  return { nama, total:data.length, jmlHari, rataKerja, rataStandby, rataUnknown,
+           pctKerja, pctStandby, pctUnknown, pctSelesai, pctDisiplin };
+}
+
+function fmtMenit(m){
+  m = Math.round(m);
+  const h = Math.floor(m/60), mn = m%60;
+  return h>0 ? `${h}j${mn>0?' '+mn+'m':''}` : `${mn}m`;
+}
+
+function togglePeringkat(){
+  const wrap    = document.getElementById('peringkat-wrap');
+  const chevron = document.getElementById('peringkat-chevron');
+  const open    = wrap.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+  if(open) document.getElementById('btn-peringkat').querySelector('.btn-peringkat-label').textContent = 'Sembunyikan Peringkat';
+  else     document.getElementById('btn-peringkat').querySelector('.btn-peringkat-label').textContent = 'Lihat Peringkat Teknisi';
+}
+
+function buildRekapTable(allRows, filterBulan){
+  const PERBAIKAN_RE = /perbaikan|penggantian part/i;
+
+  const namaAll = [...new Set(allRows.map(r=>r.nama))];
+  const stats   = namaAll.map(nama => {
+    const data = allRows.filter(r=>r.nama===nama);
+    const base = calcPerfStats(nama, data);
+
+    // Komponen 1 (bobot 50): % Perbaikan & Penggantian Part < 1 jam
+    const subsetTarget  = data.filter(r => PERBAIKAN_RE.test(r.jenis||''));
+    const dibawah1jam   = subsetTarget.filter(r => r.dur && r.dur>0 && r.dur<60).length;
+    const pct1jam       = subsetTarget.length ? Math.round(dibawah1jam/subsetTarget.length*100) : 0;
+
+    // Komponen 2 (bobot 30): % SR bernomor (dari Perbaikan & Penggantian Part)
+    const withSr        = subsetTarget.filter(r => /\d{4,}/.test(r.sr||'')).length;
+    const pctSr         = subsetTarget.length ? Math.round(withSr/subsetTarget.length*100) : 0;
+
+    // Komponen 3 (bobot 20): % Kedisiplinan input
+    const pctDisiplin   = base.pctDisiplin ?? 0;
+
+    // Skor akhir
+    const skor = Math.round(pct1jam*0.5 + pctSr*0.3 + pctDisiplin*0.2);
+
+    return { ...base, pct1jam, pctSr, skor, jmlTarget: subsetTarget.length };
+  });
+
+  // Urutkan berdasar skor tertinggi
+  stats.sort((a,b) => b.skor - a.skor);
+  const maxSkor = stats[0]?.skor || 1;
+
+  const bulanLabel = filterBulan
+    ? new Date(filterBulan+'-01').toLocaleDateString('id-ID',{month:'long',year:'numeric'})
+    : 'Semua Periode';
+
+  const tableRows = stats.map((s, i) => {
+    const rank      = i+1;
+    const rankClass = rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+    const dispCls   = s.pctDisiplin===null?'':s.pctDisiplin>=80?'disiplin':s.pctDisiplin>=50?'disiplin mid':'disiplin bad';
+    const dispTxt   = s.pctDisiplin===null ? '—' : s.pctDisiplin+'%';
+    const barW      = Math.round((s.skor/maxSkor)*100);
+    return `<tr>
+      <td><span class="rekap-rank ${rankClass}">${rank}</span></td>
+      <td>
+        <div class="rekap-nama">${s.nama}</div>
+        <div class="rekap-jam-detail">${s.total} joblog · ${s.jmlHari} hari</div>
+      </td>
+      <td class="num">
+        <span class="rekap-skor-pill">${s.skor}</span>
+        <div class="rekap-skor-bar-wrap"><div class="rekap-skor-bar" style="width:${barW}%"></div></div>
+      </td>
+      <td class="num">
+        <span class="rekap-pct-pill kerja">${s.pct1jam}%</span>
+        <div class="rekap-jam-detail">${s.jmlTarget} joblog target</div>
+      </td>
+      <td class="num">
+        <span class="rekap-pct-pill selesai">${s.pctSr}%</span>
+        <div class="rekap-jam-detail">SR bernomor</div>
+      </td>
+      <td class="num"><span class="rekap-pct-pill ${dispCls}">${dispTxt}</span></td>
+      <td class="num">
+        <span class="rekap-pct-pill standby">${s.pctKerja}%</span>
+        <div class="rekap-jam-detail">${fmtMenit(s.rataKerja)}/hari</div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span>🏆 Peringkat Teknisi</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400">${bulanLabel}</span>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:10px">
+      Skor = (% &lt;1jam × 50%) + (% SR × 30%) + (% Disiplin × 20%)
+    </div>
+    <div class="rekap-table-wrap">
+      <table class="rekap-table">
+        <thead><tr>
+          <th>#</th>
+          <th>Teknisi</th>
+          <th class="num">Skor</th>
+          <th class="num">% &lt;1 Jam <span style="font-weight:400;opacity:.7">(×50%)</span></th>
+          <th class="num">% SR Lengkap <span style="font-weight:400;opacity:.7">(×30%)</span></th>
+          <th class="num">Disiplin <span style="font-weight:400;opacity:.7">(×20%)</span></th>
+          <th class="num">% Kerja <span style="font-weight:400;opacity:.7">info</span></th>
+        </tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
 function renderPerforma(){
   const filterNama  = document.getElementById('pf-nama').value;
-  const filterBulan = document.getElementById('pf-bulan').value; // "YYYY-MM" or ""
+  const filterBulan = document.getElementById('pf-bulan').value;
 
-  // Filter data
-  let rows = [...joblogDB];
-  if(filterBulan) rows = rows.filter(r => r.date && r.date.startsWith(filterBulan));
+  let allRows = [...joblogDB];
+  if(filterBulan) allRows = allRows.filter(r => r.date && r.date.startsWith(filterBulan));
 
-  const empty = document.getElementById('perf-empty');
-  const cont  = document.getElementById('perf-cards');
+  const empty    = document.getElementById('perf-empty');
+  const cont     = document.getElementById('perf-cards');
+  const rekapEl  = document.getElementById('perf-rekap');
+  const btnEl    = document.getElementById('btn-peringkat');
 
-  if(!rows.length){ empty.style.display='block'; cont.innerHTML=''; return; }
+  if(!allRows.length){
+    empty.style.display='block';
+    cont.innerHTML='';
+    rekapEl.innerHTML='';
+    btnEl.style.display='none';
+    return;
+  }
   empty.style.display='none';
 
-  // Kelompokkan per teknisi
+  // Render tabel peringkat (tersembunyi sampai diklik)
+  rekapEl.innerHTML = buildRekapTable(allRows, filterBulan);
+  btnEl.style.display = 'flex';
+
+  // Kartu detail — ikut filter nama
   const namaList = filterNama
     ? [filterNama]
-    : [...new Set(rows.map(r=>r.nama))].sort();
+    : [...new Set(allRows.map(r=>r.nama))].sort();
 
   const html = '<div class="perf-grid">' + namaList.map(nama => {
-    const data = rows.filter(r => r.nama === nama);
+    const data = allRows.filter(r => r.nama === nama);
     if(!data.length) return '';
     return buildPerfCard(nama, data);
   }).filter(Boolean).join('') + '</div>';
@@ -1870,6 +2360,126 @@ function buildPerfCard(nama, data){
     </div>
   </div>`;
 
+  // ── 5. SR DENGAN ANGKA > 3 DIGIT + % < 1 JAM ─────────────────
+  function hasSrAngka(sr){ return /\d{4,}/.test(sr||''); }
+
+  const TARGET_JENIS = ['Perbaikan','Penggantian Part'];
+  const srHtml = (() => {
+    const items = TARGET_JENIS.map(jenisNama => {
+      const subset   = data.filter(r => r.jenis === jenisNama);
+      if(!subset.length) return null;
+      const withSr   = subset.filter(r => hasSrAngka(r.sr));
+      const pctSr    = Math.round((withSr.length / subset.length) * 100);
+      // % < 1 jam: semua joblog jenis ini, yg tdk ada durasi dianggap >= 1 jam (opsi A)
+      const dibawah1jam  = subset.filter(r => r.dur && r.dur > 0 && r.dur < 60).length;
+      const pct1jam      = Math.round((dibawah1jam / subset.length) * 100);
+      const found    = jenisDB.find(x => x.nama === jenisNama);
+      const badgeBg  = found ? found.bg    : 'var(--bg)';
+      const badgeClr = found ? found.color : 'var(--accent)';
+      return `<div class="perf-sr-item">
+        <div class="perf-sr-item-top">
+          <span class="perf-sr-jenis-badge" style="background:${badgeBg};color:${badgeClr}">${jenisNama}</span>
+          <span class="perf-sr-pct-big" style="color:${badgeClr}">${pctSr}%</span>
+        </div>
+        <div class="perf-sr-bar-wrap">
+          <div class="perf-sr-bar" style="width:${pctSr}%;background:${badgeClr}"></div>
+        </div>
+        <div class="perf-sr-detail" style="margin-bottom:8px">
+          SR bernomor: <strong>${withSr.length}</strong> dari <strong>${subset.length}</strong> joblog
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span class="perf-sr-detail">Selesai &lt; 1 jam</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${pct1jam>50?'var(--ok)':'var(--muted)'}">${pct1jam}%</span>
+        </div>
+        <div class="perf-sr-bar-wrap">
+          <div class="perf-sr-bar" style="width:${pct1jam}%;background:var(--ok)"></div>
+        </div>
+        <div class="perf-sr-detail"><strong>${dibawah1jam}</strong> dari <strong>${subset.length}</strong> joblog selesai dalam &lt; 1 jam</div>
+      </div>`;
+    }).filter(Boolean);
+
+    if(!items.length)
+      return '<div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Tidak ada data Perbaikan / Penggantian Part.</div>';
+    return `<div class="perf-sr-row">${items.join('')}</div>`;
+  })();
+
+  // ── 6. JAM KERJA VS STANDBY (rata-rata harian) ────────────────
+  const STANDBY_RE = /standby/i;
+  const JAM_KERJA_MENIT = 7 * 60; // 420 menit = target 7 jam/hari
+
+  // Kumpulkan menit per hari
+  const hariKerja   = {}; // { 'YYYY-MM-DD': menit }
+  const hariStandby = {};
+  data.forEach(r => {
+    if(!r.dur || r.dur <= 0 || !r.date) return;
+    if(STANDBY_RE.test(r.jenis||'')){
+      hariStandby[r.date] = (hariStandby[r.date]||0) + r.dur;
+    } else {
+      hariKerja[r.date] = (hariKerja[r.date]||0) + r.dur;
+    }
+  });
+
+  // Jumlah hari unik yang punya data apapun
+  const semuaHari = new Set([...Object.keys(hariKerja), ...Object.keys(hariStandby)]);
+  const jmlHari   = semuaHari.size;
+
+  function fmtJam(menit){
+    menit = Math.round(menit);
+    const h = Math.floor(menit/60);
+    const m = menit % 60;
+    return h>0 ? `${h}j${m>0?' '+m+'m':''}` : `${m}m`;
+  }
+
+  let jamHtml = '';
+  if(jmlHari === 0){
+    jamHtml = '<div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Belum ada data durasi.</div>';
+  } else {
+    const totalKerja   = Object.values(hariKerja).reduce((a,b)=>a+b,0);
+    const totalStandby = Object.values(hariStandby).reduce((a,b)=>a+b,0);
+
+    const rataKerja   = totalKerja   / jmlHari;
+    const rataStandby = totalStandby / jmlHari;
+    const rataUnknown = Math.max(0, JAM_KERJA_MENIT - rataKerja - rataStandby);
+
+    const pctKerja    = Math.round((rataKerja   / JAM_KERJA_MENIT) * 100);
+    const pctStandby  = Math.round((rataStandby / JAM_KERJA_MENIT) * 100);
+    const pctUnknown  = Math.max(0, 100 - pctKerja - pctStandby);
+
+    jamHtml = `<div class="perf-jam-wrap">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px">
+        Dihitung dari <strong style="color:var(--text)">${jmlHari} hari</strong> yang memiliki data durasi
+      </div>
+      <div class="perf-jam-stacked-bar">
+        <div class="perf-jam-bar-kerja"   style="width:${pctKerja}%"></div>
+        <div class="perf-jam-bar-standby" style="width:${pctStandby}%"></div>
+        <div class="perf-jam-bar-sisa"    style="width:${pctUnknown}%"></div>
+      </div>
+      <div class="perf-jam-legend">
+        <div class="perf-jam-legend-item"><div class="perf-jam-legend-dot" style="background:var(--ok)"></div>Kerja</div>
+        <div class="perf-jam-legend-item"><div class="perf-jam-legend-dot" style="background:var(--warn)"></div>Standby</div>
+        <div class="perf-jam-legend-item"><div class="perf-jam-legend-dot" style="background:var(--border)"></div>Unknown</div>
+      </div>
+      <div class="perf-jam-stats">
+        <div class="perf-jam-box">
+          <div class="perf-jam-val" style="color:var(--ok)">${fmtJam(rataKerja)}</div>
+          <div class="perf-jam-lbl">Rata-rata Kerja</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--ok);font-weight:700;margin-top:3px">${pctKerja}%</div>
+        </div>
+        <div class="perf-jam-box">
+          <div class="perf-jam-val" style="color:var(--warn)">${fmtJam(rataStandby)}</div>
+          <div class="perf-jam-lbl">Rata-rata Standby</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--warn);font-weight:700;margin-top:3px">${pctStandby}%</div>
+        </div>
+        <div class="perf-jam-box">
+          <div class="perf-jam-val" style="color:var(--muted)">${fmtJam(rataUnknown)}</div>
+          <div class="perf-jam-lbl">Unknown</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:700;margin-top:3px">${pctUnknown}%</div>
+        </div>
+      </div>
+      <div class="perf-jam-pct-note">Rata-rata harian dari target 7 jam (420 menit/hari)</div>
+    </div>`;}
+
+
   return `<div class="perf-card">
     <div class="perf-card-header">
       <div class="perf-card-name">👤 ${nama}</div>
@@ -1891,6 +2501,14 @@ function buildPerfCard(nama, data){
       <div class="perf-section">
         <div class="perf-section-title">Status Pekerjaan</div>
         ${statusHtml}
+      </div>
+      <div class="perf-section perf-section-full">
+        <div class="perf-section-title">Jam Kerja vs Standby (target 7 jam)</div>
+        ${jamHtml}
+      </div>
+      <div class="perf-section perf-section-full">
+        <div class="perf-section-title">SR Bernomor &amp; Durasi &lt;1 Jam (Perbaikan &amp; Penggantian Part)</div>
+        ${srHtml}
       </div>
     </div>
   </div>`;
