@@ -138,12 +138,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* TABLE */
 .table-wrap{overflow-x:auto;display:none}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{text-align:left;padding:8px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg)}
-tbody td{padding:10px 12px;border-bottom:1px solid #F0EDE8;vertical-align:middle}
+thead th{text-align:left;padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg)}
+tbody td{padding:9px 10px;border-bottom:1px solid #F0EDE8;vertical-align:middle;word-break:break-word;max-width:200px}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#FAFAF8}
-.sr-code{font-family:var(--mono);font-size:12px;color:var(--accent)}
-.nama-cell{font-weight:500}
+.sr-code{font-family:var(--mono);font-size:12px;color:var(--accent);white-space:nowrap}
+.nama-cell{font-weight:500;white-space:nowrap}
 .submit-date{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
 .submit-time{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.75}
 
@@ -200,6 +200,27 @@ tbody tr:hover td{background:#FAFAF8}
 .wip-bar-chevron.open{transform:rotate(180deg)}
 .wip-bar-body{display:none;border-top:1px solid var(--warn)}
 .wip-bar-body.open{display:block}
+
+/* SR BAR: Belum Ada No SR */
+.srbar{background:var(--surface);border:1px solid #DC2626;border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.srbar-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;gap:8px}
+.srbar-title{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:#DC2626}
+.srbar-count{background:#DC2626;color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;min-width:24px;text-align:center}
+.srbar-chevron{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.srbar-chevron.open{transform:rotate(180deg)}
+.srbar-body{display:none;border-top:1px solid #DC2626}
+.srbar-body.open{display:block}
+.srbar-list{display:flex;flex-direction:column}
+.srbar-item{border-bottom:1px solid var(--border);padding:12px 16px}
+.srbar-item:last-child{border-bottom:none}
+.srbar-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.srbar-item-job{font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.4}
+.srbar-item-meta{display:flex;gap:10px;font-family:var(--mono);font-size:10px;color:var(--muted);flex-wrap:wrap;margin-bottom:8px}
+.srbar-fill-row{display:flex;gap:6px;align-items:center}
+.srbar-fill-row input{flex:1;min-width:0}
+.btn-isi-sr{background:#FEE2E2;color:#DC2626;border:1px solid #DC2626;font-size:11px;font-family:var(--mono);font-weight:500;padding:7px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.btn-isi-sr:hover{background:#DC2626;color:#fff}
+.srbar-fill-err{color:var(--danger);font-family:var(--mono);font-size:10px;margin-top:5px;display:none}
 .wip-list{display:flex;flex-direction:column}
 .wip-item{border-bottom:1px solid var(--border)}
 .wip-item:last-child{border-bottom:none}
@@ -228,20 +249,25 @@ tbody tr:hover td{background:#FAFAF8}
 .btn-toggle-status.wip:hover{background:var(--warn);color:#fff}
 .btn-toggle-status.done{background:var(--ok-light);color:var(--ok);border-color:var(--ok)}
 .btn-toggle-status.done:hover{background:var(--ok);color:#fff}
-.status-select-admin{font-family:var(--mono);font-size:10px;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-left:4px;max-width:170px;cursor:pointer}
+.status-select-admin{font-family:var(--mono);font-size:10px;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-left:0;max-width:100%;width:100%;cursor:pointer;overflow:hidden;text-overflow:ellipsis}
 
 /* SEARCH BAR */
 .search-bar{position:relative;margin-bottom:8px}
 .search-bar input{padding-left:36px;background:var(--bg)}
 .search-bar input:focus{background:#fff}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
-.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600} — mobile: stack; desktop: row */
+.search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
+/* filter-bar — mobile: stack; desktop: row */
 .filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
 .filter-group{display:grid;gap:8px}
 .filter-group.g2{grid-template-columns:1fr 1fr}
 .filter-group.g3{grid-template-columns:1fr 1fr 1fr}
 .filter-group select,.filter-group input[type="date"]{flex:1;min-width:0}
 .filter-label-wrap{display:flex;flex-direction:column;gap:3px}
+/* Filter tanggal input */
+.filter-input-date-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:flex-end}
+.filter-input-date-row .filter-label-wrap{min-width:0}
+.filter-input-date-sep{font-family:var(--mono);font-size:12px;color:var(--muted);padding-bottom:12px;align-self:flex-end;white-space:nowrap;text-align:center}
 .filter-label-wrap label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .filter-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
@@ -266,19 +292,21 @@ tbody tr:hover td{background:#FAFAF8}
 /* MOBILE ADMIN CARDS — redesigned */
 .jl-cards{display:flex;flex-direction:column;gap:10px}
 .jl-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.jl-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
-.jl-card-header-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.jl-card-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
+.jl-card-header-left{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
 .jl-nama{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent);white-space:nowrap}
-.jl-card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.jl-card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;max-width:55%}
+.jl-card-badges .badge{white-space:normal;text-align:right;word-break:break-word;max-width:100%}
+.jl-card-badges .status-select-admin{max-width:100%;width:100%}
 .jl-card-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
-.jl-job{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.jl-job{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word}
 .jl-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
-.jl-info-item{display:flex;align-items:baseline;gap:4px;font-family:var(--mono);font-size:11px}
+.jl-info-item{display:flex;align-items:baseline;gap:4px;font-family:var(--mono);font-size:11px;min-width:0}
 .jl-info-key{color:var(--muted);flex-shrink:0}
-.jl-info-val{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.jl-card-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg)}
-.jl-submit-ts{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.jl-info-val{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.jl-card-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg);flex-wrap:wrap;gap:6px}
+.jl-submit-ts{font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-word}
 
 /* MY LOG LIST */
 .log-list{display:flex;flex-direction:column;gap:8px}
@@ -538,7 +566,8 @@ tbody tr:hover td{background:#FAFAF8}
   .filter-bar{display:grid;grid-template-columns:1fr 260px;column-gap:16px;row-gap:10px;align-items:start}
   .filter-bar .search-bar{grid-column:1}
   .filter-bar .filter-group{grid-column:1}
-  .filter-bar .export-section{grid-column:2;grid-row:1 / span 3}
+  .filter-bar .filter-input-date-row{grid-column:1}
+  .filter-bar .export-section{grid-column:2;grid-row:1 / span 4}
   .export-quick-row{grid-template-columns:1fr 1fr 1fr}
   .export-range-inputs{flex-wrap:nowrap}
   .jl-cards{display:none}
@@ -555,6 +584,9 @@ tbody tr:hover td{background:#FAFAF8}
   /* rekap tabel scroll di PC */
   .rekap-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #tab-admin .container,#tab-performa .container{max-width:1200px;margin:0 auto}
+  /* table admin: kolom tidak terpotong */
+  .table-wrap{overflow-x:auto}
+  tbody td{max-width:180px}
 }
 @media(max-width:639px){
   .form-row.cols2{grid-template-columns:1fr}
@@ -562,6 +594,11 @@ tbody tr:hover td{background:#FAFAF8}
   .form-row.cols3 .field:last-child{grid-column:span 2}
   .filter-group.g3{grid-template-columns:1fr 1fr}
   .filter-group.g3>:last-child{grid-column:span 2}
+  .filter-input-date-row{grid-template-columns:1fr 1fr;gap:8px}
+  .filter-input-date-row>div:last-child{display:none}
+  .jl-card-badges{max-width:52%}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric-value{font-size:20px}
 }
 </style>
 </head>
@@ -815,6 +852,21 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- SR BAR: Belum Ada No SR (Perbaikan & Penggantian Part) -->
+  <div class="srbar" id="srbar" style="display:none">
+    <div class="srbar-header" onclick="toggleSrBar()">
+      <div class="srbar-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="11"/><circle cx="11" cy="14" r="0.5" fill="currentColor"/></svg>
+        Belum Ada No SR
+        <span class="srbar-count" id="srbar-count">0</span>
+      </div>
+      <span class="srbar-chevron" id="srbar-chevron">▼</span>
+    </div>
+    <div class="srbar-body" id="srbar-body">
+      <div class="srbar-list" id="srbar-list"></div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">3 Joblog Terakhir Saya</div>
     <div id="my-logs"><div class="empty-state">Login dulu untuk melihat joblog.</div></div>
@@ -858,7 +910,7 @@ service cloud.firestore {
             <select id="ff-jenis" onchange="renderAdmin()"><option value="">Semua Jenis</option></select>
           </div>
         </div>
-        <!-- Baris 3: Status + Tanggal + Reset -->
+        <!-- Baris 3: Status + Tanggal Kerja + Reset -->
         <div class="filter-group g3">
           <div class="filter-label-wrap">
             <label>Status</label>
@@ -881,6 +933,18 @@ service cloud.firestore {
             <label style="opacity:0">–</label>
             <button class="btn btn-ghost btn-sm" onclick="clearFilter()" style="width:100%">✕ Reset</button>
           </div>
+        </div>
+        <!-- Baris 4: Filter Tanggal Input -->
+        <div class="filter-input-date-row">
+          <div class="filter-label-wrap">
+            <label>Tgl Input Dari</label>
+            <input type="date" id="ff-input-from" onchange="renderAdmin()">
+          </div>
+          <div class="filter-label-wrap">
+            <label>Tgl Input Sampai</label>
+            <input type="date" id="ff-input-to" onchange="renderAdmin()">
+          </div>
+          <div></div>
         </div>
         <!-- Baris 4: Export -->
         <div class="export-section">
@@ -1213,6 +1277,7 @@ window.addEventListener('fb-ready', async () => {
     renderAdmin();
     updateMetrics();
     renderWipBar();
+    renderSrBar();
     updateUnknownBanner();
     if(document.getElementById('sub-performa').style.display !== 'none') renderPerforma();
   }, err => {
@@ -1351,6 +1416,7 @@ function doLoginTeknisi(){
   document.getElementById('user-chip').style.display = 'flex';
   renderMyLogs();
   renderWipBar();
+  renderSrBar();
   updateUnknownBanner();
   toast(`Selamat datang, ${user.nama}!`);
 }
@@ -1359,6 +1425,7 @@ function logoutTeknisi(){
   document.getElementById('f-nama').value = '';
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('wip-bar').style.display = 'none';
+  document.getElementById('srbar').style.display = 'none';
   document.getElementById('unknown-banner').classList.remove('show');
   document.getElementById('my-logs').innerHTML = '<div class="empty-state">Login dulu untuk melihat joblog.</div>';
   showLoginTeknisi();
@@ -1588,7 +1655,9 @@ function renderAdmin(){
   const fd  = document.getElementById('ff-date').value;
   const fj  = document.getElementById('ff-jenis').value;
   const fsr = document.getElementById('ff-sr').value.trim().toLowerCase();
-  const fst = document.getElementById('ff-status').value; // '', '_selesai_group', '_progress_group', or specific status key
+  const fst = document.getElementById('ff-status').value;
+  const fiFrom = document.getElementById('ff-input-from').value; // filter tgl input dari
+  const fiTo   = document.getElementById('ff-input-to').value;   // filter tgl input sampai
   let rows  = [...joblogDB];
   if(fn)  rows = rows.filter(r=>r.nama===fn);
   if(fd)  rows = rows.filter(r=>r.date===fd);
@@ -1597,6 +1666,9 @@ function renderAdmin(){
   if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
   else if(fst === '_progress_group') rows = rows.filter(r=>!isSelesai(r));
   else if(fst) rows = rows.filter(r=> (r.status||(r.end?'selesai':'lanjut')) === fst);
+  // Filter berdasarkan tanggal input (submittedAt)
+  if(fiFrom) rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) >= fiFrom);
+  if(fiTo)   rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) <= fiTo);
 
   const empty = document.getElementById('admin-empty');
   if(!rows.length){
@@ -1672,7 +1744,7 @@ function renderAdmin(){
   }).join('');
 }
 function clearFilter(){
-  ['ff-nama','ff-jenis','ff-date','ff-status'].forEach(id=>document.getElementById(id).value='');
+  ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ff-sr').value='';
   renderAdmin();
 }
@@ -1845,6 +1917,81 @@ function renderWipBar(){
       </div>
     </div>`;
   }).join('');
+}
+
+// ── BAR: BELUM ADA NO SR (Perbaikan & Penggantian Part) ───────
+function toggleSrBar(){
+  const body    = document.getElementById('srbar-body');
+  const chevron = document.getElementById('srbar-chevron');
+  const open    = body.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+}
+
+function hasValidSr(sr){ return /\d{3,}/.test(sr||''); }
+
+function renderSrBar(){
+  const bar  = document.getElementById('srbar');
+  const list = document.getElementById('srbar-list');
+  const cnt  = document.getElementById('srbar-count');
+
+  if(!currentUser){ bar.style.display = 'none'; return; }
+
+  const TARGET_JENIS = /perbaikan|penggantian part/i;
+  const rows = joblogDB.filter(r =>
+    r.nama === currentUser.nama &&
+    TARGET_JENIS.test(r.jenis||'') &&
+    !hasValidSr(r.sr)
+  );
+
+  if(!rows.length){ bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+  cnt.textContent   = rows.length;
+
+  list.innerHTML = rows.map(r => `
+    <div class="srbar-item" id="srbar-item-${r._id}">
+      <div class="srbar-item-top">
+        <div>${jenisBadge(r.jenis)}</div>
+      </div>
+      <div class="srbar-item-job">${r.job}</div>
+      <div class="srbar-item-meta">
+        <span>📅 ${r.date}</span>
+        ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
+        <span>🕐 ${fmt24(r.start)}</span>
+        <span>SR saat ini: <strong style="color:var(--text)">${r.sr||'(kosong)'}</strong></span>
+      </div>
+      <div class="srbar-fill-row">
+        <input type="text" id="srfill-${r._id}" placeholder="Masukkan No. SR (cth: SR-2024-001)" value="${r.sr&&r.sr!=='-'?r.sr:''}">
+        <button class="btn-isi-sr" onclick="submitFillSr('${r._id}')">✓ Simpan SR</button>
+      </div>
+      <div class="srbar-fill-err" id="srfill-err-${r._id}"></div>
+    </div>
+  `).join('');
+}
+
+async function submitFillSr(joblogId){
+  const input = document.getElementById('srfill-'+joblogId);
+  const err   = document.getElementById('srfill-err-'+joblogId);
+  const newSr = (input?.value||'').trim();
+
+  if(!newSr){ err.style.display='block'; err.textContent='No. SR tidak boleh kosong.'; return; }
+  if(!hasValidSr(newSr)){
+    err.style.display='block';
+    err.textContent='No. SR harus mengandung minimal 3 digit angka berturut-turut.';
+    return;
+  }
+  err.style.display='none';
+
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db,'joblogs',joblogId), { sr: newSr });
+    toast(`No. SR berhasil disimpan: ${newSr}`);
+    // renderSrBar akan otomatis terpanggil ulang lewat onSnapshot
+  } catch(e){
+    err.style.display='block';
+    err.textContent = e.code==='permission-denied'
+      ? 'Akses ditolak. Periksa Firestore Security Rules.'
+      : `Gagal menyimpan: ${e.message||e.code||'error'}`;
+  }
 }
 
 function toggleLanjutForm(id){
