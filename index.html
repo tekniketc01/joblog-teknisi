@@ -513,6 +513,22 @@ tbody tr:hover td{background:#FAFAF8}
 /* PERFORMA DASHBOARD */
 .perf-filter-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
 .perf-filter-row .filter-date-field{flex:1;min-width:120px}
+/* PM SUB-TAB */
+.pm-filter-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+.pm-cards{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.pm-date-group{display:flex;flex-direction:column;gap:6px}
+.pm-date-label{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:4px 2px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.pm-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pm-card-header{display:flex;align-items:flex-start;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:10px}
+.pm-card-no{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;padding-top:3px;min-width:24px}
+.pm-card-info{flex:1;min-width:0}
+.pm-card-mesin{font-weight:600;font-size:14px;word-break:break-word}
+.pm-card-nama{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.pm-card-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.pm-card-desc{font-size:13px;color:var(--text);line-height:1.4;word-break:break-word}
+.pm-card-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+.pm-card-meta span{white-space:nowrap}
+#pm-table-wrap{margin-top:4px}
 .perf-grid{display:flex;flex-direction:column;gap:14px}
 .perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0}
 .perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
@@ -880,6 +896,7 @@ service cloud.firestore {
     <button class="sub-tab" onclick="switchSubTab('teknisi',this)">Teknisi</button>
     <button class="sub-tab" onclick="switchSubTab('jenis',this)">Jenis</button>
     <button class="sub-tab" onclick="switchSubTab('performa',this)">Performa</button>
+    <button class="sub-tab" onclick="switchSubTab('pm',this)">🔧 PM</button>
     <button class="sub-tab" onclick="switchSubTab('settings',this)">Settings</button>
   </div>
 
@@ -1043,6 +1060,55 @@ service cloud.firestore {
     </div>
     <div id="perf-cards"></div>
     <div class="empty-state" id="perf-empty" style="display:none">Tidak ada data untuk periode ini.</div>
+  </div>
+
+  <!-- SUB: PREVENTIF MAINTENANCE -->
+  <div id="sub-pm" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>🔧 Rekap Preventif Maintenance</span>
+        <button class="btn btn-export btn-sm" onclick="exportPM()">↓ Export Excel</button>
+      </div>
+      <!-- Filter bar PM -->
+      <div class="pm-filter-row">
+        <div class="filter-date-field" style="flex:1;min-width:130px">
+          <label class="filter-date-label">Teknisi</label>
+          <select id="pm-nama" onchange="renderPM()">
+            <option value="">Semua Teknisi</option>
+          </select>
+        </div>
+        <div class="filter-date-field" style="flex:1;min-width:130px">
+          <label class="filter-date-label">Tgl Dari</label>
+          <input type="date" id="pm-from" onchange="renderPM()">
+        </div>
+        <div class="filter-date-field" style="flex:1;min-width:130px">
+          <label class="filter-date-label">Tgl Sampai</label>
+          <input type="date" id="pm-to" onchange="renderPM()">
+        </div>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPMFilter()">✕ Reset</button>
+      </div>
+      <!-- Search mesin -->
+      <div class="search-bar" style="margin-top:10px">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="pm-mesin" placeholder="Cari nama/kode mesin..." oninput="renderPM()" autocomplete="off" style="width:100%">
+      </div>
+      <div id="pm-summary" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:10px 0 4px;display:none"></div>
+    </div>
+    <!-- Mobile: cards -->
+    <div class="pm-cards" id="pm-cards"></div>
+    <!-- Desktop: tabel -->
+    <div class="table-wrap" id="pm-table-wrap" style="display:none">
+      <table id="pm-table">
+        <thead><tr>
+          <th style="width:40px">No</th>
+          <th>Tanggal</th>
+          <th>Nama/Kode Mesin</th>
+          <th>Teknisi</th>
+        </tr></thead>
+        <tbody id="pm-tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="pm-empty" style="display:none">Tidak ada data Preventif Maintenance untuk filter ini.</div>
   </div>
 
   <!-- SUB: SETTINGS -->
@@ -1280,6 +1346,7 @@ window.addEventListener('fb-ready', async () => {
     renderSrBar();
     updateUnknownBanner();
     if(document.getElementById('sub-performa').style.display !== 'none') renderPerforma();
+    if(document.getElementById('sub-pm').style.display !== 'none') renderPM();
   }, err => {
     setSyncDot('err');
     document.getElementById('loading-screen').style.display = 'none';
@@ -1350,6 +1417,10 @@ function buildFilterDropdown(){
   const pfOpts = '<option value="">Semua Teknisi</option>' +
     teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
   document.getElementById('pf-nama').innerHTML = pfOpts;
+
+  const pmOpts = '<option value="">Semua Teknisi</option>' +
+    teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+  document.getElementById('pm-nama').innerHTML = pmOpts;
 }
 
 // ── BUILD JENIS DROPDOWNS ──────────────────────────────────────
@@ -1495,11 +1566,12 @@ function switchTab(t,el,type){
 function switchSubTab(s,el){
   document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  ['data','teknisi','jenis','performa','settings'].forEach(id=>
+  ['data','teknisi','jenis','performa','pm','settings'].forEach(id=>
     document.getElementById('sub-'+id).style.display=id===s?'block':'none');
   if(s==='teknisi')  renderUserList();
   if(s==='jenis')    renderJenisList();
   if(s==='performa') renderPerforma();
+  if(s==='pm')       renderPM();
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
@@ -2381,6 +2453,148 @@ function resetPerformaFilter(){
   document.getElementById('pf-nama').value  = '';
   document.getElementById('pf-bulan').value = '';
   renderPerforma();
+}
+
+// ── PREVENTIF MAINTENANCE ──────────────────────────────────────
+const PM_JENIS_RE = /preventif|preventive|prev[\s._-]*maint|^pm$/i;
+function isPMJenis(jenis){ return jenis && PM_JENIS_RE.test(jenis.trim()); }
+
+function getPMRows(){
+  const fnama  = document.getElementById('pm-nama').value;
+  const ffrom  = document.getElementById('pm-from').value;
+  const fto    = document.getElementById('pm-to').value;
+  const fmesin = document.getElementById('pm-mesin').value.trim().toLowerCase();
+  let rows = joblogDB.filter(r => isPMJenis(r.jenis));
+  if(fnama)  rows = rows.filter(r => r.nama === fnama);
+  if(ffrom)  rows = rows.filter(r => r.date && r.date >= ffrom);
+  if(fto)    rows = rows.filter(r => r.date && r.date <= fto);
+  if(fmesin) rows = rows.filter(r => (r.mesin||'').toLowerCase().includes(fmesin));
+  rows.sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.mesin||'').localeCompare(b.mesin||''));
+  return rows;
+}
+
+function getGroupedPM(rows){
+  // Group by date → array of mesin groups
+  // Returns: [{date, mesins:[{mesin, teknisis}]}]
+  const byDate = {};
+  rows.forEach(r => {
+    const d = r.date||'—';
+    const m = r.mesin||'—';
+    if(!byDate[d]) byDate[d] = {};
+    if(!byDate[d][m]) byDate[d][m] = new Set();
+    if(r.nama) byDate[d][m].add(r.nama);
+  });
+  return Object.keys(byDate).sort().map(date => ({
+    date,
+    mesins: Object.keys(byDate[date]).sort().map(mesin => ({
+      mesin,
+      teknisis: [...byDate[date][mesin]]
+    }))
+  }));
+}
+
+function renderPM(){
+  const rows   = getPMRows();
+  const empty  = document.getElementById('pm-empty');
+  const cards  = document.getElementById('pm-cards');
+  const tbody  = document.getElementById('pm-tbody');
+  const wrap   = document.getElementById('pm-table-wrap');
+  const summary= document.getElementById('pm-summary');
+
+  if(!rows.length){
+    cards.innerHTML=''; tbody.innerHTML='';
+    empty.style.display='block';
+    wrap.style.display='none'; cards.style.display='none';
+    summary.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+
+  const grouped = getGroupedPM(rows);
+  const totalMesin = grouped.reduce((s,g)=>s+g.mesins.length,0);
+  const mesinSet   = new Set(rows.map(r=>r.mesin||'').filter(Boolean));
+  summary.textContent = `${grouped.length} hari · ${totalMesin} baris · ${mesinSet.size} mesin unik · ${rows.length} record`;
+  summary.style.display='block';
+
+  const isMob = window.innerWidth < 640;
+
+  // ── Mobile: cards (tanggal sebagai pemisah) ──
+  cards.style.display = isMob ? 'flex' : 'none';
+  if(isMob){
+    let no = 1;
+    cards.innerHTML = grouped.map(g => {
+      const mesinCards = g.mesins.map(m => `
+      <div class="pm-card">
+        <div class="pm-card-header">
+          <div class="pm-card-no">${no++}</div>
+          <div class="pm-card-info">
+            <div class="pm-card-mesin">${m.mesin}</div>
+            <div class="pm-card-nama">📅 ${g.date}</div>
+          </div>
+        </div>
+        <div class="pm-card-body">
+          <div class="pm-card-meta"><span>👤 ${m.teknisis.join(', ')}</span></div>
+        </div>
+      </div>`).join('');
+      return `<div class="pm-date-group">
+        <div class="pm-date-label">📅 ${g.date}</div>
+        ${mesinCards}
+      </div>`;
+    }).join('');
+  }
+
+  // ── Desktop: tabel dengan rowspan tanggal ──
+  wrap.style.display = isMob ? 'none' : 'block';
+  let no = 1;
+  tbody.innerHTML = grouped.map(g => {
+    return g.mesins.map((m, mi) => {
+      const dateCell = mi === 0
+        ? `<td style="font-family:var(--mono);font-size:12px;white-space:nowrap;vertical-align:middle;border-right:1px solid var(--border)" rowspan="${g.mesins.length}">${g.date}</td>`
+        : '';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;white-space:nowrap;vertical-align:middle">${no++}</td>
+        ${dateCell}
+        <td style="font-weight:500;word-break:break-word;vertical-align:middle">${m.mesin}</td>
+        <td style="word-break:break-word;vertical-align:middle">${m.teknisis.join(', ')}</td>
+      </tr>`;
+    }).join('');
+  }).join('');
+}
+
+function resetPMFilter(){
+  document.getElementById('pm-nama').value  = '';
+  document.getElementById('pm-from').value  = '';
+  document.getElementById('pm-to').value    = '';
+  document.getElementById('pm-mesin').value = '';
+  renderPM();
+}
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('sub-pm') && document.getElementById('sub-pm').style.display !== 'none') renderPM();
+});
+
+function exportPM(){
+  const rows = getPMRows();
+  if(!rows.length){ toast('Tidak ada data PM untuk diekspor.','warn'); return; }
+  const fnama = document.getElementById('pm-nama').value;
+  const ffrom = document.getElementById('pm-from').value;
+  const fto   = document.getElementById('pm-to').value;
+
+  const grouped = getGroupedPM(rows);
+  let no = 1;
+  const data = [['No','Tanggal','Nama/Kode Mesin','Teknisi']];
+  grouped.forEach(g => {
+    g.mesins.forEach(m => {
+      data.push([no++, g.date, m.mesin, m.teknisis.join(', ')]);
+    });
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [4, 14, 22, 30].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Preventif Maintenance');
+  const parts = [fnama||'Semua', ffrom&&fto?`${ffrom}_sd_${fto}`:ffrom||fto||''].filter(Boolean);
+  XLSX.writeFile(wb, `PM_${parts.join('_')||'Semua'}_${todayStr()}.xlsx`);
+  toast('Export PM berhasil!');
 }
 
 function calcPerfStats(nama, data){
