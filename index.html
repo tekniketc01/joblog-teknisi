@@ -250,6 +250,12 @@ tbody tr:hover td{background:#FAFAF8}
 .btn-toggle-status.done{background:var(--ok-light);color:var(--ok);border-color:var(--ok)}
 .btn-toggle-status.done:hover{background:var(--ok);color:#fff}
 .status-select-admin{font-family:var(--mono);font-size:10px;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-left:0;max-width:100%;width:100%;cursor:pointer;overflow:hidden;text-overflow:ellipsis}
+/* Tandai Diperiksa */
+.btn-checked-toggle{font-family:var(--mono);font-size:11px;font-weight:500;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-checked-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.btn-checked-toggle.is-checked{background:var(--ok-light);color:var(--ok);border-color:var(--ok)}
+.btn-checked-toggle.is-checked:hover{background:var(--ok);color:#fff}
+.badge-checked{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;font-family:var(--mono);background:var(--ok-light);color:var(--ok);margin-left:6px}
 
 /* SEARCH BAR */
 .search-bar{position:relative;margin-bottom:8px}
@@ -500,6 +506,10 @@ tbody tr:hover td{background:#FAFAF8}
 }
 
 .empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:13px;font-family:var(--mono)}
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pagination-info{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pagination-btns{display:flex;gap:8px}
+.pagination-btns button:disabled{opacity:.4;cursor:not-allowed}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
 /* JENIS LIST */
@@ -914,24 +924,35 @@ service cloud.firestore {
         <!-- Baris 1: Search SR -->
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="renderAdmin()" autocomplete="off" style="width:100%">
+          <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
         </div>
         <!-- Baris 2: Teknisi + Jenis -->
         <div class="filter-group g2">
           <div class="filter-label-wrap">
             <label>Teknisi</label>
-            <select id="ff-nama" onchange="renderAdmin()"><option value="">Semua Teknisi</option></select>
+            <select id="ff-nama" onchange="applyAdminFilter()"><option value="">Semua Teknisi</option></select>
           </div>
           <div class="filter-label-wrap">
             <label>Jenis</label>
-            <select id="ff-jenis" onchange="renderAdmin()"><option value="">Semua Jenis</option></select>
+            <select id="ff-jenis" onchange="applyAdminFilter()"><option value="">Semua Jenis</option></select>
+          </div>
+        </div>
+        <!-- Baris 2b: Status Periksa -->
+        <div class="filter-group g2">
+          <div class="filter-label-wrap">
+            <label>Status Periksa</label>
+            <select id="ff-checked" onchange="applyAdminFilter()">
+              <option value="">Semua</option>
+              <option value="checked">✅ Sudah Diperiksa</option>
+              <option value="unchecked">⬜ Belum Diperiksa</option>
+            </select>
           </div>
         </div>
         <!-- Baris 3: Status + Tanggal Kerja + Reset -->
         <div class="filter-group g3">
           <div class="filter-label-wrap">
             <label>Status</label>
-            <select id="ff-status" onchange="renderAdmin()">
+            <select id="ff-status" onchange="applyAdminFilter()">
               <option value="">Semua Status</option>
               <option value="_selesai_group">✅ Selesai (semua)</option>
               <option value="_progress_group">⏳ On Progress (semua)</option>
@@ -944,7 +965,7 @@ service cloud.firestore {
           </div>
           <div class="filter-label-wrap">
             <label>Tgl Kerja</label>
-            <input type="date" id="ff-date" onchange="renderAdmin()">
+            <input type="date" id="ff-date" onchange="applyAdminFilter()">
           </div>
           <div class="filter-label-wrap" style="justify-content:flex-end">
             <label style="opacity:0">–</label>
@@ -955,11 +976,11 @@ service cloud.firestore {
         <div class="filter-input-date-row">
           <div class="filter-label-wrap">
             <label>Tgl Input Dari</label>
-            <input type="date" id="ff-input-from" onchange="renderAdmin()">
+            <input type="date" id="ff-input-from" onchange="applyAdminFilter()">
           </div>
           <div class="filter-label-wrap">
             <label>Tgl Input Sampai</label>
-            <input type="date" id="ff-input-to" onchange="renderAdmin()">
+            <input type="date" id="ff-input-to" onchange="applyAdminFilter()">
           </div>
           <div></div>
         </div>
@@ -988,12 +1009,20 @@ service cloud.firestore {
         <table>
           <thead><tr>
             <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
-            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Input (Tgl & Jam)</th><th>Hapus</th>
+            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th>
           </tr></thead>
           <tbody id="admin-tbody"></tbody>
         </table>
       </div>
       <div class="empty-state" id="admin-empty" style="display:none">Belum ada data.</div>
+      <!-- Kontrol pagination: mencegah render ribuan baris sekaligus ke DOM -->
+      <div class="pagination-bar" id="admin-pagination" style="display:none">
+        <span class="pagination-info" id="admin-pagination-info"></span>
+        <div class="pagination-btns">
+          <button class="btn btn-ghost btn-sm" id="admin-page-prev" onclick="adminChangePage(-1)">‹ Sebelumnya</button>
+          <button class="btn btn-ghost btn-sm" id="admin-page-next" onclick="adminChangePage(1)">Berikutnya ›</button>
+        </div>
+      </div>
     </div>
 
     <!-- HAPUS HISTORY -->
@@ -1339,14 +1368,7 @@ window.addEventListener('fb-ready', async () => {
     joblogDB = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
     setSyncDot('ok');
     document.getElementById('loading-screen').style.display = 'none';
-    renderMyLogs();
-    renderAdmin();
-    updateMetrics();
-    renderWipBar();
-    renderSrBar();
-    updateUnknownBanner();
-    if(document.getElementById('sub-performa').style.display !== 'none') renderPerforma();
-    if(document.getElementById('sub-pm').style.display !== 'none') renderPM();
+    renderActiveView();
   }, err => {
     setSyncDot('err');
     document.getElementById('loading-screen').style.display = 'none';
@@ -1551,6 +1573,35 @@ async function changeAdminPassword(){
 }
 
 // ── TABS ───────────────────────────────────────────────────────
+// ── RENDER SELEKTIF ─────────────────────────────────────────────
+// Hanya menjalankan render untuk tab/sub-tab yang sedang TERLIHAT.
+// Dipanggil setiap kali joblogDB berubah (real-time update dari Firestore),
+// agar tidak menghabiskan kerja render untuk komponen yang sedang tersembunyi.
+function renderActiveView(){
+  const tabInputVisible = document.getElementById('tab-input').style.display !== 'none';
+  const tabAdminVisible = document.getElementById('tab-admin').style.display !== 'none';
+
+  if(tabInputVisible){
+    renderMyLogs();
+    renderWipBar();
+    renderSrBar();
+    updateUnknownBanner();
+  }
+
+  if(tabAdminVisible){
+    const subDataVisible     = document.getElementById('sub-data')?.style.display !== 'none';
+    const subPerformaVisible = document.getElementById('sub-performa')?.style.display !== 'none';
+    const subPmVisible       = document.getElementById('sub-pm')?.style.display !== 'none';
+
+    if(subDataVisible){
+      renderAdmin();
+      updateMetrics();
+    }
+    if(subPerformaVisible) renderPerforma();
+    if(subPmVisible)       renderPM();
+  }
+}
+
 function switchTab(t,el,type){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -1562,12 +1613,14 @@ function switchTab(t,el,type){
   document.getElementById('tab-input').style.display=t==='input'?'block':'none';
   document.getElementById('tab-admin').style.display=t==='admin'?'block':'none';
   if(t==='admin'){renderAdmin();updateMetrics();renderUserList();}
+  else { renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner(); }
 }
 function switchSubTab(s,el){
   document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   ['data','teknisi','jenis','performa','pm','settings'].forEach(id=>
     document.getElementById('sub-'+id).style.display=id===s?'block':'none');
+  if(s==='data')      { renderAdmin(); updateMetrics(); }
   if(s==='teknisi')  renderUserList();
   if(s==='jenis')    renderJenisList();
   if(s==='performa') renderPerforma();
@@ -1722,12 +1775,17 @@ function highlightSR(text, query){
 function isSelesai(r){
   return getStatusInfo(r).selesai;
 }
+// Pagination admin: cegah render ribuan baris sekaligus ke DOM.
+const ADMIN_PAGE_SIZE = 50;
+let _adminCurrentPage = 1;
+
 function renderAdmin(){
   const fn  = document.getElementById('ff-nama').value;
   const fd  = document.getElementById('ff-date').value;
   const fj  = document.getElementById('ff-jenis').value;
   const fsr = document.getElementById('ff-sr').value.trim().toLowerCase();
   const fst = document.getElementById('ff-status').value;
+  const fck = document.getElementById('ff-checked').value; // '' | 'checked' | 'unchecked'
   const fiFrom = document.getElementById('ff-input-from').value; // filter tgl input dari
   const fiTo   = document.getElementById('ff-input-to').value;   // filter tgl input sampai
   let rows  = [...joblogDB];
@@ -1738,19 +1796,44 @@ function renderAdmin(){
   if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
   else if(fst === '_progress_group') rows = rows.filter(r=>!isSelesai(r));
   else if(fst) rows = rows.filter(r=> (r.status||(r.end?'selesai':'lanjut')) === fst);
+  if(fck === 'checked')   rows = rows.filter(r=> r.checked === true);
+  else if(fck === 'unchecked') rows = rows.filter(r=> r.checked !== true);
   // Filter berdasarkan tanggal input (submittedAt)
   if(fiFrom) rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) >= fiFrom);
   if(fiTo)   rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) <= fiTo);
 
   const empty = document.getElementById('admin-empty');
+  const pagBar = document.getElementById('admin-pagination');
   if(!rows.length){
     document.getElementById('admin-tbody').innerHTML='';
     document.getElementById('admin-cards').innerHTML='';
-    empty.style.display='block'; return;
+    empty.style.display='block';
+    pagBar.style.display='none';
+    return;
   }
   empty.style.display='none';
 
-  document.getElementById('admin-tbody').innerHTML=rows.map(r=>{
+  // Hitung total halaman, dan jaga _adminCurrentPage tetap dalam rentang valid
+  // (misal saat filter berubah dan jumlah hasil mengecil).
+  const totalPages = Math.max(1, Math.ceil(rows.length / ADMIN_PAGE_SIZE));
+  if(_adminCurrentPage > totalPages) _adminCurrentPage = totalPages;
+  if(_adminCurrentPage < 1) _adminCurrentPage = 1;
+
+  const startIdx = (_adminCurrentPage - 1) * ADMIN_PAGE_SIZE;
+  const pageRows = rows.slice(startIdx, startIdx + ADMIN_PAGE_SIZE);
+
+  // Tampilkan/sembunyikan kontrol pagination
+  if(rows.length > ADMIN_PAGE_SIZE){
+    pagBar.style.display = 'flex';
+    document.getElementById('admin-pagination-info').textContent =
+      `Menampilkan ${startIdx+1}–${Math.min(startIdx+ADMIN_PAGE_SIZE, rows.length)} dari ${rows.length} data (hal. ${_adminCurrentPage}/${totalPages})`;
+    document.getElementById('admin-page-prev').disabled = _adminCurrentPage <= 1;
+    document.getElementById('admin-page-next').disabled = _adminCurrentPage >= totalPages;
+  } else {
+    pagBar.style.display = 'none';
+  }
+
+  document.getElementById('admin-tbody').innerHTML=pageRows.map(r=>{
     const selesai = isSelesai(r);
     const srHtml  = highlightSR(r.sr, fsr);
     return `<tr>
@@ -1771,19 +1854,24 @@ function renderAdmin(){
         ).join('')}
       </select>
     </td>
+    <td>
+      <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
+        ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
+      </button>
+    </td>
     <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
     <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
   </tr>`;
   }).join('');
 
-  document.getElementById('admin-cards').innerHTML=rows.map(r=>{
+  document.getElementById('admin-cards').innerHTML=pageRows.map(r=>{
     const selesai = isSelesai(r);
     const srHtml  = highlightSR(r.sr, fsr);
     return `
     <div class="jl-card">
       <div class="jl-card-header">
         <div class="jl-card-header-left">
-          <div class="jl-nama">${r.nama}</div>
+          <div class="jl-nama">${r.nama}${r.checked===true?'<span class="badge-checked">✅ Diperiksa</span>':''}</div>
           <div class="jl-sr">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></div>
         </div>
         <div class="jl-card-badges">
@@ -1808,16 +1896,33 @@ function renderAdmin(){
       <div class="jl-card-footer">
         <span class="jl-submit-ts">🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
         <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn-toggle-status ${selesai?'done':'wip'}" onclick="toggleStatus('${r._id}',${selesai})">${selesai?'↩ Buka':'✓ Selesai'}</button>
+          <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
+            ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
+          </button>
           <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
+// Dipanggil dari setiap input filter ff-*: reset ke halaman 1 lalu render,
+// supaya ganti filter tidak nyangkut di halaman pagination yang lama.
+function applyAdminFilter(){
+  _adminCurrentPage = 1;
+  renderAdmin();
+}
+
+function adminChangePage(direction){
+  _adminCurrentPage += direction;
+  renderAdmin();
+  // Scroll ke atas tabel agar user langsung lihat data halaman baru
+  document.getElementById('admin-pagination').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
 function clearFilter(){
-  ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to'].forEach(id=>document.getElementById(id).value='');
+  ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ff-sr').value='';
+  _adminCurrentPage = 1;
   renderAdmin();
 }
 
@@ -1872,6 +1977,25 @@ async function changeStatusAdmin(joblogId, newStatus){
       e.code==='permission-denied'
         ? 'Akses ditolak. Periksa Firestore Security Rules.'
         : `Gagal mengubah status: ${e.message||e.code||'error'}`,
+      'warn'
+    );
+  }
+}
+
+// ── TANDAI DIPERIKSA (ADMIN) ──────────────────────────────────
+// Tanda 'checked' bersifat independen dari status pekerjaan —
+// joblog dengan status apapun (selesai atau belum) tetap bisa ditandai.
+async function toggleChecked(joblogId, currentlyChecked){
+  const newVal = !currentlyChecked;
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db,'joblogs',joblogId), { checked: newVal });
+    toast(newVal ? 'Ditandai sebagai sudah diperiksa.' : 'Tanda diperiksa dibatalkan.');
+  } catch(e){
+    toast(
+      e.code==='permission-denied'
+        ? 'Akses ditolak. Periksa Firestore Security Rules.'
+        : `Gagal menandai: ${e.message||e.code||'error'}`,
       'warn'
     );
   }
@@ -2008,7 +2132,7 @@ function renderSrBar(){
 
   if(!currentUser){ bar.style.display = 'none'; return; }
 
-  const TARGET_JENIS = /perbaikan|penggantian part/i;
+  const TARGET_JENIS = /perbaikan|penggantian part|project/i;
   const rows = joblogDB.filter(r =>
     r.nama === currentUser.nama &&
     TARGET_JENIS.test(r.jenis||'') &&
@@ -2113,8 +2237,19 @@ async function submitLanjut(refId, sr, mesin, jenis){
   };
 
   try {
-    const { db, collection, addDoc } = window._fb;
+    const { db, collection, addDoc, doc, updateDoc } = window._fb;
     await addDoc(collection(db,'joblogs'), record);
+
+    // Jika status pekerjaan lanjutan PERSIS "selesai" (bukan "berkelanjutan"),
+    // joblog asal otomatis ditandai selesai juga — tanpa mengubah field lain (termasuk 'end').
+    if(status === 'selesai'){
+      try {
+        await updateDoc(doc(db,'joblogs',refId), { status: 'selesai' });
+      } catch(eAuto){
+        console.warn('Gagal auto-selesaikan joblog asal:', eAuto);
+      }
+    }
+
     toggleLanjutForm(refId);
     toast(`Pekerjaan lanjutan SR ${sr} berhasil disimpan.`);
   } catch(e){
