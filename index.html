@@ -539,6 +539,23 @@ tbody tr:hover td{background:#FAFAF8}
 .pm-card-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
 .pm-card-meta span{white-space:nowrap}
 #pm-table-wrap{margin-top:4px}
+/* PM INTERVAL */
+.pm-interval-table{width:100%;border-collapse:collapse;font-size:13px}
+.pm-interval-table th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg)}
+.pm-interval-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.pm-interval-table tr:last-child td{border-bottom:none}
+.pm-interval-table tr:hover td{background:#FAFAF8}
+.pm-interval-mesin{font-weight:600;font-size:13px}
+.pm-interval-count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.pm-interval-days{font-family:var(--mono);font-size:14px;font-weight:600}
+.pm-interval-days.ok{color:var(--ok)}
+.pm-interval-days.warn{color:var(--warn)}
+.pm-interval-days.danger{color:var(--danger)}
+.pm-interval-bar-wrap{background:var(--border);border-radius:100px;height:6px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-left:8px}
+.pm-interval-bar{height:100%;border-radius:100px}
+.pm-interval-bar.ok{background:var(--ok)}
+.pm-interval-bar.warn{background:var(--warn)}
+.pm-interval-bar.danger{background:var(--danger)}
 .perf-grid{display:flex;flex-direction:column;gap:14px}
 .perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0}
 .perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
@@ -754,6 +771,68 @@ tbody tr:hover td{background:#FAFAF8}
     <div class="modal-footer">
       <button class="btn btn-danger-solid" style="flex:1" id="confirm-delete-btn">Ya, Hapus</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm-delete')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT JOBLOG LENGKAP -->
+<div class="overlay" id="modal-edit-joblog">
+  <div class="modal" style="max-width:480px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span>✏️ Edit Joblog</span>
+      <span class="badge badge-wip" id="edit-joblog-sr-badge" style="font-size:10px"></span>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:1rem" id="edit-joblog-meta"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="form-row cols2">
+        <div class="field">
+          <label>No. SR</label>
+          <input type="text" id="ej-sr" placeholder="SR-2024-001">
+        </div>
+        <div class="field">
+          <label>Nama/Kode Mesin</label>
+          <input type="text" id="ej-mesin" placeholder="CNC-01">
+        </div>
+      </div>
+      <div class="field">
+        <label>Jenis Pekerjaan</label>
+        <select id="ej-jenis"></select>
+      </div>
+      <div class="field">
+        <label>Deskripsi Pekerjaan</label>
+        <input type="text" id="ej-job" placeholder="Deskripsi pekerjaan">
+      </div>
+      <div class="form-row cols2">
+        <div class="field">
+          <label>Tanggal Kerja</label>
+          <input type="date" id="ej-date">
+        </div>
+        <div class="field">
+          <label>Status Pekerjaan</label>
+          <select id="ej-status">
+            <option value="selesai">✅ Selesai</option>
+            <option value="berkelanjutan">🔄 Pekerjaan Berkelanjutan</option>
+            <option value="lanjut">⏳ Butuh Dilanjutkan</option>
+            <option value="part">📦 Butuh Menunggu Part</option>
+            <option value="bengkel">🔧 Butuh Bengkel Luar</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row cols2">
+        <div class="field">
+          <label>Waktu Mulai</label>
+          <input type="text" id="ej-start" placeholder="HH:MM" maxlength="5" inputmode="numeric" oninput="formatTimeInput(this)">
+        </div>
+        <div class="field">
+          <label>Waktu Selesai</label>
+          <input type="text" id="ej-end" placeholder="HH:MM" maxlength="5" inputmode="numeric" oninput="formatTimeInput(this)">
+        </div>
+      </div>
+    </div>
+    <div class="pw-error" id="edit-joblog-err" style="margin-top:8px"></div>
+    <div class="modal-footer" style="margin-top:1.25rem">
+      <button class="btn btn-primary" style="flex:1" onclick="saveEditJoblog()">💾 Simpan Perubahan</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-joblog')">Batal</button>
     </div>
   </div>
 </div>
@@ -1009,7 +1088,7 @@ service cloud.firestore {
         <table>
           <thead><tr>
             <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
-            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th>
+            <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th><th>Edit</th>
           </tr></thead>
           <tbody id="admin-tbody"></tbody>
         </table>
@@ -1138,6 +1217,22 @@ service cloud.firestore {
       </table>
     </div>
     <div class="empty-state" id="pm-empty" style="display:none">Tidak ada data Preventif Maintenance untuk filter ini.</div>
+  </div>
+
+  <!-- SUB: PM - INTERVAL MESIN -->
+  <div id="sub-pm-interval" style="margin-top:0">
+    <div class="card" style="margin-top:0">
+      <div class="card-title">
+        <span>📊 Status Interval PM per Mesin</span>
+        <span id="pm-interval-bulan" style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400"></span>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">
+        Berdasarkan seluruh data PM. Mesin diurutkan dari yang paling lama belum di-PM.
+      </div>
+      <div id="pm-interval-wrap">
+        <div class="empty-state">Belum ada data PM.</div>
+      </div>
+    </div>
   </div>
 
   <!-- SUB: SETTINGS -->
@@ -1598,7 +1693,7 @@ function renderActiveView(){
       updateMetrics();
     }
     if(subPerformaVisible) renderPerforma();
-    if(subPmVisible)       renderPM();
+    if(subPmVisible){ renderPM(); renderPMInterval(); }
   }
 }
 
@@ -1624,7 +1719,7 @@ function switchSubTab(s,el){
   if(s==='teknisi')  renderUserList();
   if(s==='jenis')    renderJenisList();
   if(s==='performa') renderPerforma();
-  if(s==='pm')       renderPM();
+  if(s==='pm'){ renderPM(); renderPMInterval(); }
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
@@ -1861,6 +1956,7 @@ function renderAdmin(){
     </td>
     <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
     <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
+    <td><button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button></td>
   </tr>`;
   }).join('');
 
@@ -1899,6 +1995,7 @@ function renderAdmin(){
           <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
             ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
           </button>
+          <button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button>
           <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
         </div>
       </div>
@@ -2021,6 +2118,81 @@ async function saveEditJob(){
     await updateDoc(doc(db,'joblogs',_editJobId), { job: newJob });
     closeModal('modal-edit-job');
     toast('Deskripsi pekerjaan berhasil diubah.');
+  } catch(e){
+    err.style.display='block';
+    err.textContent = e.code==='permission-denied'
+      ? 'Akses ditolak. Periksa Firestore Security Rules.'
+      : `Gagal menyimpan: ${e.message||e.code||'error'}`;
+  }
+}
+
+// ── EDIT JOBLOG LENGKAP (ADMIN) ────────────────────────────────
+let _editJoblogId = null;
+function openEditJoblog(joblogId){
+  const r = joblogDB.find(x => x._id === joblogId);
+  if(!r) return;
+  _editJoblogId = joblogId;
+
+  // Isi badge & meta
+  document.getElementById('edit-joblog-sr-badge').textContent = r.sr || 'No SR';
+  document.getElementById('edit-joblog-meta').textContent =
+    `Teknisi: ${r.nama}  ·  Input: ${fmtSubmitDateTime(r.submittedAt)}`;
+
+  // Isi field
+  document.getElementById('ej-sr').value     = r.sr    || '';
+  document.getElementById('ej-mesin').value  = r.mesin || '';
+  document.getElementById('ej-job').value    = r.job   || '';
+  document.getElementById('ej-date').value   = r.date  || '';
+  document.getElementById('ej-start').value  = r.start || '';
+  document.getElementById('ej-end').value    = r.end   || '';
+  document.getElementById('ej-status').value = r.status || (r.end ? 'selesai' : 'lanjut');
+
+  // Isi dropdown jenis dari jenisDB
+  const sel = document.getElementById('ej-jenis');
+  sel.innerHTML = '<option value="">-- Pilih Jenis --</option>' +
+    jenisDB.map(j => `<option value="${j.nama}" ${j.nama===r.jenis?'selected':''}>${j.nama}</option>`).join('');
+
+  document.getElementById('edit-joblog-err').style.display = 'none';
+  document.getElementById('modal-edit-joblog').classList.add('show');
+}
+
+async function saveEditJoblog(){
+  const err = document.getElementById('edit-joblog-err');
+  err.style.display = 'none';
+  if(!_editJoblogId) return;
+
+  const sr    = document.getElementById('ej-sr').value.trim();
+  const mesin = document.getElementById('ej-mesin').value.trim();
+  const jenis = document.getElementById('ej-jenis').value;
+  const job   = document.getElementById('ej-job').value.trim();
+  const date  = document.getElementById('ej-date').value;
+  const start = document.getElementById('ej-start').value.trim();
+  const end   = document.getElementById('ej-end').value.trim();
+  const status= document.getElementById('ej-status').value;
+
+  if(!job || !date || !start){
+    err.style.display='block';
+    err.textContent = 'Deskripsi, tanggal, dan waktu mulai wajib diisi.';
+    return;
+  }
+
+  // Hitung ulang durasi
+  let dur = null;
+  if(start && end){
+    const [sh,sm] = start.split(':').map(Number);
+    const [eh,em] = end.split(':').map(Number);
+    const d = (eh*60+em) - (sh*60+sm);
+    if(d > 0) dur = d;
+  }
+
+  const updates = { sr, mesin, jenis, job, date, start, end, status };
+  if(dur !== null) updates.dur = dur; else updates.dur = null;
+
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db,'joblogs',_editJoblogId), updates);
+    closeModal('modal-edit-joblog');
+    toast('Joblog berhasil diperbarui.');
   } catch(e){
     err.style.display='block';
     err.textContent = e.code==='permission-denied'
@@ -2706,6 +2878,110 @@ function resetPMFilter(){
 window.addEventListener('resize', ()=>{
   if(document.getElementById('sub-pm') && document.getElementById('sub-pm').style.display !== 'none') renderPM();
 });
+
+// ── PM INTERVAL: Rekap Terakhir PM & Interval per Mesin ────────
+function renderPMInterval(){
+  const allPM = joblogDB.filter(r => isPMJenis(r.jenis) && r.date && r.mesin);
+  const wrap  = document.getElementById('pm-interval-wrap');
+  if(!wrap) return;
+
+  if(!allPM.length){
+    wrap.innerHTML = '<div class="empty-state">Belum ada data PM.</div>';
+    return;
+  }
+
+  // Kelompokkan per mesin: kumpulkan semua tanggal PM
+  const byMesin = {};
+  allPM.forEach(r => {
+    const m = r.mesin.trim();
+    if(!byMesin[m]) byMesin[m] = [];
+    byMesin[m].push(r.date);
+  });
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const rows = Object.entries(byMesin).map(([mesin, dates]) => {
+    dates.sort(); // ascending
+    const lastPM    = dates[dates.length - 1];
+    const firstPM   = dates[0];
+    const totalPM   = dates.length;
+    const lastDate  = new Date(lastPM + 'T00:00:00');
+    const hariSejak = Math.floor((today - lastDate) / 86400000);
+
+    // Hitung rata-rata interval antar PM
+    let avgInterval = null;
+    if(dates.length >= 2){
+      let totalGap = 0;
+      for(let i = 1; i < dates.length; i++){
+        const d1 = new Date(dates[i-1]+'T00:00:00');
+        const d2 = new Date(dates[i]+'T00:00:00');
+        totalGap += Math.floor((d2 - d1) / 86400000);
+      }
+      avgInterval = Math.round(totalGap / (dates.length - 1));
+    }
+
+    // Status: hitung % dari rata-rata interval
+    let cls = 'ok', statusTxt = '';
+    if(avgInterval){
+      const pct = hariSejak / avgInterval;
+      if(pct >= 1.2)       { cls = 'danger'; statusTxt = '⚠ Terlambat'; }
+      else if(pct >= 0.85) { cls = 'warn';   statusTxt = '⏳ Segera'; }
+      else                  { cls = 'ok';     statusTxt = '✅ Aman'; }
+    } else {
+      cls = hariSejak > 30 ? 'warn' : 'ok';
+      statusTxt = hariSejak > 30 ? '⏳ >30 hari' : '✅ Aman';
+    }
+
+    const barPct = avgInterval
+      ? Math.min(100, Math.round(hariSejak / avgInterval * 100))
+      : Math.min(100, hariSejak * 2);
+
+    return { mesin, lastPM, firstPM, totalPM, hariSejak, avgInterval, cls, statusTxt, barPct };
+  });
+
+  // Urutkan: paling lama (hariSejak terbesar) duluan
+  rows.sort((a,b) => b.hariSejak - a.hariSejak);
+
+  document.getElementById('pm-interval-bulan').textContent =
+    `${rows.length} mesin terdaftar`;
+
+  wrap.innerHTML = `
+  <div style="overflow-x:auto">
+  <table class="pm-interval-table">
+    <thead><tr>
+      <th>#</th>
+      <th>Nama/Kode Mesin</th>
+      <th>Terakhir PM</th>
+      <th>Hari Sejak PM</th>
+      <th>Rata² Interval</th>
+      <th>Total PM</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map((r,i) => `<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center">${i+1}</td>
+      <td>
+        <div class="pm-interval-mesin">${r.mesin}</div>
+        <div class="pm-interval-count">PM pertama: ${r.firstPM}</div>
+      </td>
+      <td style="font-family:var(--mono);font-size:12px">${r.lastPM}</td>
+      <td>
+        <span class="pm-interval-days ${r.cls}">${r.hariSejak} hari</span>
+        <div class="pm-interval-bar-wrap">
+          <div class="pm-interval-bar ${r.cls}" style="width:${r.barPct}%"></div>
+        </div>
+      </td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">
+        ${r.avgInterval ? r.avgInterval+' hari' : '—'}
+      </td>
+      <td style="font-family:var(--mono);font-size:12px;text-align:center">${r.totalPM}×</td>
+      <td><span class="badge ${r.cls==='ok'?'badge-ok':r.cls==='warn'?'badge-wip':'badge-part'}">${r.statusTxt}</span></td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>`;
+}
 
 function exportPM(){
   const rows = getPMRows();
