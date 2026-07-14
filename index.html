@@ -556,6 +556,17 @@ tbody tr:hover td{background:#FAFAF8}
 .pm-interval-bar.ok{background:var(--ok)}
 .pm-interval-bar.warn{background:var(--warn)}
 .pm-interval-bar.danger{background:var(--danger)}
+/* POST-PM */
+.postpm-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:0}
+.postpm-card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
+.postpm-card-mesin{font-weight:600;font-size:14px;flex:1;min-width:0;word-break:break-word}
+.postpm-card-mesin-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;word-break:break-word}
+.postpm-selisih-badge{flex-shrink:0;font-family:var(--mono);font-weight:700;font-size:13px;padding:4px 10px;border-radius:20px;background:#FEF2F2;color:#991B1B;white-space:nowrap}
+.postpm-card-body{padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.postpm-desc{font-size:13px;color:var(--text);word-break:break-word;line-height:1.4}
+.postpm-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+.postpm-meta span{white-space:nowrap}
+.selisih-cell{font-family:var(--mono);font-weight:700;font-size:13px;text-align:center;color:#991B1B}
 .perf-grid{display:flex;flex-direction:column;gap:14px}
 .perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0}
 .perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
@@ -986,6 +997,7 @@ service cloud.firestore {
     <button class="sub-tab" onclick="switchSubTab('jenis',this)">Jenis</button>
     <button class="sub-tab" onclick="switchSubTab('performa',this)">Performa</button>
     <button class="sub-tab" onclick="switchSubTab('pm',this)">🔧 PM</button>
+    <button class="sub-tab" onclick="switchSubTab('postpm',this)">⚡ Post-PM</button>
     <button class="sub-tab" onclick="switchSubTab('settings',this)">Settings</button>
   </div>
 
@@ -1232,6 +1244,49 @@ service cloud.firestore {
       <div id="pm-interval-wrap">
         <div class="empty-state">Belum ada data PM.</div>
       </div>
+    </div>
+  </div>
+
+  <!-- SUB: POST-PM (Perbaikan/Penggantian Part setelah PM) -->
+  <div id="sub-postpm" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>⚡ Perbaikan Setelah PM (&lt;3 Hari)</span>
+        <button class="btn btn-export btn-sm" onclick="exportPostPM()">↓ Export Excel</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+        Menampilkan pekerjaan <strong>Perbaikan / Penggantian Part</strong> yang terjadi <strong>1–3 hari setelah PM</strong> pada mesin yang sama (minimal 2 kata cocok, diluar kata "mesin").
+      </div>
+      <div class="pm-filter-row">
+        <div class="filter-date-field" style="flex:1;min-width:150px">
+          <label class="filter-date-label">Bulan Perbaikan</label>
+          <input type="month" id="postpm-bulan" onchange="renderPostPM()">
+        </div>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPostPMFilter()">✕ Reset</button>
+      </div>
+      <div id="postpm-summary" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:10px 0 4px;display:none"></div>
+    </div>
+    <!-- Mobile cards -->
+    <div class="pm-cards" id="postpm-cards"></div>
+    <!-- Desktop table -->
+    <div class="table-wrap" id="postpm-table-wrap" style="display:none">
+      <table>
+        <thead><tr>
+          <th style="width:36px">No</th>
+          <th>Mesin (PM)</th>
+          <th>Mesin (Perbaikan)</th>
+          <th>Tgl PM</th>
+          <th>Tgl Perbaikan</th>
+          <th style="width:60px;text-align:center">Selisih</th>
+          <th>Jenis Perbaikan</th>
+          <th>Deskripsi Perbaikan</th>
+          <th>Teknisi</th>
+        </tr></thead>
+        <tbody id="postpm-tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="postpm-empty" style="display:none">
+      Tidak ada perbaikan dalam 1–3 hari setelah PM untuk bulan ini.
     </div>
   </div>
 
@@ -1713,13 +1768,14 @@ function switchTab(t,el,type){
 function switchSubTab(s,el){
   document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  ['data','teknisi','jenis','performa','pm','settings'].forEach(id=>
+  ['data','teknisi','jenis','performa','pm','postpm','settings'].forEach(id=>
     document.getElementById('sub-'+id).style.display=id===s?'block':'none');
-  if(s==='data')      { renderAdmin(); updateMetrics(); }
+  if(s==='data')     { renderAdmin(); updateMetrics(); }
   if(s==='teknisi')  renderUserList();
   if(s==='jenis')    renderJenisList();
   if(s==='performa') renderPerforma();
-  if(s==='pm'){ renderPM(); renderPMInterval(); }
+  if(s==='pm')       { renderPM(); renderPMInterval(); }
+  if(s==='postpm')   renderPostPM();
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
@@ -2201,7 +2257,167 @@ async function saveEditJoblog(){
   }
 }
 
-// ── WIP BAR ────────────────────────────────────────────────────
+// ── POST-PM: Perbaikan setelah PM ─────────────────────────────
+
+// Tokenize nama mesin: lowercase, buang kata "mesin", split spasi/tanda baca
+function tokenizeMesin(nama){
+  return (nama||'')
+    .toLowerCase()
+    .split(/[\s\-_\/.,;:]+/)
+    .filter(t => t.length > 0 && t !== 'mesin');
+}
+
+// Cek apakah dua nama mesin match (minimal 2 token sama)
+function mesinMatch(a, b){
+  const ta = new Set(tokenizeMesin(a));
+  const tb = tokenizeMesin(b);
+  if(ta.size === 0 || tb.length === 0) return false;
+  let matchCount = 0;
+  for(const t of tb){ if(ta.has(t)) matchCount++; }
+  return matchCount >= 2;
+}
+
+// Jenis yang dianggap "perbaikan"
+const PERBAIKAN_RE = /perbaikan|penggantian\s*part/i;
+function isPerbaikan(jenis){ return jenis && PERBAIKAN_RE.test(jenis.trim()); }
+
+// Selisih hari antara dua string tanggal YYYY-MM-DD (b - a)
+function selisihHari(tglA, tglB){
+  const a = new Date(tglA + 'T00:00:00');
+  const b = new Date(tglB + 'T00:00:00');
+  return Math.round((b - a) / 86400000);
+}
+
+function getPostPMRows(){
+  const fbulan = document.getElementById('postpm-bulan').value; // YYYY-MM
+
+  const pmRows  = joblogDB.filter(r => isPMJenis(r.jenis) && r.date && r.mesin);
+  const repRows = joblogDB.filter(r => isPerbaikan(r.jenis) && r.date && r.mesin);
+
+  const results = [];
+  repRows.forEach(rep => {
+    if(fbulan && !rep.date.startsWith(fbulan)) return;
+    pmRows.forEach(pm => {
+      if(!mesinMatch(pm.mesin, rep.mesin)) return;
+      const gap = selisihHari(pm.date, rep.date);
+      if(gap >= 1 && gap <= 3){
+        results.push({
+          mesinPM   : pm.mesin,
+          mesinRep  : rep.mesin,
+          tglPM     : pm.date,
+          tglRep    : rep.date,
+          selisih   : gap,
+          jenis     : rep.jenis,
+          deskripsi : rep.job,
+          teknisi   : rep.nama,
+          _repId    : rep._id,
+          _pmId     : pm._id
+        });
+      }
+    });
+  });
+
+  // Deduplikasi: 1 perbaikan bisa match beberapa PM, ambil PM terdekat sebelumnya
+  const seen = new Map();
+  results.forEach(r => {
+    const key = r._repId;
+    if(!seen.has(key) || r.selisih < seen.get(key).selisih) seen.set(key, r);
+  });
+
+  return [...seen.values()].sort((a,b) =>
+    a.tglRep.localeCompare(b.tglRep) || a.selisih - b.selisih
+  );
+}
+
+function renderPostPM(){
+  const rows   = getPostPMRows();
+  const empty  = document.getElementById('postpm-empty');
+  const cards  = document.getElementById('postpm-cards');
+  const tbody  = document.getElementById('postpm-tbody');
+  const wrap   = document.getElementById('postpm-table-wrap');
+  const summary= document.getElementById('postpm-summary');
+
+  // Set default bulan ini jika belum ada
+  if(!document.getElementById('postpm-bulan').value){
+    document.getElementById('postpm-bulan').value = todayStr().slice(0,7);
+  }
+
+  if(!rows.length){
+    cards.innerHTML=''; tbody.innerHTML='';
+    empty.style.display='block';
+    wrap.style.display='none'; cards.style.display='none';
+    summary.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+  summary.textContent = `${rows.length} kejadian ditemukan`;
+  summary.style.display='block';
+
+  const isMob = window.innerWidth < 640;
+
+  // Mobile cards
+  cards.style.display = isMob ? 'flex' : 'none';
+  if(isMob){
+    cards.innerHTML = rows.map((r,i) => `
+    <div class="postpm-card">
+      <div class="postpm-card-header">
+        <div style="flex:1;min-width:0">
+          <div class="postpm-card-mesin">⚙ ${r.mesinRep}</div>
+          <div class="postpm-card-mesin-sub">🔧 PM: ${r.mesinPM}</div>
+        </div>
+        <div class="postpm-selisih-badge">+${r.selisih} hari</div>
+      </div>
+      <div class="postpm-card-body">
+        <div class="postpm-desc">${r.deskripsi}</div>
+        <div class="postpm-meta">
+          <span>📅 PM: ${r.tglPM}</span>
+          <span>🔨 Perbaikan: ${r.tglRep}</span>
+          <span>👤 ${r.teknisi}</span>
+          <span>${jenisBadge(r.jenis)}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  }
+
+  // Desktop table
+  wrap.style.display = isMob ? 'none' : 'block';
+  tbody.innerHTML = rows.map((r,i) => `<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center">${i+1}</td>
+    <td style="font-weight:500;word-break:break-word">${r.mesinPM}</td>
+    <td style="word-break:break-word">${r.mesinRep}</td>
+    <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.tglPM}</td>
+    <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.tglRep}</td>
+    <td class="selisih-cell">+${r.selisih} hari</td>
+    <td>${jenisBadge(r.jenis)}</td>
+    <td style="word-break:break-word;max-width:200px">${r.deskripsi}</td>
+    <td style="white-space:nowrap">${r.teknisi}</td>
+  </tr>`).join('');
+}
+
+function resetPostPMFilter(){
+  document.getElementById('postpm-bulan').value = todayStr().slice(0,7);
+  renderPostPM();
+}
+
+function exportPostPM(){
+  const rows = getPostPMRows();
+  if(!rows.length){ toast('Tidak ada data Post-PM untuk diekspor.','warn'); return; }
+  const bulan = document.getElementById('postpm-bulan').value || todayStr().slice(0,7);
+  const data = [
+    ['No','Mesin (PM)','Mesin (Perbaikan)','Tgl PM','Tgl Perbaikan','Selisih (hari)','Jenis Perbaikan','Deskripsi Perbaikan','Teknisi'],
+    ...rows.map((r,i) => [i+1, r.mesinPM, r.mesinRep, r.tglPM, r.tglRep, r.selisih, r.jenis, r.deskripsi, r.teknisi])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [4,22,22,13,13,8,20,34,16].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Post-PM');
+  XLSX.writeFile(wb, `PostPM_${bulan}_${todayStr()}.xlsx`);
+  toast('Export Post-PM berhasil!');
+}
+
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('sub-postpm')?.style.display !== 'none') renderPostPM();
+});
 function toggleWipBar(){
   const body    = document.getElementById('wip-bar-body');
   const chevron = document.getElementById('wip-chevron');
