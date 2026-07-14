@@ -2263,18 +2263,23 @@ async function saveEditJoblog(){
 function tokenizeMesin(nama){
   return (nama||'')
     .toLowerCase()
+    .replace(/ac\s+split/gi, '')      // buang frasa "ac split" sekaligus
     .split(/[\s\-_\/.,;:]+/)
-    .filter(t => t.length > 0 && t !== 'mesin');
+    .filter(t => t.length > 0 && t !== 'mesin')
+    .slice(0, 2);                     // ambil 2 kata pertama saja
 }
 
-// Cek apakah dua nama mesin match (minimal 2 token sama)
+// Match: kedua kata pertama dari A harus ditemukan di token B
 function mesinMatch(a, b){
-  const ta = new Set(tokenizeMesin(a));
-  const tb = tokenizeMesin(b);
-  if(ta.size === 0 || tb.length === 0) return false;
-  let matchCount = 0;
-  for(const t of tb){ if(ta.has(t)) matchCount++; }
-  return matchCount >= 2;
+  const ta = tokenizeMesin(a);        // 2 kata pertama mesin PM
+  const tb = new Set(                 // semua token mesin perbaikan
+    (b||'').toLowerCase()
+      .replace(/ac\s+split/gi, '')
+      .split(/[\s\-_\/.,;:]+/)
+      .filter(t => t.length > 0 && t !== 'mesin')
+  );
+  if(ta.length < 2 || tb.size === 0) return false;
+  return ta.every(t => tb.has(t));   // kedua kata pertama harus ada di B
 }
 
 // Jenis yang dianggap "perbaikan"
