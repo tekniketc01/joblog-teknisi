@@ -613,8 +613,30 @@ tbody tr:hover td{background:#FAFAF8}
 .perf-status-val{font-family:var(--mono);font-size:16px;font-weight:500;line-height:1.1}
 .perf-status-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
 
-/* DESKTOP */
-@media(min-width:640px){
+/* GROUP NAV — dropdown kelompok admin */
+.group-nav{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;position:relative}
+.group-nav-item{position:relative}
+.group-nav-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;font-family:var(--mono);font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;user-select:none}
+.group-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.group-nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.group-nav-btn.has-dropdown .group-nav-chevron{font-size:10px;transition:transform .2s;margin-left:2px}
+.group-nav-btn.open .group-nav-chevron{transform:rotate(180deg)}
+.group-nav-btn.open{border-color:var(--accent);color:var(--accent);background:var(--bg)}
+.group-nav-icon{font-size:14px}
+.group-dropdown{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:160px;z-index:150;overflow:hidden;display:none}
+.group-dropdown.open{display:block}
+.group-dropdown-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-family:var(--mono);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border);white-space:nowrap}
+.group-dropdown-item:last-child{border-bottom:none}
+.group-dropdown-item:hover{background:var(--bg);color:var(--accent)}
+.group-dropdown-item.active{background:var(--ok-light);color:var(--ok)}
+.group-dropdown-item-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0}
+.group-dropdown-item.active .group-dropdown-item-dot{background:var(--ok)}
+
+/* SUB-TAB PM (PM | Interval) — tab kecil di dalam konten PM */
+.pm-inner-tabs{display:flex;margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+.pm-inner-tab{flex:1;padding:9px 4px;font-size:11px;font-weight:500;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:all .15s;text-align:center;border-right:1px solid var(--border)}
+.pm-inner-tab:last-child{border-right:none}
+.pm-inner-tab.active{background:var(--surface);color:var(--accent)}
   body{padding-bottom:0}
   .bottom-nav{display:none}
   .top-tabs{display:block}
@@ -998,14 +1020,53 @@ service cloud.firestore {
 
 <!-- ADMIN TAB -->
 <div id="tab-admin" class="container" style="display:none">
-  <div class="sub-tabs">
-    <button class="sub-tab active" onclick="switchSubTab('data',this)">Data</button>
-    <button class="sub-tab" onclick="switchSubTab('teknisi',this)">Teknisi</button>
-    <button class="sub-tab" onclick="switchSubTab('jenis',this)">Jenis</button>
-    <button class="sub-tab" onclick="switchSubTab('performa',this)">Performa</button>
-    <button class="sub-tab" onclick="switchSubTab('pm',this)">🔧 PM</button>
-    <button class="sub-tab" onclick="switchSubTab('postpm',this)">⚡ Post-PM</button>
-    <button class="sub-tab" onclick="switchSubTab('settings',this)">Settings</button>
+  <!-- GROUP NAV: 3 kelompok dropdown -->
+  <div class="group-nav" id="group-nav">
+    <!-- Kelompok 1: Data Joblog -->
+    <div class="group-nav-item">
+      <button class="group-nav-btn has-dropdown active" id="gnav-data" onclick="toggleGroupNav('data')">
+        <span class="group-nav-icon">📋</span>
+        Data Joblog
+        <span class="group-nav-chevron">▼</span>
+      </button>
+      <div class="group-dropdown" id="gdrop-data">
+        <div class="group-dropdown-item active" id="gitem-data" onclick="switchGroupItem('data')">
+          <span class="group-dropdown-item-dot"></span>Data
+        </div>
+        <div class="group-dropdown-item" id="gitem-pm" onclick="switchGroupItem('pm')">
+          <span class="group-dropdown-item-dot"></span>🔧 PM
+        </div>
+        <div class="group-dropdown-item" id="gitem-postpm" onclick="switchGroupItem('postpm')">
+          <span class="group-dropdown-item-dot"></span>⚡ Post PM
+        </div>
+      </div>
+    </div>
+    <!-- Kelompok 2: Performa -->
+    <div class="group-nav-item">
+      <button class="group-nav-btn" id="gnav-performa" onclick="switchGroupItem('performa')">
+        <span class="group-nav-icon">📊</span>
+        Performa
+      </button>
+    </div>
+    <!-- Kelompok 3: Admin -->
+    <div class="group-nav-item">
+      <button class="group-nav-btn has-dropdown" id="gnav-admin" onclick="toggleGroupNav('admin')">
+        <span class="group-nav-icon">⚙</span>
+        Admin
+        <span class="group-nav-chevron">▼</span>
+      </button>
+      <div class="group-dropdown" id="gdrop-admin">
+        <div class="group-dropdown-item" id="gitem-teknisi" onclick="switchGroupItem('teknisi')">
+          <span class="group-dropdown-item-dot"></span>Teknisi
+        </div>
+        <div class="group-dropdown-item" id="gitem-jenis" onclick="switchGroupItem('jenis')">
+          <span class="group-dropdown-item-dot"></span>Jenis Pekerjaan
+        </div>
+        <div class="group-dropdown-item" id="gitem-settings" onclick="switchGroupItem('settings')">
+          <span class="group-dropdown-item-dot"></span>Settings
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- SUB: DATA -->
@@ -1019,10 +1080,16 @@ service cloud.firestore {
     <div class="card">
       <div class="card-title">Semua Data Joblog</div>
       <div class="filter-bar">
-        <!-- Baris 1: Search SR -->
-        <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
+        <!-- Baris 1: Search SR + Search Mesin -->
+        <div class="filter-group g2">
+          <div class="search-bar" style="margin-bottom:0">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
+          </div>
+          <div class="search-bar" style="margin-bottom:0">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="ff-mesin" placeholder="Cari nama mesin..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
+          </div>
         </div>
         <!-- Baris 2: Teknisi + Jenis -->
         <div class="filter-group g2">
@@ -1191,6 +1258,13 @@ service cloud.firestore {
 
   <!-- SUB: PREVENTIF MAINTENANCE -->
   <div id="sub-pm" style="display:none">
+    <!-- Inner tabs: PM | Interval -->
+    <div class="pm-inner-tabs">
+      <button class="pm-inner-tab active" id="pm-tab-list" onclick="switchPMInner('list',this)">🔧 PM</button>
+      <button class="pm-inner-tab" id="pm-tab-interval" onclick="switchPMInner('interval',this)">📊 Interval</button>
+    </div>
+    <!-- Konten PM -->
+    <div id="pm-inner-list">
     <div class="card">
       <div class="card-title">
         <span>🔧 Rekap Preventif Maintenance</span>
@@ -1217,7 +1291,7 @@ service cloud.firestore {
       <!-- Search mesin -->
       <div class="search-bar" style="margin-top:10px">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" id="pm-mesin" placeholder="Cari nama/kode mesin..." oninput="renderPM()" autocomplete="off" style="width:100%">
+        <input type="text" id="pm-mesin" placeholder="Cari nama/kode mesin..." oninput="applyPMFilter()" autocomplete="off" style="width:100%">
       </div>
       <div id="pm-summary" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:10px 0 4px;display:none"></div>
     </div>
@@ -1231,28 +1305,30 @@ service cloud.firestore {
           <th>Tanggal</th>
           <th>Nama/Kode Mesin</th>
           <th>Teknisi</th>
+          <th>Deskripsi PM</th>
         </tr></thead>
         <tbody id="pm-tbody"></tbody>
       </table>
     </div>
     <div class="empty-state" id="pm-empty" style="display:none">Tidak ada data Preventif Maintenance untuk filter ini.</div>
-  </div>
+    </div><!-- /pm-inner-list -->
 
-  <!-- SUB: PM - INTERVAL MESIN -->
-  <div id="sub-pm-interval" style="margin-top:0">
-    <div class="card" style="margin-top:0">
-      <div class="card-title">
-        <span>📊 Status Interval PM per Mesin</span>
-        <span id="pm-interval-bulan" style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400"></span>
+    <!-- Konten Interval (tersembunyi default) -->
+    <div id="pm-inner-interval" style="display:none">
+      <div class="card" style="margin-top:0">
+        <div class="card-title">
+          <span>📊 Status Interval PM per Mesin</span>
+          <span id="pm-interval-bulan" style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400"></span>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">
+          Berdasarkan seluruh data PM. Mesin diurutkan dari yang paling lama belum di-PM.
+        </div>
+        <div id="pm-interval-wrap">
+          <div class="empty-state">Belum ada data PM.</div>
+        </div>
       </div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">
-        Berdasarkan seluruh data PM. Mesin diurutkan dari yang paling lama belum di-PM.
-      </div>
-      <div id="pm-interval-wrap">
-        <div class="empty-state">Belum ada data PM.</div>
-      </div>
-    </div>
-  </div>
+    </div><!-- /pm-inner-interval -->
+  </div><!-- /sub-pm -->
 
   <!-- SUB: POST-PM (Perbaikan/Penggantian Part setelah PM) -->
   <div id="sub-postpm" style="display:none">
@@ -1749,16 +1825,16 @@ function renderActiveView(){
   }
 
   if(tabAdminVisible){
-    const subDataVisible     = document.getElementById('sub-data')?.style.display !== 'none';
-    const subPerformaVisible = document.getElementById('sub-performa')?.style.display !== 'none';
-    const subPmVisible       = document.getElementById('sub-pm')?.style.display !== 'none';
-
-    if(subDataVisible){
-      renderAdmin();
-      updateMetrics();
+    if(_activeItem==='data')     { renderAdmin(); updateMetrics(); }
+    if(_activeItem==='performa') renderPerforma();
+    if(_activeItem==='pm'){
+      // Render sesuai inner tab PM yang aktif
+      const innerList = document.getElementById('pm-inner-list');
+      const innerInt  = document.getElementById('pm-inner-interval');
+      if(innerList && innerList.style.display !== 'none') renderPM();
+      if(innerInt  && innerInt.style.display  !== 'none') renderPMInterval();
     }
-    if(subPerformaVisible) renderPerforma();
-    if(subPmVisible){ renderPM(); renderPMInterval(); }
+    if(_activeItem==='postpm') renderPostPM();
   }
 }
 
@@ -1772,14 +1848,93 @@ function switchTab(t,el,type){
   if(mirror) mirror.classList.add('active');
   document.getElementById('tab-input').style.display=t==='input'?'block':'none';
   document.getElementById('tab-admin').style.display=t==='admin'?'block':'none';
-  if(t==='admin'){renderAdmin();updateMetrics();renderUserList();}
-  else { renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner(); }
+  if(t==='admin'){
+    // Aktifkan panel terakhir yang aktif, atau default ke 'data'
+    switchGroupItem(_activeItem||'data');
+    renderUserList();
+  } else {
+    renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner();
+  }
 }
-function switchSubTab(s,el){
-  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  ['data','teknisi','jenis','performa','pm','postpm','settings'].forEach(id=>
-    document.getElementById('sub-'+id).style.display=id===s?'block':'none');
+// ── GROUP NAV ──────────────────────────────────────────────────
+// Semua sub-panel yang ada
+const ALL_PANELS = ['data','teknisi','jenis','performa','pm','postpm','settings'];
+// Mapping: item → kelompok dropdown mana yang punya item itu
+const ITEM_GROUP = {
+  data:'data', pm:'data', postpm:'data',
+  performa:null,  // langsung, tidak dalam dropdown
+  teknisi:'admin', jenis:'admin', settings:'admin'
+};
+// State aktif
+let _activeItem  = 'data';
+let _openDropdown = null; // 'data' | 'admin' | null
+
+function closeAllDropdowns(){
+  ['data','admin'].forEach(g => {
+    document.getElementById('gdrop-'+g)?.classList.remove('open');
+    document.getElementById('gnav-'+g)?.classList.remove('open');
+  });
+  _openDropdown = null;
+}
+
+function toggleGroupNav(group){
+  if(_openDropdown === group){
+    closeAllDropdowns();
+  } else {
+    closeAllDropdowns();
+    document.getElementById('gdrop-'+group).classList.add('open');
+    document.getElementById('gnav-'+group).classList.add('open');
+    _openDropdown = group;
+  }
+}
+
+// Tutup dropdown jika klik di luar
+document.addEventListener('click', e => {
+  if(!e.target.closest('.group-nav-item')) closeAllDropdowns();
+});
+
+function switchGroupItem(s){
+  closeAllDropdowns();
+  _activeItem = s;
+
+  // Sembunyikan semua panel
+  ALL_PANELS.forEach(id => {
+    const el = document.getElementById('sub-'+id);
+    if(el) el.style.display = 'none';
+  });
+
+  // Tampilkan panel yang dipilih
+  const panel = document.getElementById('sub-'+s);
+  if(panel) panel.style.display = 'block';
+
+  // Update visual active state pada group-nav-btn
+  ['data','performa','admin'].forEach(g => {
+    document.getElementById('gnav-'+g)?.classList.remove('active');
+  });
+
+  // Tentukan kelompok yang aktif
+  const grp = ITEM_GROUP[s];
+  if(grp){
+    document.getElementById('gnav-'+grp)?.classList.add('active');
+  } else {
+    // Performa: langsung aktif
+    document.getElementById('gnav-performa')?.classList.add('active');
+  }
+
+  // Update dropdown item highlight
+  ALL_PANELS.forEach(id => {
+    document.getElementById('gitem-'+id)?.classList.remove('active');
+    const dot = document.getElementById('gitem-'+id)?.querySelector('.group-dropdown-item-dot');
+    if(dot) dot.style.background = 'var(--border)';
+  });
+  const activeItem = document.getElementById('gitem-'+s);
+  if(activeItem){
+    activeItem.classList.add('active');
+    const dot = activeItem.querySelector('.group-dropdown-item-dot');
+    if(dot) dot.style.background = 'var(--ok)';
+  }
+
+  // Trigger render sesuai panel
   if(s==='data')     { renderAdmin(); updateMetrics(); }
   if(s==='teknisi')  renderUserList();
   if(s==='jenis')    renderJenisList();
@@ -1787,6 +1942,22 @@ function switchSubTab(s,el){
   if(s==='pm')       { renderPM(); renderPMInterval(); }
   if(s==='postpm')   renderPostPM();
 }
+
+// ── SWITCH PM INNER TAB (PM | Interval) ───────────────────────
+function switchPMInner(tab, el){
+  // Update tombol
+  document.querySelectorAll('.pm-inner-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  // Tampilkan/sembunyikan konten
+  document.getElementById('pm-inner-list').style.display     = tab==='list'     ? 'block' : 'none';
+  document.getElementById('pm-inner-interval').style.display = tab==='interval' ? 'block' : 'none';
+
+  // Trigger render
+  if(tab==='list')     renderPM();
+  if(tab==='interval') renderPMInterval();
+}
+
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
 // ── SUBMIT JOBLOG ──────────────────────────────────────────────
@@ -1945,21 +2116,22 @@ function renderAdmin(){
   const fd  = document.getElementById('ff-date').value;
   const fj  = document.getElementById('ff-jenis').value;
   const fsr = document.getElementById('ff-sr').value.trim().toLowerCase();
+  const fms = document.getElementById('ff-mesin')?.value.trim().toLowerCase()||'';
   const fst = document.getElementById('ff-status').value;
-  const fck = document.getElementById('ff-checked').value; // '' | 'checked' | 'unchecked'
-  const fiFrom = document.getElementById('ff-input-from').value; // filter tgl input dari
-  const fiTo   = document.getElementById('ff-input-to').value;   // filter tgl input sampai
+  const fck = document.getElementById('ff-checked').value;
+  const fiFrom = document.getElementById('ff-input-from').value;
+  const fiTo   = document.getElementById('ff-input-to').value;
   let rows  = [...joblogDB];
   if(fn)  rows = rows.filter(r=>r.nama===fn);
   if(fd)  rows = rows.filter(r=>r.date===fd);
   if(fj)  rows = rows.filter(r=>r.jenis===fj);
-  if(fsr) rows = rows.filter(r=>r.sr.toLowerCase().includes(fsr));
+  if(fsr) rows = rows.filter(r=>(r.sr||'').toLowerCase().includes(fsr));
+  if(fms) rows = rows.filter(r=>(r.mesin||'').toLowerCase().includes(fms));
   if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
   else if(fst === '_progress_group') rows = rows.filter(r=>!isSelesai(r));
   else if(fst) rows = rows.filter(r=> (r.status||(r.end?'selesai':'lanjut')) === fst);
   if(fck === 'checked')   rows = rows.filter(r=> r.checked === true);
   else if(fck === 'unchecked') rows = rows.filter(r=> r.checked !== true);
-  // Filter berdasarkan tanggal input (submittedAt)
   if(fiFrom) rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) >= fiFrom);
   if(fiTo)   rows = rows.filter(r => r.submittedAt && r.submittedAt.slice(0,10) <= fiTo);
 
@@ -2084,7 +2256,7 @@ function adminChangePage(direction){
 
 function clearFilter(){
   ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ff-sr').value='';
+  ['ff-sr','ff-mesin'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   _adminCurrentPage = 1;
   renderAdmin();
 }
@@ -3075,23 +3247,34 @@ function getPMRows(){
 }
 
 function getGroupedPM(rows){
-  // Group by date → array of mesin groups
-  // Returns: [{date, mesins:[{mesin, teknisis}]}]
   const byDate = {};
   rows.forEach(r => {
     const d = r.date||'—';
     const m = r.mesin||'—';
     if(!byDate[d]) byDate[d] = {};
-    if(!byDate[d][m]) byDate[d][m] = new Set();
-    if(r.nama) byDate[d][m].add(r.nama);
+    if(!byDate[d][m]) byDate[d][m] = { teknisis: new Set(), jobs: new Set() };
+    if(r.nama) byDate[d][m].teknisis.add(r.nama);
+    if(r.job)  byDate[d][m].jobs.add(r.job);
   });
   return Object.keys(byDate).sort().map(date => ({
     date,
     mesins: Object.keys(byDate[date]).sort().map(mesin => ({
       mesin,
-      teknisis: [...byDate[date][mesin]]
+      teknisis: [...byDate[date][mesin].teknisis],
+      jobs:     [...byDate[date][mesin].jobs]
     }))
   }));
+}
+
+// Pagination PM
+const PM_PAGE_SIZE = 10;
+let _pmCurrentPage = 1;
+
+function applyPMFilter(){ _pmCurrentPage = 1; renderPM(); }
+function pmChangePage(dir){
+  _pmCurrentPage += dir;
+  renderPM();
+  document.getElementById('pm-pagination')?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function renderPM(){
@@ -3101,65 +3284,87 @@ function renderPM(){
   const tbody  = document.getElementById('pm-tbody');
   const wrap   = document.getElementById('pm-table-wrap');
   const summary= document.getElementById('pm-summary');
+  let pagBar   = document.getElementById('pm-pagination');
+
+  // Buat kontrol pagination jika belum ada
+  if(!pagBar){
+    pagBar = document.createElement('div');
+    pagBar.id = 'pm-pagination';
+    pagBar.className = 'pagination-bar';
+    pagBar.style.display = 'none';
+    document.getElementById('pm-empty').insertAdjacentElement('beforebegin', pagBar);
+  }
 
   if(!rows.length){
     cards.innerHTML=''; tbody.innerHTML='';
     empty.style.display='block';
     wrap.style.display='none'; cards.style.display='none';
     summary.style.display='none';
+    pagBar.style.display='none';
     return;
   }
   empty.style.display='none';
 
   const grouped = getGroupedPM(rows);
-  const totalMesin = grouped.reduce((s,g)=>s+g.mesins.length,0);
-  const mesinSet   = new Set(rows.map(r=>r.mesin||'').filter(Boolean));
-  summary.textContent = `${grouped.length} hari · ${totalMesin} baris · ${mesinSet.size} mesin unik · ${rows.length} record`;
+  // Flatten ke array baris (setiap mesin per tanggal = 1 baris)
+  const flatRows = [];
+  grouped.forEach(g => g.mesins.forEach(m => flatRows.push({date:g.date, ...m})));
+
+  const totalPages = Math.max(1, Math.ceil(flatRows.length / PM_PAGE_SIZE));
+  if(_pmCurrentPage > totalPages) _pmCurrentPage = totalPages;
+  if(_pmCurrentPage < 1) _pmCurrentPage = 1;
+  const startIdx  = (_pmCurrentPage-1) * PM_PAGE_SIZE;
+  const pageFlat  = flatRows.slice(startIdx, startIdx+PM_PAGE_SIZE);
+
+  const mesinSet = new Set(rows.map(r=>r.mesin||'').filter(Boolean));
+  summary.textContent = `${flatRows.length} baris · ${mesinSet.size} mesin unik · ${rows.length} record`;
   summary.style.display='block';
+
+  // Pagination bar
+  if(flatRows.length > PM_PAGE_SIZE){
+    pagBar.style.display='flex';
+    pagBar.innerHTML = `
+      <span class="pagination-info">Menampilkan ${startIdx+1}–${Math.min(startIdx+PM_PAGE_SIZE,flatRows.length)} dari ${flatRows.length} baris (hal. ${_pmCurrentPage}/${totalPages})</span>
+      <div class="pagination-btns">
+        <button class="btn btn-ghost btn-sm" onclick="pmChangePage(-1)" ${_pmCurrentPage<=1?'disabled':''}>‹ Sebelumnya</button>
+        <button class="btn btn-ghost btn-sm" onclick="pmChangePage(1)"  ${_pmCurrentPage>=totalPages?'disabled':''}>Berikutnya ›</button>
+      </div>`;
+  } else {
+    pagBar.style.display='none';
+  }
 
   const isMob = window.innerWidth < 640;
 
-  // ── Mobile: cards (tanggal sebagai pemisah) ──
+  // Mobile: cards
   cards.style.display = isMob ? 'flex' : 'none';
   if(isMob){
-    let no = 1;
-    cards.innerHTML = grouped.map(g => {
-      const mesinCards = g.mesins.map(m => `
-      <div class="pm-card">
-        <div class="pm-card-header">
-          <div class="pm-card-no">${no++}</div>
-          <div class="pm-card-info">
-            <div class="pm-card-mesin">${m.mesin}</div>
-            <div class="pm-card-nama">📅 ${g.date}</div>
-          </div>
+    let no = startIdx+1;
+    cards.innerHTML = pageFlat.map(m => `
+    <div class="pm-card">
+      <div class="pm-card-header">
+        <div class="pm-card-no">${no++}</div>
+        <div class="pm-card-info">
+          <div class="pm-card-mesin">${m.mesin}</div>
+          <div class="pm-card-nama">📅 ${m.date}</div>
         </div>
-        <div class="pm-card-body">
-          <div class="pm-card-meta"><span>👤 ${m.teknisis.join(', ')}</span></div>
-        </div>
-      </div>`).join('');
-      return `<div class="pm-date-group">
-        <div class="pm-date-label">📅 ${g.date}</div>
-        ${mesinCards}
-      </div>`;
-    }).join('');
+      </div>
+      <div class="pm-card-body">
+        <div class="pm-card-meta"><span>👤 ${m.teknisis.join(', ')}</span></div>
+        ${m.jobs.length ? `<div style="font-size:12px;color:var(--muted);margin-top:5px;line-height:1.4">📝 ${m.jobs.join(' · ')}</div>` : ''}
+      </div>
+    </div>`).join('');
   }
 
-  // ── Desktop: tabel dengan rowspan tanggal ──
+  // Desktop: tabel
   wrap.style.display = isMob ? 'none' : 'block';
-  let no = 1;
-  tbody.innerHTML = grouped.map(g => {
-    return g.mesins.map((m, mi) => {
-      const dateCell = mi === 0
-        ? `<td style="font-family:var(--mono);font-size:12px;white-space:nowrap;vertical-align:middle;border-right:1px solid var(--border)" rowspan="${g.mesins.length}">${g.date}</td>`
-        : '';
-      return `<tr>
-        <td style="font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;white-space:nowrap;vertical-align:middle">${no++}</td>
-        ${dateCell}
-        <td style="font-weight:500;word-break:break-word;vertical-align:middle">${m.mesin}</td>
-        <td style="word-break:break-word;vertical-align:middle">${m.teknisis.join(', ')}</td>
-      </tr>`;
-    }).join('');
-  }).join('');
+  let no = startIdx+1;
+  tbody.innerHTML = pageFlat.map(m => `<tr>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;white-space:nowrap;vertical-align:top">${no++}</td>
+    <td style="font-family:var(--mono);font-size:12px;white-space:nowrap;vertical-align:top">${m.date}</td>
+    <td style="font-weight:500;word-break:break-word;vertical-align:top">${m.mesin}</td>
+    <td style="word-break:break-word;vertical-align:top">${m.teknisis.join(', ')}</td>
+    <td style="font-size:12px;color:var(--muted);word-break:break-word;vertical-align:top;line-height:1.5">${m.jobs.join('<br>')}</td>
+  </tr>`).join('');
 }
 
 function resetPMFilter(){
@@ -3167,13 +3372,26 @@ function resetPMFilter(){
   document.getElementById('pm-from').value  = '';
   document.getElementById('pm-to').value    = '';
   document.getElementById('pm-mesin').value = '';
+  _pmCurrentPage = 1;
   renderPM();
 }
 window.addEventListener('resize', ()=>{
-  if(document.getElementById('sub-pm') && document.getElementById('sub-pm').style.display !== 'none') renderPM();
+  if(document.getElementById('tab-admin').style.display !== 'none' && _activeItem === 'pm'){
+    const innerList = document.getElementById('pm-inner-list');
+    if(innerList && innerList.style.display !== 'none') renderPM();
+  }
 });
 
 // ── PM INTERVAL: Rekap Terakhir PM & Interval per Mesin ────────
+// Pagination Interval PM
+const PM_INTERVAL_PAGE_SIZE = 10;
+let _pmIntervalPage = 1;
+function pmIntervalChangePage(dir){
+  _pmIntervalPage += dir;
+  renderPMInterval();
+  document.getElementById('pm-interval-pagination')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
 function renderPMInterval(){
   const allPM = joblogDB.filter(r => isPMJenis(r.jenis) && r.date && r.mesin);
   const wrap  = document.getElementById('pm-interval-wrap');
@@ -3184,7 +3402,6 @@ function renderPMInterval(){
     return;
   }
 
-  // Kelompokkan per mesin: kumpulkan semua tanggal PM
   const byMesin = {};
   allPM.forEach(r => {
     const m = r.mesin.trim();
@@ -3196,85 +3413,78 @@ function renderPMInterval(){
   today.setHours(0,0,0,0);
 
   const rows = Object.entries(byMesin).map(([mesin, dates]) => {
-    dates.sort(); // ascending
-    const lastPM    = dates[dates.length - 1];
+    dates.sort();
+    const lastPM    = dates[dates.length-1];
     const firstPM   = dates[0];
     const totalPM   = dates.length;
-    const lastDate  = new Date(lastPM + 'T00:00:00');
-    const hariSejak = Math.floor((today - lastDate) / 86400000);
-
-    // Hitung rata-rata interval antar PM
+    const lastDate  = new Date(lastPM+'T00:00:00');
+    const hariSejak = Math.floor((today-lastDate)/86400000);
     let avgInterval = null;
     if(dates.length >= 2){
       let totalGap = 0;
-      for(let i = 1; i < dates.length; i++){
-        const d1 = new Date(dates[i-1]+'T00:00:00');
-        const d2 = new Date(dates[i]+'T00:00:00');
-        totalGap += Math.floor((d2 - d1) / 86400000);
+      for(let i=1;i<dates.length;i++){
+        totalGap += Math.floor((new Date(dates[i]+'T00:00:00')-new Date(dates[i-1]+'T00:00:00'))/86400000);
       }
-      avgInterval = Math.round(totalGap / (dates.length - 1));
+      avgInterval = Math.round(totalGap/(dates.length-1));
     }
-
-    // Status: hitung % dari rata-rata interval
-    let cls = 'ok', statusTxt = '';
+    let cls='ok', statusTxt='';
     if(avgInterval){
-      const pct = hariSejak / avgInterval;
-      if(pct >= 1.2)       { cls = 'danger'; statusTxt = '⚠ Terlambat'; }
-      else if(pct >= 0.85) { cls = 'warn';   statusTxt = '⏳ Segera'; }
-      else                  { cls = 'ok';     statusTxt = '✅ Aman'; }
+      const pct = hariSejak/avgInterval;
+      if(pct>=1.2){cls='danger';statusTxt='⚠ Terlambat';}
+      else if(pct>=0.85){cls='warn';statusTxt='⏳ Segera';}
+      else{cls='ok';statusTxt='✅ Aman';}
     } else {
-      cls = hariSejak > 30 ? 'warn' : 'ok';
-      statusTxt = hariSejak > 30 ? '⏳ >30 hari' : '✅ Aman';
+      cls = hariSejak>30?'warn':'ok';
+      statusTxt = hariSejak>30?'⏳ >30 hari':'✅ Aman';
     }
-
-    const barPct = avgInterval
-      ? Math.min(100, Math.round(hariSejak / avgInterval * 100))
-      : Math.min(100, hariSejak * 2);
-
-    return { mesin, lastPM, firstPM, totalPM, hariSejak, avgInterval, cls, statusTxt, barPct };
+    const barPct = avgInterval?Math.min(100,Math.round(hariSejak/avgInterval*100)):Math.min(100,hariSejak*2);
+    return {mesin,lastPM,firstPM,totalPM,hariSejak,avgInterval,cls,statusTxt,barPct};
   });
 
-  // Urutkan: paling lama (hariSejak terbesar) duluan
-  rows.sort((a,b) => b.hariSejak - a.hariSejak);
+  rows.sort((a,b)=>b.hariSejak-a.hariSejak);
 
-  document.getElementById('pm-interval-bulan').textContent =
-    `${rows.length} mesin terdaftar`;
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(rows.length/PM_INTERVAL_PAGE_SIZE));
+  if(_pmIntervalPage > totalPages) _pmIntervalPage = totalPages;
+  if(_pmIntervalPage < 1) _pmIntervalPage = 1;
+  const startIdx  = (_pmIntervalPage-1)*PM_INTERVAL_PAGE_SIZE;
+  const pageRows  = rows.slice(startIdx, startIdx+PM_INTERVAL_PAGE_SIZE);
+
+  document.getElementById('pm-interval-bulan').textContent = `${rows.length} mesin terdaftar`;
+
+  const pagHtml = rows.length > PM_INTERVAL_PAGE_SIZE ? `
+    <div class="pagination-bar" id="pm-interval-pagination" style="margin-top:12px">
+      <span class="pagination-info">Menampilkan ${startIdx+1}–${Math.min(startIdx+PM_INTERVAL_PAGE_SIZE,rows.length)} dari ${rows.length} mesin (hal. ${_pmIntervalPage}/${totalPages})</span>
+      <div class="pagination-btns">
+        <button class="btn btn-ghost btn-sm" onclick="pmIntervalChangePage(-1)" ${_pmIntervalPage<=1?'disabled':''}>‹ Sebelumnya</button>
+        <button class="btn btn-ghost btn-sm" onclick="pmIntervalChangePage(1)" ${_pmIntervalPage>=totalPages?'disabled':''}>Berikutnya ›</button>
+      </div>
+    </div>` : '';
 
   wrap.innerHTML = `
   <div style="overflow-x:auto">
   <table class="pm-interval-table">
     <thead><tr>
-      <th>#</th>
-      <th>Nama/Kode Mesin</th>
-      <th>Terakhir PM</th>
-      <th>Hari Sejak PM</th>
-      <th>Rata² Interval</th>
-      <th>Total PM</th>
-      <th>Status</th>
+      <th>#</th><th>Nama/Kode Mesin</th><th>Terakhir PM</th>
+      <th>Hari Sejak PM</th><th>Rata² Interval</th><th>Total PM</th><th>Status</th>
     </tr></thead>
     <tbody>
-    ${rows.map((r,i) => `<tr>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center">${i+1}</td>
-      <td>
-        <div class="pm-interval-mesin">${r.mesin}</div>
-        <div class="pm-interval-count">PM pertama: ${r.firstPM}</div>
-      </td>
+    ${pageRows.map((r,i)=>`<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center">${startIdx+i+1}</td>
+      <td><div class="pm-interval-mesin">${r.mesin}</div><div class="pm-interval-count">PM pertama: ${r.firstPM}</div></td>
       <td style="font-family:var(--mono);font-size:12px">${r.lastPM}</td>
       <td>
         <span class="pm-interval-days ${r.cls}">${r.hariSejak} hari</span>
-        <div class="pm-interval-bar-wrap">
-          <div class="pm-interval-bar ${r.cls}" style="width:${r.barPct}%"></div>
-        </div>
+        <div class="pm-interval-bar-wrap"><div class="pm-interval-bar ${r.cls}" style="width:${r.barPct}%"></div></div>
       </td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">
-        ${r.avgInterval ? r.avgInterval+' hari' : '—'}
-      </td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${r.avgInterval?r.avgInterval+' hari':'—'}</td>
       <td style="font-family:var(--mono);font-size:12px;text-align:center">${r.totalPM}×</td>
       <td><span class="badge ${r.cls==='ok'?'badge-ok':r.cls==='warn'?'badge-wip':'badge-part'}">${r.statusTxt}</span></td>
     </tr>`).join('')}
     </tbody>
   </table>
-  </div>`;
+  </div>
+  ${pagHtml}`;
 }
 
 function exportPM(){
