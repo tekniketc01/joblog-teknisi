@@ -352,16 +352,6 @@ tbody tr:hover td{background:#FAFAF8}
 
 /* PERFORMA */
 .perf-filter-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-.perf-grid{display:flex;flex-direction:column;gap:14px}
-.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
-.perf-card-name{font-weight:600;font-size:15px;color:var(--text)}
-.perf-card-total{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.perf-sections{display:flex;flex-direction:column}
-.perf-section{padding:14px 16px;border-bottom:1px solid var(--border)}
-.perf-section:last-child{border-bottom:none}
-.perf-section-title{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.perf-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 /* Jenis bars — now with avg duration column */
 .perf-jenis-table{width:100%;border-collapse:collapse}
 .perf-jenis-table td{padding:4px 0;vertical-align:middle}
@@ -450,14 +440,6 @@ tbody tr:hover td{background:#FAFAF8}
 .perf-jam-val{font-family:var(--mono);font-size:15px;font-weight:600;line-height:1.2}
 .perf-jam-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:3px}
 .perf-jam-pct-note{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:6px}
-@media(min-width:640px){
-  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto}
-  .perf-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
-  .perf-section:nth-child(2n):not(.perf-section-full){border-right:none}
-  .perf-section-full{grid-column:1 / -1;border-right:none!important;border-bottom:none!important}
-  .perf-section:nth-last-child(-n+2):not(.perf-section-full){border-bottom:none}
-}
 .user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
 .user-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;gap:8px}
 .user-info{flex:1;min-width:0}
@@ -640,6 +622,8 @@ tbody tr:hover td{background:#FAFAF8}
 .pm-inner-tab{flex:1;padding:9px 4px;font-size:11px;font-weight:500;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;transition:all .15s;text-align:center;border-right:1px solid var(--border)}
 .pm-inner-tab:last-child{border-right:none}
 .pm-inner-tab.active{background:var(--surface);color:var(--accent)}
+
+@media(min-width:640px){
   body{padding-bottom:0}
   .bottom-nav{display:none}
   .top-tabs{display:block}
@@ -648,7 +632,6 @@ tbody tr:hover td{background:#FAFAF8}
   .metrics{grid-template-columns:repeat(4,1fr)}
   .form-row.cols2{grid-template-columns:1fr 1fr}
   .form-row.cols3{grid-template-columns:1fr 1fr 1fr}
-  /* filter bar desktop — stack normal, export di dalam card */
   .filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
   .filter-bar .filter-group.g2{grid-template-columns:1fr 1fr}
   .filter-bar .filter-group.g3{grid-template-columns:1fr 1fr 1fr}
@@ -659,7 +642,9 @@ tbody tr:hover td{background:#FAFAF8}
   .table-wrap{display:block;overflow-x:auto}
   #toast{bottom:24px;left:auto;right:24px;transform:none}
   .user-chip{display:flex}
-  /* performa */
+  .filter-toggle-btn{display:none}
+  .filter-collapsible{display:flex}
+  /* performa — desktop: 2 kolom */
   .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   .perf-sections{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;align-items:start}
   .perf-section{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -680,6 +665,11 @@ tbody tr:hover td{background:#FAFAF8}
   .jl-card-badges{max-width:52%}
   .metrics{grid-template-columns:1fr 1fr}
   .metric-value{font-size:20px}
+  /* performa — mobile: 1 kolom full width */
+  .perf-grid{display:flex!important;flex-direction:column!important;gap:16px!important}
+  .perf-sections{display:flex!important;flex-direction:column!important}
+  .perf-section{border-right:none!important}
+  .perf-section-full{grid-column:unset!important}
 }
 </style>
 </head>
@@ -1175,7 +1165,7 @@ service cloud.firestore {
       <!-- Mobile: Kartu (CSS kontrol, bukan JS) -->
       <div class="jl-cards" id="admin-cards"></div>
       <!-- Desktop: Tabel (CSS kontrol via @media) -->
-      <div class="table-wrap">
+      <div class="table-wrap" id="admin-table-wrap">
         <table>
           <thead><tr>
             <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
@@ -2155,9 +2145,16 @@ function renderAdmin(){
 
   const empty = document.getElementById('admin-empty');
   const pagBar = document.getElementById('admin-pagination');
+  const isMob  = window.innerWidth < 640;
+  const tableWrap = document.getElementById('admin-table-wrap');
+  const cardsEl   = document.getElementById('admin-cards');
+  // Kontrol visibility kartu vs tabel via JS (lebih reliable dari CSS-only)
+  if(tableWrap) tableWrap.style.display = isMob ? 'none' : 'block';
+  if(cardsEl)   cardsEl.style.display   = isMob ? 'flex'  : 'none';
+
   if(!rows.length){
     document.getElementById('admin-tbody').innerHTML='';
-    document.getElementById('admin-cards').innerHTML='';
+    if(cardsEl) cardsEl.innerHTML='';
     empty.style.display='block';
     pagBar.style.display='none';
     return;
@@ -2783,6 +2780,9 @@ function exportPostPM(){
 
 window.addEventListener('resize', ()=>{
   if(document.getElementById('sub-postpm')?.style.display !== 'none') renderPostPM();
+  // Re-render admin jika tab data aktif agar kartu/tabel switch benar
+  const subData = document.getElementById('sub-data');
+  if(subData && subData.style.display !== 'none') renderAdmin();
 });
 function toggleWipBar(){
   const body    = document.getElementById('wip-bar-body');
