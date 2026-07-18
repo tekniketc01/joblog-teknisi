@@ -66,16 +66,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 #rules-banner code{font-family:var(--mono);background:#fff;padding:1px 5px;border-radius:3px;font-size:11px;display:block;margin-top:6px;color:#333;white-space:pre}
 
 /* HEADER */
-header{background:var(--text);color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:var(--header-h);position:sticky;top:0;z-index:100}
-.logo{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.03em}
+header{background:var(--text);color:#fff;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:var(--header-h);position:sticky;top:0;z-index:100;gap:8px}
+.logo{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.03em;flex-shrink:0}
 .logo span{color:#6B9BFF}
-.header-right{display:flex;align-items:center;gap:10px}
-.header-date{font-family:var(--mono);font-size:10px;color:#888;display:none}
-.user-chip{font-family:var(--mono);font-size:11px;color:#ccc;display:none;align-items:center;gap:6px}
-.user-chip strong{color:#fff}
-.btn-logout-user{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 9px;cursor:pointer;white-space:nowrap}
+.header-right{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:nowrap;overflow:hidden}
+.header-date{font-family:var(--mono);font-size:10px;color:#888;display:none;white-space:nowrap}
+.user-chip{font-family:var(--mono);font-size:11px;color:#ccc;display:none;align-items:center;gap:5px;min-width:0;overflow:hidden}
+.user-chip strong{color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+.btn-logout-user{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .btn-logout-user:hover{border-color:#888;color:#fff}
-.btn-admin-logout{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 9px;cursor:pointer;display:none;white-space:nowrap}
+.btn-admin-logout{font-family:var(--mono);font-size:11px;color:#aaa;background:none;border:1px solid #444;border-radius:4px;padding:4px 8px;cursor:pointer;display:none;white-space:nowrap;flex-shrink:0}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s}
 .sync-dot.ok{background:#4ADE80}
 .sync-dot.syncing{background:#FACC15;animation:pulse 1s infinite}
@@ -147,15 +147,23 @@ tbody tr:hover td{background:#FAFAF8}
 .submit-date{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
 .submit-time{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.75}
 
-/* MOBILE ADMIN CARDS */
-.jl-cards{display:flex;flex-direction:column;gap:8px}
-.jl-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
-.jl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px}
-.jl-nama{font-weight:600;font-size:14px}
-.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent)}
-.jl-job{font-size:13px;color:var(--text);margin-bottom:5px}
-.jl-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.jl-submit{font-family:var(--mono);font-size:11px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+/* MOBILE ADMIN CARDS — redesign v31 */
+.jl-cards{display:flex;flex-direction:column;gap:12px}
+.jl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.jl-card-top{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 14px 8px;gap:8px}
+.jl-card-top-left{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.jl-card-sr{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-card-nama{font-size:13px;font-weight:600;color:var(--text);margin-top:1px}
+.jl-card-job{padding:0 14px 8px;font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.jl-card-divider{height:1px;background:var(--border);margin:0 14px}
+.jl-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.jl-card-meta-item{display:flex;flex-direction:column;gap:1px}
+.jl-card-meta-label{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);opacity:.7}
+.jl-card-meta-val{font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-card-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg);gap:8px}
+.jl-card-footer-left{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn-detail{background:var(--accent);color:#fff;border:none;font-family:var(--mono);font-size:11px;font-weight:500;padding:7px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:all .15s;min-height:34px}
+.btn-detail:hover{opacity:.85}
 
 /* MY LOG LIST */
 .log-list{display:flex;flex-direction:column;gap:8px}
@@ -264,18 +272,26 @@ tbody tr:hover td{background:#FAFAF8}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
 .search-highlight{background:#FFF3CD;border-radius:2px;font-weight:600}
 /* filter-bar — mobile: stack; desktop: row */
-.filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
+.filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
 .filter-group{display:grid;gap:8px}
 .filter-group.g2{grid-template-columns:1fr 1fr}
-.filter-group.g3{grid-template-columns:1fr 1fr 1fr}
+.filter-group.g3{grid-template-columns:1fr 1fr}
+.filter-group.g3>:last-child{grid-column:span 2}
 .filter-group select,.filter-group input[type="date"]{flex:1;min-width:0}
 .filter-label-wrap{display:flex;flex-direction:column;gap:3px}
 /* Filter tanggal input */
-.filter-input-date-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:flex-end}
+.filter-input-date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:flex-end}
 .filter-input-date-row .filter-label-wrap{min-width:0}
-.filter-input-date-sep{font-family:var(--mono);font-size:12px;color:var(--muted);padding-bottom:12px;align-self:flex-end;white-space:nowrap;text-align:center}
+.filter-input-date-sep{display:none}
 .filter-label-wrap label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .filter-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* Toggle filter — mobile */
+.filter-toggle-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;justify-content:space-between;margin-bottom:4px}
+.filter-toggle-btn.has-filter{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.05)}
+.filter-toggle-chevron{transition:transform .2s;font-size:10px}
+.filter-toggle-chevron.open{transform:rotate(180deg)}
+.filter-collapsible{display:none;flex-direction:column;gap:8px}
+.filter-collapsible.open{display:flex}
 
 /* EXPORT SECTION */
 .export-section{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--border)}
@@ -283,8 +299,7 @@ tbody tr:hover td{background:#FAFAF8}
 .export-range-row{display:flex;flex-direction:column;gap:6px;background:var(--ok-light);border:1px solid #AADEC3;border-radius:8px;padding:10px 12px}
 .export-range-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ok)}
 .export-range-inputs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.export-range-inputs input[type="date"]{flex:1;min-width:120px;background:#fff;border-color:#AADEC3;font-size:13px;padding:8px 10px}
-.export-range-inputs input[type="date"]:focus{border-color:var(--ok)}
+.export-range-inputs input[type="date"]{flex:1;min-width:110px;background:#fff;border-color:#AADEC3;font-size:13px}
 .export-range-sep{font-family:var(--mono);font-size:12px;color:var(--ok);flex-shrink:0;font-weight:500}
 .export-range-btn{background:var(--ok);color:#fff;border-color:var(--ok);flex-shrink:0}
 .export-range-btn:hover{background:#155f3a}
@@ -295,24 +310,11 @@ tbody tr:hover td{background:#FAFAF8}
 .modal-jenis-current{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:1rem;padding:8px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
 .modal-jenis-current strong{color:var(--text)}
 
-/* MOBILE ADMIN CARDS — redesigned */
-.jl-cards{display:flex;flex-direction:column;gap:10px}
-.jl-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.jl-card-header{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
-.jl-card-header-left{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.jl-nama{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.jl-sr{font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
-.jl-card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;max-width:55%}
-.jl-card-badges .badge{white-space:normal;text-align:right;word-break:break-word;max-width:100%}
-.jl-card-badges .status-select-admin{max-width:100%;width:100%}
-.jl-card-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
-.jl-job{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word}
-.jl-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
-.jl-info-item{display:flex;align-items:baseline;gap:4px;font-family:var(--mono);font-size:11px;min-width:0}
-.jl-info-key{color:var(--muted);flex-shrink:0}
-.jl-info-val{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.jl-card-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg);flex-wrap:wrap;gap:6px}
-.jl-submit-ts{font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-word}
+/* DETAIL MODAL ROWS */
+.detail-row{display:flex;flex-direction:column;gap:2px}
+.detail-row-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.detail-row-val{font-size:13px;color:var(--text);line-height:1.4;word-break:break-word}
+.detail-divider{height:1px;background:var(--border);margin:4px 0}
 
 /* MY LOG LIST */
 .log-list{display:flex;flex-direction:column;gap:8px}
@@ -574,15 +576,16 @@ tbody tr:hover td{background:#FAFAF8}
 .pg-btn:hover{background:var(--bg)}
 .pg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .pg-btn:disabled{opacity:.4;cursor:not-allowed}
-.perf-grid{display:flex;flex-direction:column;gap:14px}
-.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0}
-.perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:2px solid var(--border)}
-.perf-card-name{font-weight:600;font-size:15px;color:var(--text)}
-.perf-card-total{font-family:var(--mono);font-size:11px;color:var(--muted)}
+/* PERFORMA CARD — mobile: full width, bersih */
+.perf-grid{display:flex;flex-direction:column;gap:16px}
+.perf-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;min-width:0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.perf-card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(135deg,var(--accent),#2563EB);gap:8px}
+.perf-card-name{font-weight:700;font-size:16px;color:#fff}
+.perf-card-total{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.75);white-space:nowrap}
 .perf-sections{display:flex;flex-direction:column}
 .perf-section{padding:14px 16px;border-bottom:1px solid var(--border);min-width:0;overflow:hidden}
 .perf-section:last-child{border-bottom:none}
-.perf-section-title{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.perf-section-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .perf-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .perf-section-full{border-bottom:none}
 /* Jenis bars */
@@ -598,19 +601,19 @@ tbody tr:hover td{background:#FAFAF8}
 .perf-stat-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);line-height:1.2}
 .perf-stat-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:3px}
 /* Kedisiplinan */
-.perf-disip-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.perf-disip-pct{font-size:28px;font-weight:600;line-height:1}
+.perf-disip-row{display:flex;align-items:center;gap:14px}
+.perf-disip-pct{font-size:36px;font-weight:700;line-height:1;flex-shrink:0}
 .perf-disip-pct.good{color:var(--ok)}
 .perf-disip-pct.mid{color:var(--warn)}
 .perf-disip-pct.bad{color:var(--danger)}
-.perf-disip-detail{display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.perf-disip-detail{display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:11px;color:var(--muted);min-width:0}
 .perf-disip-detail strong{color:var(--text);font-size:12px}
 /* Status summary */
-.perf-status-row{display:flex;gap:10px}
-.perf-status-box{flex:1;background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px}
-.perf-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.perf-status-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.perf-status-box{background:var(--bg);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.perf-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .perf-status-info{display:flex;flex-direction:column}
-.perf-status-val{font-family:var(--mono);font-size:16px;font-weight:500;line-height:1.1}
+.perf-status-val{font-family:var(--mono);font-size:22px;font-weight:600;line-height:1.1}
 .perf-status-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
 
 /* GROUP NAV — dropdown kelompok admin */
@@ -645,16 +648,15 @@ tbody tr:hover td{background:#FAFAF8}
   .metrics{grid-template-columns:repeat(4,1fr)}
   .form-row.cols2{grid-template-columns:1fr 1fr}
   .form-row.cols3{grid-template-columns:1fr 1fr 1fr}
-  /* filter bar: grid 2-col, export di sisi kanan */
-  .filter-bar{display:grid;grid-template-columns:1fr 260px;column-gap:16px;row-gap:10px;align-items:start}
-  .filter-bar .search-bar{grid-column:1}
-  .filter-bar .filter-group{grid-column:1}
-  .filter-bar .filter-input-date-row{grid-column:1}
-  .filter-bar .export-section{grid-column:2;grid-row:1 / span 4}
-  .export-quick-row{grid-template-columns:1fr 1fr 1fr}
+  /* filter bar desktop — stack normal, export di dalam card */
+  .filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:0}
+  .filter-bar .filter-group.g2{grid-template-columns:1fr 1fr}
+  .filter-bar .filter-group.g3{grid-template-columns:1fr 1fr 1fr}
+  .filter-input-date-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:flex-end}
   .export-range-inputs{flex-wrap:nowrap}
+  .export-quick-row{grid-template-columns:1fr 1fr 1fr}
   .jl-cards{display:none}
-  .table-wrap{display:block}
+  .table-wrap{display:block;overflow-x:auto}
   #toast{bottom:24px;left:auto;right:24px;transform:none}
   .user-chip{display:flex}
   /* performa */
@@ -664,12 +666,8 @@ tbody tr:hover td{background:#FAFAF8}
   .perf-section:nth-child(2n):not(.perf-section-full){border-right:none}
   .perf-section-full{grid-column:1 / -1;border-right:none!important;border-bottom:none!important}
   .perf-section:nth-last-child(-n+2):not(.perf-section-full){border-bottom:none}
-  /* rekap tabel scroll di PC */
   .rekap-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #tab-admin .container,#tab-performa .container{max-width:1200px;margin:0 auto}
-  /* table admin: kolom tidak terpotong */
-  .table-wrap{overflow-x:auto}
-  tbody td{max-width:180px}
 }
 @media(max-width:639px){
   .form-row.cols2{grid-template-columns:1fr}
@@ -1079,97 +1077,104 @@ service cloud.firestore {
     </div>
     <div class="card">
       <div class="card-title">Semua Data Joblog</div>
-      <div class="filter-bar">
-        <!-- Baris 1: Search SR + Search Mesin -->
-        <div class="filter-group g2">
-          <div class="search-bar" style="margin-bottom:0">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
-          </div>
-          <div class="search-bar" style="margin-bottom:0">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="ff-mesin" placeholder="Cari nama mesin..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
-          </div>
+      <!-- Search bar selalu tampil -->
+      <div class="filter-group g2" style="margin-bottom:8px">
+        <div class="search-bar" style="margin-bottom:0">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="ff-sr" placeholder="Cari No. SR..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
         </div>
-        <!-- Baris 2: Teknisi + Jenis -->
-        <div class="filter-group g2">
-          <div class="filter-label-wrap">
-            <label>Teknisi</label>
-            <select id="ff-nama" onchange="applyAdminFilter()"><option value="">Semua Teknisi</option></select>
-          </div>
-          <div class="filter-label-wrap">
-            <label>Jenis</label>
-            <select id="ff-jenis" onchange="applyAdminFilter()"><option value="">Semua Jenis</option></select>
-          </div>
+        <div class="search-bar" style="margin-bottom:0">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="ff-mesin" placeholder="Cari nama mesin..." oninput="applyAdminFilter()" autocomplete="off" style="width:100%">
         </div>
-        <!-- Baris 2b: Status Periksa -->
-        <div class="filter-group g2">
-          <div class="filter-label-wrap">
-            <label>Status Periksa</label>
-            <select id="ff-checked" onchange="applyAdminFilter()">
-              <option value="">Semua</option>
-              <option value="checked">✅ Sudah Diperiksa</option>
-              <option value="unchecked">⬜ Belum Diperiksa</option>
-            </select>
+      </div>
+      <!-- Toggle filter lanjutan -->
+      <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleAdminFilter()">
+        <span>🔽 Filter Lanjutan</span>
+        <span class="filter-toggle-chevron" id="filter-toggle-chevron">▼</span>
+      </button>
+      <div class="filter-collapsible" id="filter-collapsible">
+        <div class="filter-bar">
+          <!-- Teknisi + Jenis -->
+          <div class="filter-group g2">
+            <div class="filter-label-wrap">
+              <label>Teknisi</label>
+              <select id="ff-nama" onchange="applyAdminFilter()"><option value="">Semua Teknisi</option></select>
+            </div>
+            <div class="filter-label-wrap">
+              <label>Jenis</label>
+              <select id="ff-jenis" onchange="applyAdminFilter()"><option value="">Semua Jenis</option></select>
+            </div>
           </div>
-        </div>
-        <!-- Baris 3: Status + Tanggal Kerja + Reset -->
-        <div class="filter-group g3">
-          <div class="filter-label-wrap">
-            <label>Status</label>
-            <select id="ff-status" onchange="applyAdminFilter()">
-              <option value="">Semua Status</option>
-              <option value="_selesai_group">✅ Selesai (semua)</option>
-              <option value="_progress_group">⏳ On Progress (semua)</option>
-              <option value="selesai">✅ Selesai</option>
-              <option value="berkelanjutan">🔄 Pekerjaan Berkelanjutan</option>
-              <option value="lanjut">⏳ Butuh Dilanjutkan</option>
-              <option value="part">📦 Butuh Menunggu Part</option>
-              <option value="bengkel">🔧 Butuh Bengkel Luar</option>
-            </select>
+          <!-- Status Periksa + Status -->
+          <div class="filter-group g2">
+            <div class="filter-label-wrap">
+              <label>Status Periksa</label>
+              <select id="ff-checked" onchange="applyAdminFilter()">
+                <option value="">Semua</option>
+                <option value="checked">✅ Sudah Diperiksa</option>
+                <option value="unchecked">⬜ Belum Diperiksa</option>
+              </select>
+            </div>
+            <div class="filter-label-wrap">
+              <label>Status</label>
+              <select id="ff-status" onchange="applyAdminFilter()">
+                <option value="">Semua Status</option>
+                <option value="_selesai_group">✅ Selesai (semua)</option>
+                <option value="_progress_group">⏳ On Progress (semua)</option>
+                <option value="selesai">✅ Selesai</option>
+                <option value="berkelanjutan">🔄 Berkelanjutan</option>
+                <option value="lanjut">⏳ Butuh Dilanjutkan</option>
+                <option value="part">📦 Tunggu Part</option>
+                <option value="bengkel">🔧 Bengkel Luar</option>
+              </select>
+            </div>
           </div>
-          <div class="filter-label-wrap">
-            <label>Tgl Kerja</label>
-            <input type="date" id="ff-date" onchange="applyAdminFilter()">
+          <!-- Tgl Kerja -->
+          <div class="filter-group g2">
+            <div class="filter-label-wrap">
+              <label>Tgl Kerja</label>
+              <input type="date" id="ff-date" onchange="applyAdminFilter()">
+            </div>
+            <div class="filter-label-wrap" style="justify-content:flex-end">
+              <label style="opacity:0">–</label>
+              <button class="btn btn-ghost btn-sm" onclick="clearFilter()" style="width:100%">✕ Reset Semua</button>
+            </div>
           </div>
-          <div class="filter-label-wrap" style="justify-content:flex-end">
-            <label style="opacity:0">–</label>
-            <button class="btn btn-ghost btn-sm" onclick="clearFilter()" style="width:100%">✕ Reset</button>
-          </div>
-        </div>
-        <!-- Baris 4: Filter Tanggal Input -->
-        <div class="filter-input-date-row">
-          <div class="filter-label-wrap">
-            <label>Tgl Input Dari</label>
-            <input type="date" id="ff-input-from" onchange="applyAdminFilter()">
-          </div>
-          <div class="filter-label-wrap">
-            <label>Tgl Input Sampai</label>
-            <input type="date" id="ff-input-to" onchange="applyAdminFilter()">
-          </div>
-          <div></div>
-        </div>
-        <!-- Baris 4: Export -->
-        <div class="export-section">
-          <div class="export-quick-row">
-            <button class="btn btn-export btn-sm" onclick="exportExcel('hari')">↓ Hari Ini</button>
-            <button class="btn btn-export btn-sm" onclick="exportExcel('minggu')">↓ Minggu Ini</button>
-            <button class="btn btn-export btn-sm" onclick="exportExcel('bulan')">↓ Bulan Ini</button>
-          </div>
-          <div class="export-range-row">
-            <div class="export-range-label">↓ Rekap Periode</div>
-            <div class="export-range-inputs">
-              <input type="date" id="exp-from" title="Dari tanggal">
-              <span class="export-range-sep">s/d</span>
-              <input type="date" id="exp-to" title="Sampai tanggal">
-              <button class="btn btn-export btn-sm export-range-btn" onclick="exportExcelRange()">Download</button>
+          <!-- Tgl Input range -->
+          <div class="filter-input-date-row">
+            <div class="filter-label-wrap">
+              <label>Tgl Input Dari</label>
+              <input type="date" id="ff-input-from" onchange="applyAdminFilter()">
+            </div>
+            <div class="filter-label-wrap">
+              <label>Tgl Input Sampai</label>
+              <input type="date" id="ff-input-to" onchange="applyAdminFilter()">
             </div>
           </div>
         </div>
       </div>
-      <!-- Mobile -->
+      <!-- Export -->
+      <div class="export-section" style="margin-top:8px">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">⬇ Download Rekap</div>
+        <div class="export-quick-row">
+          <button class="btn btn-export btn-sm" onclick="exportExcel('hari')">Hari Ini</button>
+          <button class="btn btn-export btn-sm" onclick="exportExcel('minggu')">Minggu</button>
+          <button class="btn btn-export btn-sm" onclick="exportExcel('bulan')">Bulan Ini</button>
+        </div>
+        <div class="export-range-row">
+          <div class="export-range-label">↓ Rekap Periode</div>
+          <div class="export-range-inputs">
+            <input type="date" id="exp-from" title="Dari tanggal">
+            <span class="export-range-sep">s/d</span>
+            <input type="date" id="exp-to" title="Sampai tanggal">
+            <button class="btn btn-export btn-sm export-range-btn" onclick="exportExcelRange()">Download</button>
+          </div>
+        </div>
+      </div>
+      <!-- Mobile: Kartu (CSS kontrol, bukan JS) -->
       <div class="jl-cards" id="admin-cards"></div>
-      <!-- Desktop -->
+      <!-- Desktop: Tabel (CSS kontrol via @media) -->
       <div class="table-wrap">
         <table>
           <thead><tr>
@@ -1415,6 +1420,19 @@ service cloud.firestore {
       <div class="notif-msg" id="notif-msg"></div>
     </div>
     <button class="notif-close" onclick="closeNotif()">✕</button>
+  </div>
+</div>
+
+<!-- MODAL: DETAIL JOBLOG (HP) -->
+<div class="overlay" id="modal-detail-joblog">
+  <div class="modal">
+    <div class="modal-title" id="detail-modal-title">Detail Joblog</div>
+    <div id="detail-modal-body" style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem"></div>
+    <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
+      <button class="btn btn-ghost btn-sm" style="flex:1;min-width:80px" onclick="closeModal('modal-detail-joblog')">Tutup</button>
+      <button class="btn btn-sm" id="detail-btn-edit" style="flex:1;min-width:80px;background:#EEF2FF;color:#3730A3;border-color:#C7D2FE">✏ Edit</button>
+      <button class="btn btn-danger btn-sm" id="detail-btn-hapus" style="flex:1;min-width:80px">Hapus</button>
+    </div>
   </div>
 </div>
 
@@ -2198,44 +2216,56 @@ function renderAdmin(){
   </tr>`;
   }).join('');
 
+  // Render kartu mobile (CSS yang mengontrol visibility via breakpoint, bukan JS)
   document.getElementById('admin-cards').innerHTML=pageRows.map(r=>{
-    const selesai = isSelesai(r);
     const srHtml  = highlightSR(r.sr, fsr);
+    const info    = getStatusInfo(r);
+    const jam     = r.start ? fmt24(r.start) + (r.end ? ' → '+fmt24(r.end) : '') : '—';
+    const dur     = r.dur   ? fmtDur(r.dur) : '—';
+    const tglInput= r.submittedAt ? fmtSubmitDateTime(r.submittedAt) : '—';
     return `
     <div class="jl-card">
-      <div class="jl-card-header">
-        <div class="jl-card-header-left">
-          <div class="jl-nama">${r.nama}${r.checked===true?'<span class="badge-checked">✅ Diperiksa</span>':''}</div>
-          <div class="jl-sr">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></div>
+      <div class="jl-card-top">
+        <div class="jl-card-top-left">
+          <div class="jl-card-sr">${srHtml}${r.checked===true?' ✅':''}</div>
+          <div class="jl-card-nama">👤 ${r.nama}</div>
         </div>
-        <div class="jl-card-badges">
-          ${statusBadgeHtml(r)}
-          <select class="status-select-admin" onchange="changeStatusAdmin('${r._id}', this.value)" title="Ubah status">
-            ${Object.entries(STATUS_MAP).filter(([k])=>k!=='progress').map(([k,v])=>
-              `<option value="${k}" ${ (r.status||(r.end?'selesai':'lanjut'))===k ? 'selected':''}>${v.icon} ${v.label}</option>`
-            ).join('')}
-          </select>
-          <span style="display:flex;align-items:center;gap:4px">${jenisBadge(r.jenis)}<button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></span>
-        </div>
+        <span class="badge ${info.badgeClass}" style="flex-shrink:0;font-size:10px;white-space:nowrap;max-width:45%;text-align:center">${info.icon} ${info.label}</span>
       </div>
-      <div class="jl-card-body">
-        <div class="jl-job">${r.job} <button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></div>
-        <div class="jl-info-grid">
-          <div class="jl-info-item"><span class="jl-info-key">📅</span><span class="jl-info-val">${r.date}</span></div>
-          <div class="jl-info-item"><span class="jl-info-key">⚙</span><span class="jl-info-val">${r.mesin||'—'}</span></div>
-          <div class="jl-info-item"><span class="jl-info-key">🕐</span><span class="jl-info-val">${fmt24(r.start)}${r.end?' → '+fmt24(r.end):' → ...'}</span></div>
-          <div class="jl-info-item"><span class="jl-info-key">⏱</span><span class="jl-info-val">${fmtDur(r.dur)}</span></div>
+      <div class="jl-card-job">${r.job}</div>
+      <div class="jl-card-divider"></div>
+      <div class="jl-card-meta">
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Tanggal Kerja</span>
+          <span class="jl-card-meta-val">📅 ${r.date||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Mesin</span>
+          <span class="jl-card-meta-val">⚙ ${r.mesin||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Jam Kerja</span>
+          <span class="jl-card-meta-val">🕐 ${jam}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Durasi</span>
+          <span class="jl-card-meta-val">⏱ ${dur}</span>
+        </div>
+        <div class="jl-card-meta-item" style="grid-column:span 2">
+          <span class="jl-card-meta-label">Jenis</span>
+          <span class="jl-card-meta-val">${r.jenis||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item" style="grid-column:span 2">
+          <span class="jl-card-meta-label">Tgl Input</span>
+          <span class="jl-card-meta-val" style="font-size:11px">${tglInput}</span>
         </div>
       </div>
       <div class="jl-card-footer">
-        <span class="jl-submit-ts">🖊 ${fmtSubmitDateTime(r.submittedAt)}</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
-            ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
-          </button>
-          <button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button>
+        <div class="jl-card-footer-left">
           <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
+          <button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button>
         </div>
+        <button class="btn-detail" onclick="openDetailJoblog('${r._id}')">Detail ›</button>
       </div>
     </div>`;
   }).join('');
@@ -2244,6 +2274,7 @@ function renderAdmin(){
 // supaya ganti filter tidak nyangkut di halaman pagination yang lama.
 function applyAdminFilter(){
   _adminCurrentPage = 1;
+  updateFilterToggleState();
   renderAdmin();
 }
 
@@ -2254,9 +2285,46 @@ function adminChangePage(direction){
   document.getElementById('admin-pagination').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
+function toggleAdminFilter(){
+  const col = document.getElementById('filter-collapsible');
+  const chv = document.getElementById('filter-toggle-chevron');
+  const btn = document.getElementById('filter-toggle-btn');
+  const isOpen = col.classList.contains('open');
+  col.classList.toggle('open', !isOpen);
+  chv.classList.toggle('open', !isOpen);
+  btn.querySelector('span').textContent = isOpen ? '🔽 Filter Lanjutan' : '🔼 Filter Lanjutan';
+}
+
+function updateFilterToggleState(){
+  const vals = ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'];
+  const hasFilter = vals.some(id => { const el=document.getElementById(id); return el && el.value; });
+  const srEl = document.getElementById('ff-sr');
+  const mesinEl = document.getElementById('ff-mesin');
+  const hasSearch = (srEl&&srEl.value) || (mesinEl&&mesinEl.value);
+  const btn = document.getElementById('filter-toggle-btn');
+  if(btn) btn.classList.toggle('has-filter', hasFilter);
+  // Auto-open filter jika ada nilai aktif
+  if(hasFilter){
+    const col = document.getElementById('filter-collapsible');
+    const chv = document.getElementById('filter-toggle-chevron');
+    if(col && !col.classList.contains('open')){
+      col.classList.add('open');
+      chv.classList.add('open');
+      btn.querySelector('span').textContent = '🔼 Filter Lanjutan';
+    }
+  }
+}
+
 function clearFilter(){
   ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'].forEach(id=>document.getElementById(id).value='');
   ['ff-sr','ff-mesin'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  // Reset toggle state
+  const btn = document.getElementById('filter-toggle-btn');
+  if(btn){ btn.classList.remove('has-filter'); btn.querySelector('span').textContent='🔽 Filter Lanjutan'; }
+  const col = document.getElementById('filter-collapsible');
+  const chv = document.getElementById('filter-toggle-chevron');
+  if(col){ col.classList.remove('open'); }
+  if(chv){ chv.classList.remove('open'); }
   _adminCurrentPage = 1;
   renderAdmin();
 }
@@ -2301,6 +2369,54 @@ function updateUnknownBanner(){
   document.getElementById('unknown-banner-sub').textContent = `rata-rata per hari · ${bulanLabel} · dari ${jmlHari} hari berdata`;
   banner.classList.add('show');
 }
+// ── MODAL DETAIL JOBLOG (dari kartu mobile) ────────────────────
+function openDetailJoblog(joblogId){
+  const r = joblogDB.find(x => x._id === joblogId);
+  if(!r) return;
+  const info = getStatusInfo(r);
+
+  document.getElementById('detail-modal-title').textContent = `Detail — ${r.sr||'No SR'}`;
+
+  const row = (label, valHtml, mono=false) => `
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">${label}</div>
+      <div style="${mono?'font-family:var(--mono);font-size:12px;':'font-size:13px;'}font-weight:500;color:var(--text)">${valHtml||'—'}</div>
+    </div>`;
+
+  document.getElementById('detail-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${row('No. SR', r.sr, true)}
+      ${row('Teknisi', r.nama)}
+      ${row('Tanggal Kerja', r.date, true)}
+      ${row('Nama Mesin', r.mesin)}
+      ${row('Jam Mulai', fmt24(r.start), true)}
+      ${row('Jam Selesai', r.end ? fmt24(r.end) : '—', true)}
+      ${row('Durasi', fmtDur(r.dur), true)}
+      ${row('Jenis', jenisBadge(r.jenis))}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Deskripsi Pekerjaan</div>
+      <div style="font-size:13px;line-height:1.5;color:var(--text);padding:8px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">${r.job||'—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${row('Status', statusBadgeHtml(r))}
+      ${row('Input (Tgl & Jam)', fmtSubmitDateTime(r.submittedAt), true)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;border-top:1px solid var(--border)">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',null),100)">✏ Edit SR</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${(r.sr||'').replace(/'/g,"\\'")}'),100)">✏ Edit Jenis</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditJob('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',null),100)">✏ Edit Deskripsi</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditJoblog('${r._id}'),100)">✏ Edit Lengkap</button>
+      <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}',${r.checked===true});closeModal('modal-detail-joblog')" style="grid-column:1/-1">
+        ${r.checked===true ? '✅ Batalkan Tanda Diperiksa' : '⬜ Tandai Sudah Diperiksa'}
+      </button>
+    </div>`;
+
+  document.getElementById('detail-btn-edit').onclick  = () => { closeModal('modal-detail-joblog'); setTimeout(()=>openEditJoblog(r._id),100); };
+  document.getElementById('detail-btn-hapus').onclick = () => { closeModal('modal-detail-joblog'); setTimeout(()=>confirmDeleteOne(r._id,`${r.nama} - ${r.sr}`),100); };
+  document.getElementById('modal-detail-joblog').classList.add('show');
+}
+
 async function changeStatusAdmin(joblogId, newStatus){
   const info = STATUS_MAP[newStatus];
   try {
