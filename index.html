@@ -98,6 +98,19 @@ header{background:var(--text);color:#fff;padding:0 1rem;display:flex;align-items
 /* LAYOUT */
 .container{max-width:960px;margin:0 auto;padding:1rem}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+
+/* TROUBLESHOOT DASHBOARD (halaman awal) */
+.ts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:640px){.ts-grid{grid-template-columns:repeat(3,1fr)}}
+.ts-tile{position:relative;border:1px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;background:var(--bg);transition:border-color .15s}
+.ts-tile:hover{border-color:var(--accent)}
+.ts-tile-icon{font-size:20px;margin-bottom:6px;line-height:1}
+.ts-tile-name{font-size:12px;font-weight:600;line-height:1.35;padding-right:20px}
+.ts-tile-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+.ts-tile-edit{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:11px;align-items:center;justify-content:center;cursor:pointer;display:none}
+.ts-tile-edit:hover{border-color:var(--accent)}
+.ts-tile.admin-mode .ts-tile-edit{display:flex}
+.ts-empty{font-size:12px;color:var(--muted);padding:8px 0}
 .card-title{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 
 /* FORM */
@@ -551,6 +564,30 @@ tbody tr:hover td{background:#FAFAF8}
 .postpm-meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
 .postpm-meta span{white-space:nowrap}
 .selisih-cell{font-family:var(--mono);font-weight:700;font-size:13px;text-align:center;color:#991B1B}
+/* PERFORMA MESIN */
+.mr-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.mr-card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 14px;background:var(--bg);border-bottom:1px solid var(--border);gap:8px}
+.mr-rank{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);flex-shrink:0;min-width:36px}
+.mr-rank.r1{color:#F59E0B}
+.mr-rank.r2{color:#9CA3AF}
+.mr-rank.r3{color:#B45309}
+.mr-mesin{font-weight:600;font-size:14px;word-break:break-word;flex:1}
+.mr-total-badge{font-family:var(--mono);font-size:13px;font-weight:700;background:#FEE2E2;color:#991B1B;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.mr-card-body{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mr-stat{display:flex;flex-direction:column;gap:2px}
+.mr-stat-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.mr-stat-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+.mr-jenis{grid-column:span 2;padding-top:6px;border-top:1px solid var(--border);margin-top:4px}
+.mr-jenis-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.mr-jenis-val{font-size:12px;color:var(--text);word-break:break-word}
+/* Kata kerusakan bars */
+.kk-bar-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.kk-bar-row:last-child{border-bottom:none}
+.kk-rank{font-family:var(--mono);font-size:10px;color:var(--muted);width:20px;flex-shrink:0;text-align:right}
+.kk-word{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kk-bar-wrap{flex:1;background:var(--border);border-radius:100px;height:10px;overflow:hidden;min-width:40px}
+.kk-bar-fill{height:100%;border-radius:100px;background:var(--accent);transition:width .4s ease}
+.kk-count{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);flex-shrink:0;min-width:28px;text-align:right}
 /* highlight kata match */
 .match-hl{background:#FEF08A;border-radius:3px;padding:0 2px;font-weight:600}
 /* pagination */
@@ -675,6 +712,15 @@ tbody tr:hover td{background:#FAFAF8}
 </head>
 <body>
 
+<!-- BANNER: VERSI BARU TERSEDIA -->
+<div id="version-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#1D4ED8,#2563EB);color:#fff;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.2)">
+  <span>🔄 Versi baru aplikasi ini sudah tersedia.</span>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button onclick="location.reload()" style="background:#fff;color:#1D4ED8;border:none;padding:6px 14px;border-radius:6px;font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Muat Ulang</button>
+    <button onclick="document.getElementById('version-banner').style.display='none'" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">Nanti</button>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="ll">JOBLOG<span>.</span>TEKNISI</div>
@@ -791,6 +837,65 @@ tbody tr:hover td{background:#FAFAF8}
   </div>
 </div>
 
+<!-- MODAL: TAMBAH/EDIT KATEGORI PANDUAN TROUBLESHOOT (admin only) -->
+<div class="overlay" id="modal-ts-cat">
+  <div class="modal">
+    <div class="modal-title" id="ts-cat-title">Tambah Kategori Panduan</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Icon (emoji, opsional)</label>
+      <input type="text" id="ts-cat-icon" maxlength="4" placeholder="🔧">
+    </div>
+    <div class="field" style="margin-bottom:4px">
+      <label>Nama Kategori</label>
+      <input type="text" id="ts-cat-nama" placeholder="Contoh: CNC & Mesin Produksi" onkeydown="if(event.key==='Enter')saveTsCat()">
+    </div>
+    <div class="pw-error" id="ts-cat-error" style="margin-top:8px">Nama wajib diisi atau sudah ada.</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" id="ts-cat-save-btn" onclick="saveTsCat()">Tambah</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-ts-cat')">Batal</button>
+      <button class="btn btn-danger" id="ts-cat-delete-btn" style="display:none" onclick="closeModal('modal-ts-cat');confirmDeleteTsCat(_editTsCatId, document.getElementById('ts-cat-nama').value.trim())">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DAFTAR KERUSAKAN PER KATEGORI (teknisi, read-only) -->
+<div class="overlay" id="modal-ts-items">
+  <div class="modal">
+    <div class="modal-title" id="ts-items-modal-title">Kategori</div>
+    <div id="ts-items-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeTsItemsModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TAMBAH/EDIT KERUSAKAN & CARA MENGATASI (admin only) -->
+<div class="overlay" id="modal-ts-item">
+  <div class="modal">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span id="ts-item-title">Tambah Kerusakan</span>
+      <span id="ts-item-status-badge" style="display:none;font-family:var(--mono);font-size:9px;font-weight:600;padding:3px 9px;border-radius:100px;letter-spacing:.04em;white-space:nowrap;text-transform:uppercase"></span>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Nama Kerusakan</label>
+      <input type="text" id="ts-item-nama" placeholder="Contoh: Motor spindle tidak mau start">
+    </div>
+    <div class="field" style="margin-bottom:4px">
+      <label>Cara Mengatasi</label>
+      <textarea id="ts-item-solusi" rows="5" placeholder="Langkah-langkah penanganan..." style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:7px;font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:vertical"></textarea>
+    </div>
+    <div class="pw-error" id="ts-item-error" style="margin-top:8px">Nama kerusakan wajib diisi.</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1" id="ts-item-draft-btn" onclick="saveTsItem('draft')">💾 Simpan Draft</button>
+      <button class="btn btn-primary" style="flex:1" id="ts-item-publish-btn" onclick="saveTsItem('published')">🚀 Publish</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-ts-item')">Batal</button>
+      <button class="btn btn-danger" id="ts-item-delete-btn" style="display:none;flex:1" onclick="closeModal('modal-ts-item');confirmDeleteTsItem(_editTsItemId, document.getElementById('ts-item-nama').value.trim())">Hapus</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: KONFIRMASI HAPUS -->
 <div class="overlay" id="modal-confirm-delete">
   <div class="modal">
@@ -799,6 +904,46 @@ tbody tr:hover td{background:#FAFAF8}
     <div class="modal-footer">
       <button class="btn btn-danger-solid" style="flex:1" id="confirm-delete-btn">Ya, Hapus</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm-delete')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONFIRMASI STANDBY 1 SHIFT PENUH -->
+<div class="overlay" id="modal-confirm-standby">
+  <div class="modal">
+    <div class="modal-title">Konfirmasi Standby</div>
+    <p id="confirm-standby-msg" style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem"></p>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" id="confirm-standby-yes-btn">Ya, Benar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-standby')">Tidak, Ubah Dulu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RIWAYAT KERUSAKAN PER MESIN -->
+<div class="overlay" id="modal-mr-detail">
+  <div class="modal" style="max-width:520px;max-height:85vh;overflow-y:auto">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span id="mr-detail-title">Riwayat Kerusakan</span>
+      <span class="badge badge-part" id="mr-detail-count-badge"></span>
+    </div>
+    <div id="mr-detail-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-mr-detail')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RIWAYAT JOBLOG PER FRASA KERUSAKAN -->
+<div class="overlay" id="modal-kk-detail">
+  <div class="modal" style="max-width:520px;max-height:85vh;overflow-y:auto">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span id="kk-detail-title">Riwayat Frasa</span>
+      <span class="badge badge-part" id="kk-detail-count-badge"></span>
+    </div>
+    <div id="kk-detail-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-kk-detail')">Tutup</button>
     </div>
   </div>
 </div>
@@ -824,7 +969,11 @@ tbody tr:hover td{background:#FAFAF8}
       </div>
       <div class="field">
         <label>Jenis Pekerjaan</label>
-        <select id="ej-jenis"></select>
+        <select id="ej-jenis" onchange="toggleEjJenis2Field()"></select>
+      </div>
+      <div class="field" id="ej-field-jenis2" style="display:none">
+        <label>Jenis Pekerjaan Tambahan (Lembur)</label>
+        <select id="ej-jenis2"></select>
       </div>
       <div class="field">
         <label>Deskripsi Pekerjaan</label>
@@ -885,6 +1034,10 @@ tbody tr:hover td{background:#FAFAF8}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
     Input Joblog
   </button>
+  <button class="tab-btn" id="desk-tab-panduan" onclick="tryPanduan(this,'desk')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
+    Panduan
+  </button>
   <button class="tab-btn" id="desk-tab-admin" onclick="tryAdmin(this,'desk')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Dashboard Admin
@@ -919,6 +1072,15 @@ service cloud.firestore {
     </div>
   </div>
 
+  <div class="unknown-banner" id="sisa-jam-banner">
+    <div class="unknown-banner-icon" id="sisa-jam-icon">⏱️</div>
+    <div class="unknown-banner-body">
+      <div class="unknown-banner-jam" id="sisa-jam-value">—</div>
+      <div class="unknown-banner-label" id="sisa-jam-label">Sisa Jam Kerja Hari Ini</div>
+      <div class="unknown-banner-sub" id="sisa-jam-sub">—</div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">Form Input Pekerjaan Harian</div>
     <div class="form-row cols2" style="margin-bottom:12px">
@@ -929,10 +1091,16 @@ service cloud.firestore {
       <div class="field"><label>Nama/Kode Mesin *</label><input type="text" id="f-mesin" placeholder="Contoh: CNC-01"></div>
       <div class="field">
         <label>Jenis Pekerjaan *</label>
-        <select id="f-jenis">
+        <select id="f-jenis" onchange="toggleJenis2Field()">
           <option value="">-- Pilih Jenis --</option>
         </select>
       </div>
+    </div>
+    <div class="field" id="field-jenis2" style="display:none;margin-bottom:12px">
+      <label>Jenis Pekerjaan Tambahan (Lembur) *</label>
+      <select id="f-jenis2">
+        <option value="">-- Pilih Jenis Pekerjaan Sebenarnya --</option>
+      </select>
     </div>
     <div class="field" style="margin-bottom:12px">
       <label>Pekerjaan *</label>
@@ -941,7 +1109,7 @@ service cloud.firestore {
     <div class="form-row cols2" style="margin-bottom:12px">
       <div class="field">
         <label>Tanggal *</label>
-        <input type="date" id="f-date">
+        <input type="date" id="f-date" onchange="updateSisaJamBanner()">
       </div>
       <div class="field">
         <label>Status Pekerjaan *</label>
@@ -1006,6 +1174,16 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- PANDUAN TAB -->
+<div id="tab-panduan" class="container" style="display:none">
+  <div class="card">
+    <div class="card-title">
+      <span>📋 Panduan Troubleshoot</span>
+    </div>
+    <div class="ts-grid" id="ts-grid"></div>
+  </div>
+</div>
+
 <!-- ADMIN TAB -->
 <div id="tab-admin" class="container" style="display:none">
   <!-- GROUP NAV: 3 kelompok dropdown -->
@@ -1026,6 +1204,9 @@ service cloud.firestore {
         </div>
         <div class="group-dropdown-item" id="gitem-postpm" onclick="switchGroupItem('postpm')">
           <span class="group-dropdown-item-dot"></span>⚡ Post PM
+        </div>
+        <div class="group-dropdown-item" id="gitem-mesin" onclick="switchGroupItem('mesin')">
+          <span class="group-dropdown-item-dot"></span>🏭 Performa Mesin
         </div>
       </div>
     </div>
@@ -1049,6 +1230,12 @@ service cloud.firestore {
         </div>
         <div class="group-dropdown-item" id="gitem-jenis" onclick="switchGroupItem('jenis')">
           <span class="group-dropdown-item-dot"></span>Jenis Pekerjaan
+        </div>
+        <div class="group-dropdown-item" id="gitem-panduan" onclick="switchGroupItem('panduan')">
+          <span class="group-dropdown-item-dot"></span>Kelola Panduan
+        </div>
+        <div class="group-dropdown-item" id="gitem-katasifat" onclick="switchGroupItem('katasifat')">
+          <span class="group-dropdown-item-dot"></span>Kata Kerusakan
         </div>
         <div class="group-dropdown-item" id="gitem-settings" onclick="switchGroupItem('settings')">
           <span class="group-dropdown-item-dot"></span>Settings
@@ -1219,6 +1406,46 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- SUB: KELOLA PANDUAN -->
+  <div id="sub-panduan" style="display:none">
+    <div class="card" id="panduan-cat-card">
+      <div class="card-title">
+        <span>Kelola Kategori Panduan Troubleshoot</span>
+        <button class="btn btn-primary btn-sm" onclick="openAddTsCat()">+ Tambah Kategori</button>
+      </div>
+      <div class="jenis-list" id="panduan-manage-list"><div class="empty-state">Memuat...</div></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Klik kategori untuk mengelola daftar kerusakan & cara mengatasi. Kategori yang dikelola di sini akan tampil di tab "Panduan" untuk semua teknisi.</p>
+    </div>
+
+    <div class="card" id="panduan-items-card" style="display:none">
+      <button class="btn btn-ghost btn-xs" style="margin-bottom:10px" onclick="closePanduanItemsView()">← Kembali ke Kategori</button>
+      <div class="card-title">
+        <span id="panduan-items-cat-title">Kerusakan</span>
+        <button class="btn btn-primary btn-sm" onclick="openAddTsItem()">+ Tambah Kerusakan</button>
+      </div>
+      <div class="jenis-list" id="panduan-items-manage-list"><div class="empty-state">Memuat...</div></div>
+    </div>
+  </div>
+
+  <!-- SUB: KELOLA KATA KERUSAKAN -->
+  <div id="sub-katasifat" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Kelola Kata Sifat Kerusakan</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:var(--mono);line-height:1.6">
+        Daftar kata kondisi (kata sifat) yang dipakai untuk mendeteksi frasa kerusakan dari deskripsi pekerjaan —
+        misal "mati" pada "lampu mati", atau "kurang" pada "freon kurang". Tambahkan istilah baru di sini kalau
+        ada yang belum terdeteksi di laporan "Kata Kerusakan".
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input type="text" id="ks-input" placeholder="Contoh: bocor" style="flex:1;padding:11px 13px;border:1px solid var(--border);border-radius:7px;font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--text);outline:none" onkeydown="if(event.key==='Enter')addKataSifat()">
+        <button class="btn btn-primary btn-sm" onclick="addKataSifat()">+ Tambah</button>
+      </div>
+      <div id="ks-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+  </div>
+
   <!-- SUB: PERFORMA -->
   <div id="sub-performa" style="display:none">
     <div class="card">
@@ -1371,6 +1598,88 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- SUB: PERFORMA MESIN -->
+  <div id="sub-mesin" style="display:none">
+
+    <!-- Inner tabs: Mesin Sering Rusak | Kata Kerusakan -->
+    <div class="pm-inner-tabs">
+      <button class="pm-inner-tab active" id="mesin-tab-rusak" onclick="switchMesinInner('rusak',this)">🔴 Mesin Rusak</button>
+      <button class="pm-inner-tab" id="mesin-tab-kata" onclick="switchMesinInner('kata',this)">🔤 Kata Kerusakan</button>
+    </div>
+
+    <!-- PANEL 1: Mesin Sering Rusak -->
+    <div id="mesin-inner-rusak">
+      <div class="card">
+        <div class="card-title">
+          <span>🔴 Ranking Mesin Sering Rusak</span>
+          <button class="btn btn-export btn-sm" onclick="exportMesinRusak()">↓ Excel</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+          Berdasarkan jenis pekerjaan <strong>Perbaikan</strong> dan <strong>Penggantian Part</strong>.
+        </div>
+        <div class="pm-filter-row">
+          <div class="filter-date-field" style="flex:1;min-width:140px">
+            <label class="filter-date-label">Bulan</label>
+            <input type="month" id="mr-bulan" onchange="renderMesinRusak()">
+          </div>
+          <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetMesinRusakFilter()">✕ Reset</button>
+        </div>
+        <div id="mr-summary" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:8px 0 4px;display:none"></div>
+      </div>
+      <!-- Mobile: cards -->
+      <div id="mr-cards" style="display:none;flex-direction:column;gap:10px;margin-top:0"></div>
+      <!-- Desktop: tabel -->
+      <div class="table-wrap" id="mr-table-wrap" style="display:none">
+        <table>
+          <thead><tr>
+            <th style="width:36px">#</th>
+            <th>Nama/Kode Mesin</th>
+            <th style="text-align:center">Total Kerusakan</th>
+            <th>Terakhir Rusak</th>
+            <th>Rata² Interval</th>
+            <th>Jenis Terbanyak</th>
+          </tr></thead>
+          <tbody id="mr-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="mr-empty" style="display:none">Tidak ada data perbaikan untuk periode ini.</div>
+      <div id="mr-pagination" style="display:none;padding:12px 0;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- PANEL 2: Kata Kerusakan -->
+    <div id="mesin-inner-kata" style="display:none">
+      <div class="card">
+        <div class="card-title">
+          <span>🔤 Frasa Kerusakan Sering Muncul</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+          Frasa 2 kata (kata benda + kondisi rusak) dari deskripsi pekerjaan Perbaikan & Penggantian Part, mis. "lampu mati", "freon kurang". Daftar kata kondisi bisa disesuaikan di Dashboard Admin → Kata Kerusakan.
+        </div>
+        <div class="pm-filter-row" style="flex-wrap:wrap">
+          <div class="filter-date-field" style="flex:1;min-width:130px">
+            <label class="filter-date-label">Bulan</label>
+            <input type="month" id="kk-bulan" onchange="renderKataKerusakan()">
+          </div>
+          <div class="filter-date-field" style="flex:1;min-width:130px">
+            <label class="filter-date-label">Filter Mesin</label>
+            <select id="kk-mesin" onchange="renderKataKerusakan()">
+              <option value="">Semua Mesin</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetKataKerusakanFilter()">✕ Reset</button>
+        </div>
+        <div id="kk-summary" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin:8px 0 4px;display:none"></div>
+      </div>
+      <!-- Word cloud / bar chart kata -->
+      <div class="card" id="kk-result" style="display:none">
+        <div class="card-title" style="font-size:13px">Top 20 Frasa Paling Sering Muncul</div>
+        <div id="kk-bars"></div>
+      </div>
+      <div class="empty-state" id="kk-empty" style="display:none">Tidak ada data untuk filter ini.</div>
+      <div id="kk-pagination" style="display:none;padding:12px 0;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+
   <!-- SUB: SETTINGS -->
   <div id="sub-settings" style="display:none">
     <div class="card">
@@ -1394,6 +1703,10 @@ service cloud.firestore {
   <button class="nav-btn active" id="mob-tab-input" onclick="switchTab('input',this,'mob')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
     Input
+  </button>
+  <button class="nav-btn" id="mob-tab-panduan" onclick="tryPanduan(this,'mob')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
+    Panduan
   </button>
   <button class="nav-btn" id="mob-tab-admin" onclick="tryAdmin(this,'mob')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -1484,11 +1797,20 @@ service cloud.firestore {
 let joblogDB   = [];
 let teknisisDB = [];   // [{id, nama, password}] dari Firestore
 let jenisDB    = [];   // [{id, nama, bg, color}] dari Firestore — jenis pekerjaan
+let kataSifatDB = [];  // [{id, kata}] dari Firestore — kata sifat kondisi rusak (untuk deteksi frasa kerusakan)
+let tsCatDB    = [];   // [{id, nama, icon, order}] dari Firestore — kategori Panduan Troubleshoot
+let _editTsCatId = null;
+let tsItemsDB   = [];   // [{id, nama, solusi, order}] — daftar kerusakan untuk kategori yang sedang dibuka
+let _tsItemsUnsub = null;
+let _editTsItemId = null;
+let _panduanActiveCatId = null; // id kategori yang sedang dikelola di admin "Kelola Panduan"
 let adminPw    = 'admin123';
 let adminIn    = false;
 let currentUser = null;  // {id, nama} teknisi yang sedang login
 let fbConfigOk  = false;
 let _pendingAdminEl, _pendingAdminType;
+let _pendingPanduanEl, _pendingPanduanType; // dipakai saat teknisi belum login coba buka tab Panduan
+let _bypassStandbyConfirm = false; // sekali pakai: true setelah user konfirmasi "Ya" pada popup standby 1 shift penuh
 let _editPwUserId     = null;
 let _editJenisId      = null;
 let _editJenisJoblogId= null;
@@ -1522,6 +1844,31 @@ window.addEventListener('fb-ready', async () => {
     const s = await getDoc(doc(db,'settings','admin'));
     if(s.exists() && s.data().password) adminPw = s.data().password;
   } catch(e){}
+
+  // Seed kategori Panduan Troubleshoot default (sekali saja, kalau koleksi masih kosong)
+  try {
+    const { getDocs, addDoc } = window._fb;
+    const tsSnap = await getDocs(collection(db,'troubleshootCats'));
+    if(tsSnap.empty){
+      const defaults = [
+        {icon:'⚙️', nama:'CNC & Mesin Produksi', order:1},
+        {icon:'🔌', nama:'Motor & Panel Listrik', order:2},
+        {icon:'💨', nama:'Kompresor & Pneumatik', order:3},
+        {icon:'🚰', nama:'Pompa & Perpipaan', order:4},
+        {icon:'❄️', nama:'HVAC / AC', order:5},
+        {icon:'🔧', nama:'Genset & Mekanikal', order:6}
+      ];
+      for(const d of defaults) await addDoc(collection(db,'troubleshootCats'), d);
+    }
+  } catch(e){ console.error('Gagal seed kategori troubleshoot:', e); }
+
+  // Listen: kategori Panduan Troubleshoot (real-time)
+  onSnapshot(collection(db,'troubleshootCats'), snap => {
+    tsCatDB = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                       .sort((a,b) => (a.order||0)-(b.order||0) || (a.nama||'').localeCompare(b.nama||''));
+    renderTsGrid();
+    renderPanduanManageList();
+  }, err => { console.error('Gagal memuat kategori troubleshoot:', err); });
 
   // Listen: teknisi list (real-time)
   onSnapshot(collection(db,'teknisis'), snap => {
@@ -1604,6 +1951,33 @@ window.addEventListener('fb-ready', async () => {
     }
   }, err => {
     console.error('Gagal memuat jenis:', err);
+  });
+
+  // Listen: kata sifat kerusakan (real-time) — untuk deteksi frasa "Kata Kerusakan"
+  let _kataSifatSeedDone = false;
+  onSnapshot(query(collection(db,'kataSifat'), orderBy('kata','asc')), async snap => {
+    kataSifatDB = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderKataSifatList();
+    if(document.getElementById('kk-bulan')) renderKataKerusakan();
+
+    // Seed daftar kata sifat default pertama kali jika kosong
+    if(!_kataSifatSeedDone && kataSifatDB.length === 0){
+      _kataSifatSeedDone = true;
+      const defaults = [
+        'mati','rusak','bocor','kurang','lemah','panas','dingin','rendah','tinggi',
+        'aus','kendor','longgar','macet','tersumbat','korslet','konslet','error','eror',
+        'ngadat','jebol','pecah','retak','patah','putus','kotor','buntu','karat','berkarat',
+        'oleng','goyang','drop','lambat','berisik','bising','getar','bergetar','trip','nyangkut'
+      ];
+      try{
+        const {db:fdb, collection:fcol, addDoc:fadd} = window._fb;
+        for(const k of defaults) await fadd(fcol(fdb,'kataSifat'), {kata:k});
+      }catch(e){}
+    } else {
+      _kataSifatSeedDone = true;
+    }
+  }, err => {
+    console.error('Gagal memuat kata sifat kerusakan:', err);
   });
 
   // Listen: joblogs (real-time)
@@ -1703,6 +2077,16 @@ function buildJenisDropdowns(){
     opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
   if(prevF) fJenis.value = prevF;
 
+  // Dropdown "Jenis Pekerjaan Tambahan" — muncul saat Jenis Pekerjaan utama = Lembur.
+  // Lembur sendiri tidak boleh dipilih lagi di sini.
+  const fJenis2 = document.getElementById('f-jenis2');
+  if(fJenis2){
+    const prevF2 = fJenis2.value;
+    fJenis2.innerHTML = '<option value="">-- Pilih Jenis Pekerjaan Sebenarnya --</option>' +
+      opts.filter(j => !/lembur/i.test(j.nama||'')).map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
+    if(prevF2) fJenis2.value = prevF2;
+  }
+
   // Dropdown filter admin
   const ffJenis = document.getElementById('ff-jenis');
   const prevFF = ffJenis.value;
@@ -1712,6 +2096,14 @@ function buildJenisDropdowns(){
 }
 
 // ── LOGIN TEKNISI ──────────────────────────────────────────────
+// ── AKSES TAB PANDUAN (wajib login teknisi) ─────────────────────
+function tryPanduan(el, type){
+  if(currentUser){ switchTab('panduan', el, type); return; }
+  _pendingPanduanEl = el; _pendingPanduanType = type;
+  showLoginTeknisi();
+  document.getElementById('login-sub').textContent = 'Pilih nama dan masukkan password untuk melihat Panduan Troubleshoot.';
+}
+
 function showLoginTeknisi(){
   // Jika Firebase belum siap, tampilkan loading message
   if(!fbConfigOk){
@@ -1720,6 +2112,7 @@ function showLoginTeknisi(){
   }
   // Rebuild dropdown dengan data terbaru dari Firestore
   buildLoginDropdown();
+  document.getElementById('login-sub').textContent = 'Pilih nama dan masukkan password untuk mulai input joblog.';
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-pw').value = '';
   // Jangan reset nama jika sudah ada pilihan
@@ -1755,7 +2148,13 @@ function doLoginTeknisi(){
   renderWipBar();
   renderSrBar();
   updateUnknownBanner();
+  updateSisaJamBanner();
   toast(`Selamat datang, ${user.nama}!`);
+  // Jika login dipicu karena mencoba membuka tab Panduan, lanjutkan ke sana
+  if(_pendingPanduanEl){
+    switchTab('panduan', _pendingPanduanEl, _pendingPanduanType);
+    _pendingPanduanEl = null; _pendingPanduanType = null;
+  }
 }
 function logoutTeknisi(){
   currentUser = null;
@@ -1764,7 +2163,14 @@ function logoutTeknisi(){
   document.getElementById('wip-bar').style.display = 'none';
   document.getElementById('srbar').style.display = 'none';
   document.getElementById('unknown-banner').classList.remove('show');
+  document.getElementById('sisa-jam-banner').classList.remove('show');
   document.getElementById('my-logs').innerHTML = '<div class="empty-state">Login dulu untuk melihat joblog.</div>';
+  // Tab Panduan wajib login — jika sedang dibuka, kembali ke tab Input
+  const panduanTab = document.getElementById('tab-panduan');
+  if(panduanTab && panduanTab.style.display !== 'none'){
+    const mob = window.innerWidth < 640;
+    switchTab('input', document.getElementById(mob?'mob-tab-input':'desk-tab-input'), mob?'mob':'desk');
+  }
   showLoginTeknisi();
 }
 
@@ -1830,6 +2236,7 @@ function renderActiveView(){
     renderWipBar();
     renderSrBar();
     updateUnknownBanner();
+    updateSisaJamBanner();
   }
 
   if(tabAdminVisible){
@@ -1847,31 +2254,36 @@ function renderActiveView(){
 }
 
 function switchTab(t,el,type){
+  // Tab Panduan wajib login teknisi — jaga-jaga jika switchTab dipanggil langsung
+  if(t==='panduan' && !currentUser){ tryPanduan(el,type); return; }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   const mirror=type==='mob'
-    ?document.getElementById('desk-tab-'+(t==='input'?'input':'admin'))
-    :document.getElementById('mob-tab-'+(t==='input'?'input':'admin'));
+    ?document.getElementById('desk-tab-'+t)
+    :document.getElementById('mob-tab-'+t);
   if(mirror) mirror.classList.add('active');
   document.getElementById('tab-input').style.display=t==='input'?'block':'none';
+  document.getElementById('tab-panduan').style.display=t==='panduan'?'block':'none';
   document.getElementById('tab-admin').style.display=t==='admin'?'block':'none';
   if(t==='admin'){
     // Aktifkan panel terakhir yang aktif, atau default ke 'data'
     switchGroupItem(_activeItem||'data');
     renderUserList();
+  } else if(t==='panduan'){
+    renderTsGrid();
   } else {
-    renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner();
+    renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner(); updateSisaJamBanner();
   }
 }
 // ── GROUP NAV ──────────────────────────────────────────────────
 // Semua sub-panel yang ada
-const ALL_PANELS = ['data','teknisi','jenis','performa','pm','postpm','settings'];
+const ALL_PANELS = ['data','teknisi','jenis','performa','pm','postpm','mesin','settings','panduan','katasifat'];
 // Mapping: item → kelompok dropdown mana yang punya item itu
 const ITEM_GROUP = {
-  data:'data', pm:'data', postpm:'data',
+  data:'data', pm:'data', postpm:'data', mesin:'data',
   performa:null,  // langsung, tidak dalam dropdown
-  teknisi:'admin', jenis:'admin', settings:'admin'
+  teknisi:'admin', jenis:'admin', settings:'admin', panduan:'admin', katasifat:'admin'
 };
 // State aktif
 let _activeItem  = 'data';
@@ -1904,6 +2316,9 @@ document.addEventListener('click', e => {
 function switchGroupItem(s){
   closeAllDropdowns();
   _activeItem = s;
+
+  // Reset drill-down "Kelola Panduan" (kategori→kerusakan) setiap kali pindah panel
+  if(_panduanActiveCatId) closePanduanItemsView();
 
   // Sembunyikan semua panel
   ALL_PANELS.forEach(id => {
@@ -1949,6 +2364,9 @@ function switchGroupItem(s){
   if(s==='performa') renderPerforma();
   if(s==='pm')       { renderPM(); renderPMInterval(); }
   if(s==='postpm')   renderPostPM();
+  if(s==='mesin')    renderPerformaMesin();
+  if(s==='panduan')  renderPanduanManageList();
+  if(s==='katasifat') renderKataSifatList();
 }
 
 // ── SWITCH PM INNER TAB (PM | Interval) ───────────────────────
@@ -1974,6 +2392,8 @@ async function submitJob(){
   const sr     = document.getElementById('f-sr').value.trim();
   const mesin  = document.getElementById('f-mesin').value.trim();
   const jenis  = document.getElementById('f-jenis').value;
+  const isLemburJenis = /lembur/i.test(jenis || '');
+  const jenis2 = isLemburJenis ? document.getElementById('f-jenis2').value : '';
   const job    = document.getElementById('f-job').value.trim();
   const start  = getTimeVal('f-start');
   const date   = document.getElementById('f-date').value;
@@ -1997,16 +2417,35 @@ async function submitJob(){
   if(!sr)  { showNotif('error','Validasi Gagal','No. SR wajib diisi.'); return; }
   if(!mesin){ showNotif('error','Validasi Gagal','Nama/Kode Mesin wajib diisi.'); return; }
   if(!jenis){ showNotif('error','Validasi Gagal','Jenis Pekerjaan wajib dipilih.'); return; }
+  if(isLemburJenis && !jenis2){ showNotif('error','Validasi Gagal','Jenis Pekerjaan Tambahan wajib dipilih untuk Lembur.'); return; }
   if(!job)  { showNotif('error','Validasi Gagal','Deskripsi Pekerjaan wajib diisi.'); return; }
   if(start === null){ showNotif('error','Format Waktu Salah','Waktu mulai tidak valid. Gunakan format HH:MM (contoh: 08:30).'); return; }
   if(!start){ showNotif('error','Validasi Gagal','Waktu Mulai wajib diisi.'); return; }
   if(end && end < start){ showNotif('error','Waktu Tidak Valid','Waktu selesai tidak boleh sebelum waktu mulai.'); return; }
   if(!fbConfigOk){ showNotif('error','Koneksi Gagal','Firebase belum dikonfigurasi. Hubungi admin.'); return; }
 
+  const dur = (end && start) ? durMins(start, end) : null;
+
+  // ── VALIDASI JAM KERJA HARIAN ──────────────────────────────────
+  // Total input joblog per teknisi per hari dibatasi sesuai jam kerja (7 jam,
+  // Sabtu 5 jam). Jenis Pekerjaan "Lembur" dikecualikan dari batas ini.
+  if(dur !== null && dur > 0){
+    const capCheck = checkJamKerjaCap({ jenis, dur, date, nama: currentUser.nama, bypassConfirm:_bypassStandbyConfirm });
+    _bypassStandbyConfirm = false; // konsumsi sekali pakai, apapun hasilnya
+    if(capCheck.type === 'block'){
+      showNotif('error', capCheck.title, capCheck.message);
+      return;
+    }
+    if(capCheck.type === 'confirm'){
+      confirmStandbyFullDay(capCheck.message);
+      return; // tunggu konfirmasi user — submit dilanjutkan otomatis jika user pilih "Ya, Benar"
+    }
+  }
+
   const record = {
-    nama:currentUser.nama, sr, mesin, jenis, job, start, end, date,
+    nama:currentUser.nama, sr, mesin, jenis, jenis2: jenis2 || null, job, start, end, date,
     status, // salah satu: selesai | berkelanjutan | lanjut | part | bengkel
-    dur:(end&&start)?durMins(start,end):null,
+    dur,
     submittedAt:nowTs()
   };
 
@@ -2038,10 +2477,12 @@ async function submitJob(){
   }
 }
 function resetForm(){
-  ['f-sr','f-mesin','f-jenis','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
+  ['f-sr','f-mesin','f-jenis','f-jenis2','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-date').value=todayStr();
   document.getElementById('f-status').value='lanjut';
+  toggleJenis2Field();
   updateEndFieldVisibility();
+  updateSisaJamBanner();
 }
 
 // Tampilkan/sembunyikan label "wajib" pada field waktu selesai sesuai status
@@ -2050,6 +2491,15 @@ function updateEndFieldVisibility(){
   const wajibEnd   = STATUS_MAP[statusVal] ? STATUS_MAP[statusVal].selesai : false;
   const lbl = document.querySelector('#field-end label');
   if(lbl) lbl.textContent = wajibEnd ? 'Waktu Selesai *' : 'Waktu Selesai';
+}
+
+// Tampilkan field "Jenis Pekerjaan Tambahan" saat Jenis Pekerjaan utama = Lembur
+function toggleJenis2Field(){
+  const jenisVal = document.getElementById('f-jenis').value;
+  const wrap = document.getElementById('field-jenis2');
+  const isLembur = /lembur/i.test(jenisVal || '');
+  wrap.style.display = isLembur ? 'block' : 'none';
+  if(!isLembur) document.getElementById('f-jenis2').value = '';
 }
 
 // ── RENDER MY LOGS ─────────────────────────────────────────────
@@ -2068,7 +2518,7 @@ function renderMyLogs(){
     <div class="log-item">
       <div class="log-item-top">
         <div style="display:flex;align-items:center;gap:8px">
-          <span class="log-sr">${r.sr}</span>${jenisBadge(r.jenis)}
+          <span class="log-sr">${r.sr}</span>${jenisBadges(r)}
         </div>
         ${statusBadgeHtml(r)}
       </div>
@@ -2132,7 +2582,7 @@ function renderAdmin(){
   let rows  = [...joblogDB];
   if(fn)  rows = rows.filter(r=>r.nama===fn);
   if(fd)  rows = rows.filter(r=>r.date===fd);
-  if(fj)  rows = rows.filter(r=>r.jenis===fj);
+  if(fj)  rows = rows.filter(r=>r.jenis===fj || r.jenis2===fj);
   if(fsr) rows = rows.filter(r=>(r.sr||'').toLowerCase().includes(fsr));
   if(fms) rows = rows.filter(r=>(r.mesin||'').toLowerCase().includes(fms));
   if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
@@ -2189,7 +2639,7 @@ function renderAdmin(){
     <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
     <td class="sr-code">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></td>
     <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
-    <td>${jenisBadge(r.jenis)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
+    <td>${jenisBadges(r)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
     <td>${r.job}<button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></td>
     <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
     <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
@@ -2366,6 +2816,62 @@ function updateUnknownBanner(){
   document.getElementById('unknown-banner-sub').textContent = `rata-rata per hari · ${bulanLabel} · dari ${jmlHari} hari berdata`;
   banner.classList.add('show');
 }
+
+// ── BANNER SISA JAM KERJA HARI INI ──────────────────────────────
+// Tampil begitu teknisi sudah punya input joblog di tanggal yang dipilih pada
+// form (default: hari ini), menunjukkan sisa kuota jam kerja yang masih boleh
+// diinput. Sama seperti guard di checkJamKerjaCap: Lembur dikecualikan.
+function updateSisaJamBanner(){
+  const banner = document.getElementById('sisa-jam-banner');
+  if(!banner) return;
+  if(!currentUser){ banner.classList.remove('show'); return; }
+
+  const dateEl = document.getElementById('f-date');
+  const date = dateEl ? dateEl.value : '';
+  if(!date){ banner.classList.remove('show'); return; }
+
+  const capMenit = getDailyCapMinutes(date);
+  const dayRows = joblogDB.filter(r =>
+    r.nama === currentUser.nama && r.date === date && typeof r.dur === 'number' && !LEMBUR_RE_CAP.test(r.jenis || '')
+  );
+  const existingTotal = dayRows.reduce((sum, r) => sum + r.dur, 0);
+
+  // Belum ada input di tanggal ini — belum ada yang perlu ditunjukkan
+  if(existingTotal <= 0){ banner.classList.remove('show'); return; }
+
+  const sisa = Math.max(0, capMenit - existingTotal);
+  const habisKarenaStandby = dayRows.some(r => STANDBY_RE_CAP.test(r.jenis || '') && r.dur >= capMenit);
+  const tglLabel = new Date(date + 'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+
+  const icon  = document.getElementById('sisa-jam-icon');
+  const value = document.getElementById('sisa-jam-value');
+  const label = document.getElementById('sisa-jam-label');
+  const sub   = document.getElementById('sisa-jam-sub');
+
+  if(sisa <= 0){
+    banner.style.background = 'linear-gradient(135deg,#FEF2F2,#FEE2E2)';
+    banner.style.borderColor = '#EF4444';
+    icon.textContent = '🔒';
+    value.textContent = '0 menit';
+    value.style.color = '#B91C1C';
+    label.textContent = habisKarenaStandby ? 'Jam Kerja Sudah Habis di Standby' : 'Jam Kerja Hari Ini Sudah Habis';
+    label.style.color = '#991B1B';
+    sub.textContent = `${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
+    sub.style.color = '#B91C1C';
+  } else {
+    banner.style.background = 'linear-gradient(135deg,#EFF6FF,#DBEAFE)';
+    banner.style.borderColor = '#3B82F6';
+    icon.textContent = '⏱️';
+    value.textContent = fmtDur(sisa);
+    value.style.color = '#1D4ED8';
+    label.textContent = 'Sisa Jam Kerja Hari Ini';
+    label.style.color = '#1E40AF';
+    sub.textContent = `sudah terpakai ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
+    sub.style.color = '#1D4ED8';
+  }
+
+  banner.classList.add('show');
+}
 // ── MODAL DETAIL JOBLOG (dari kartu mobile) ────────────────────
 function openDetailJoblog(joblogId){
   const r = joblogDB.find(x => x._id === joblogId);
@@ -2389,7 +2895,7 @@ function openDetailJoblog(joblogId){
       ${row('Jam Mulai', fmt24(r.start), true)}
       ${row('Jam Selesai', r.end ? fmt24(r.end) : '—', true)}
       ${row('Durasi', fmtDur(r.dur), true)}
-      ${row('Jenis', jenisBadge(r.jenis))}
+      ${row('Jenis', jenisBadges(r))}
     </div>
     <div style="display:flex;flex-direction:column;gap:2px">
       <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Deskripsi Pekerjaan</div>
@@ -2503,8 +3009,23 @@ function openEditJoblog(joblogId){
   sel.innerHTML = '<option value="">-- Pilih Jenis --</option>' +
     jenisDB.map(j => `<option value="${j.nama}" ${j.nama===r.jenis?'selected':''}>${j.nama}</option>`).join('');
 
+  // Isi dropdown "Jenis Pekerjaan Tambahan" (khusus Lembur) — Lembur tidak boleh pilih Lembur lagi
+  const sel2 = document.getElementById('ej-jenis2');
+  sel2.innerHTML = '<option value="">-- Pilih Jenis Pekerjaan Sebenarnya --</option>' +
+    jenisDB.filter(j => !/lembur/i.test(j.nama||'')).map(j => `<option value="${j.nama}" ${j.nama===r.jenis2?'selected':''}>${j.nama}</option>`).join('');
+  toggleEjJenis2Field();
+
   document.getElementById('edit-joblog-err').style.display = 'none';
   document.getElementById('modal-edit-joblog').classList.add('show');
+}
+
+// Tampilkan field "Jenis Pekerjaan Tambahan" di modal Edit Joblog saat jenis = Lembur
+function toggleEjJenis2Field(){
+  const jenisVal = document.getElementById('ej-jenis').value;
+  const wrap = document.getElementById('ej-field-jenis2');
+  const isLembur = /lembur/i.test(jenisVal || '');
+  wrap.style.display = isLembur ? 'block' : 'none';
+  if(!isLembur) document.getElementById('ej-jenis2').value = '';
 }
 
 async function saveEditJoblog(){
@@ -2515,6 +3036,8 @@ async function saveEditJoblog(){
   const sr    = document.getElementById('ej-sr').value.trim();
   const mesin = document.getElementById('ej-mesin').value.trim();
   const jenis = document.getElementById('ej-jenis').value;
+  const isLemburJenis = /lembur/i.test(jenis || '');
+  const jenis2 = isLemburJenis ? document.getElementById('ej-jenis2').value : '';
   const job   = document.getElementById('ej-job').value.trim();
   const date  = document.getElementById('ej-date').value;
   const start = document.getElementById('ej-start').value.trim();
@@ -2524,6 +3047,11 @@ async function saveEditJoblog(){
   if(!job || !date || !start){
     err.style.display='block';
     err.textContent = 'Deskripsi, tanggal, dan waktu mulai wajib diisi.';
+    return;
+  }
+  if(isLemburJenis && !jenis2){
+    err.style.display='block';
+    err.textContent = 'Jenis Pekerjaan Tambahan wajib dipilih untuk Lembur.';
     return;
   }
 
@@ -2536,7 +3064,7 @@ async function saveEditJoblog(){
     if(d > 0) dur = d;
   }
 
-  const updates = { sr, mesin, jenis, job, date, start, end, status };
+  const updates = { sr, mesin, jenis, jenis2: jenis2 || null, job, date, start, end, status };
   if(dur !== null) updates.dur = dur; else updates.dur = null;
 
   try {
@@ -2581,6 +3109,49 @@ function mesinMatch(a, b){
 const PERBAIKAN_RE = /perbaikan|penggantian\s*part/i;
 function isPerbaikan(jenis){ return jenis && PERBAIKAN_RE.test(jenis.trim()); }
 
+// Ambil 4 digit angka terakhir dari No. SR. null kalau SR tidak punya minimal 4 digit angka
+// (supaya SR yang formatnya tidak jelas tidak salah digabung dengan yang lain).
+function last4Digits(sr){
+  if(!sr) return null;
+  const digits = (String(sr).match(/\d/g) || []).join('');
+  if(digits.length < 4) return null;
+  return digits.slice(-4);
+}
+
+// Gabungkan baris joblog Perbaikan/Penggantian Part (termasuk Lembur+Perbaikan) yang merupakan
+// SR yang SAMA (4 digit terakhir No. SR sama), mesin yang sama, dan bulan yang sama — supaya 1
+// kejadian kerusakan yang diinput bertahap (diagnosa → lanjut → selesai) dihitung sebagai 1 kejadian,
+// bukan berkali-kali. Tanggal yang dipakai untuk hasil gabungan = tanggal paling awal dari grup.
+// Deskripsi pekerjaan yang berbeda-beda dalam grup digabung dengan " / ".
+function dedupSrRows(rows){
+  const groups = {};
+  const order  = [];
+  rows.forEach(r => {
+    const mesin = (r.mesin||'').trim();
+    const last4 = last4Digits(r.sr);
+    const bulan = (r.date||'').slice(0,7);
+    // SR tanpa 4 digit angka yang jelas: jangan digabung dengan apapun, berdiri sendiri
+    const key = last4 ? `${mesin}|||${last4}|||${bulan}` : `__solo__${r._id}`;
+    if(!groups[key]){ groups[key]=[]; order.push(key); }
+    groups[key].push(r);
+  });
+
+  return order.map(key => {
+    const members = groups[key].slice().sort((a,b) =>
+      (a.date||'').localeCompare(b.date||'') || (a.start||'').localeCompare(b.start||'')
+    );
+    const base = members[0]; // paling awal tanggalnya jadi representasi kejadian ini
+    const uniqJobs  = [...new Set(members.map(m=>m.job).filter(Boolean))];
+    const totalDur  = members.reduce((s,m) => s + (typeof m.dur==='number'?m.dur:0), 0);
+    return {
+      ...base,
+      job: uniqJobs.join(' / '),
+      dur: totalDur || base.dur,
+      _mergedCount: members.length
+    };
+  });
+}
+
 // Selisih hari antara dua string tanggal YYYY-MM-DD (b - a)
 function selisihHari(tglA, tglB){
   const a = new Date(tglA + 'T00:00:00');
@@ -2592,7 +3163,7 @@ function getPostPMRows(){
   const fbulan = document.getElementById('postpm-bulan').value;
 
   const pmRows  = joblogDB.filter(r => isPMJenis(r.jenis) && r.date && r.mesin);
-  const repRows = joblogDB.filter(r => isPerbaikan(r.jenis) && r.date && r.mesin);
+  const repRows = joblogDB.filter(r => (isPerbaikan(r.jenis) || isPerbaikan(r.jenis2)) && r.date && r.mesin);
 
   const results = [];
   repRows.forEach(rep => {
@@ -2608,6 +3179,7 @@ function getPostPMRows(){
           tglRep     : rep.date,
           selisih    : gap,
           jenis      : rep.jenis,
+          jenis2     : rep.jenis2,
           deskripsi  : rep.job,
           teknisi    : rep.nama,
           teknisiPM  : pm.nama,   // ← teknisi yang melakukan PM
@@ -2706,7 +3278,7 @@ function renderPostPM(){
           <div class="postpm-meta">
             <span>📅 PM: ${r.tglPM} · 👤 ${r.teknisiPM}</span>
             <span>🔨 Perbaikan: ${r.tglRep} · 👤 ${r.teknisi}</span>
-            <span>${jenisBadge(r.jenis)}</span>
+            <span>${jenisBadges(r)}</span>
           </div>
         </div>
       </div>`;
@@ -2726,7 +3298,7 @@ function renderPostPM(){
       <td style="white-space:nowrap">${r.teknisiPM}</td>
       <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.tglRep}</td>
       <td class="selisih-cell">+${r.selisih} hari</td>
-      <td>${jenisBadge(r.jenis)}</td>
+      <td>${jenisBadges(r)}</td>
       <td style="word-break:break-word;max-width:200px">${r.deskripsi}</td>
       <td style="white-space:nowrap">${r.teknisi}</td>
     </tr>`;
@@ -2784,6 +3356,444 @@ window.addEventListener('resize', ()=>{
   const subData = document.getElementById('sub-data');
   if(subData && subData.style.display !== 'none') renderAdmin();
 });
+
+// ── PERFORMA MESIN ─────────────────────────────────────────────
+
+function switchMesinInner(tab, el){
+  document.querySelectorAll('.pm-inner-tab[id^="mesin-tab"]').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('mesin-inner-rusak').style.display = tab==='rusak' ? 'block' : 'none';
+  document.getElementById('mesin-inner-kata').style.display  = tab==='kata'  ? 'block' : 'none';
+  if(tab==='rusak') renderMesinRusak();
+  if(tab==='kata')  renderKataKerusakan();
+}
+
+function renderPerformaMesin(){
+  if(!document.getElementById('mr-bulan').value)
+    document.getElementById('mr-bulan').value = todayStr().slice(0,7);
+  if(!document.getElementById('kk-bulan').value)
+    document.getElementById('kk-bulan').value = todayStr().slice(0,7);
+  buildMesinDropdown();
+  renderMesinRusak();
+}
+
+// ── Laporan 1: Mesin Sering Rusak ─────────────────────────────
+function getMesinRusakRows(){
+  const fbulan = document.getElementById('mr-bulan').value;
+  let rows = joblogDB.filter(r => (isPerbaikan(r.jenis) || isPerbaikan(r.jenis2)) && r.mesin);
+  if(fbulan) rows = rows.filter(r => r.date && r.date.startsWith(fbulan));
+  return dedupSrRows(rows);
+}
+
+let _mrPage = 1;
+const MR_PER_PAGE = 10;
+
+function renderMesinRusak(){
+  const rows    = getMesinRusakRows();
+  const empty   = document.getElementById('mr-empty');
+  const cards   = document.getElementById('mr-cards');
+  const tbody   = document.getElementById('mr-tbody');
+  const wrap    = document.getElementById('mr-table-wrap');
+  const summary = document.getElementById('mr-summary');
+  const pgEl    = document.getElementById('mr-pagination');
+  const isMob   = window.innerWidth < 640;
+
+  if(!rows.length){
+    cards.style.display='none'; wrap.style.display='none';
+    empty.style.display='block'; summary.style.display='none';
+    if(pgEl) pgEl.style.display='none';
+    tbody.innerHTML=''; cards.innerHTML=''; return;
+  }
+
+  const byMesin = {};
+  rows.forEach(r => {
+    const m = (r.mesin||'').trim();
+    if(!byMesin[m]) byMesin[m] = {mesin:m,dates:[],jenisCount:{}};
+    byMesin[m].dates.push(r.date||'');
+    const j=r.jenis||'Perbaikan';
+    byMesin[m].jenisCount[j]=(byMesin[m].jenisCount[j]||0)+1;
+  });
+
+  // Hanya tampilkan mesin yang rusak LEBIH DARI 2x (≥3x)
+  const ranked = Object.values(byMesin)
+    .filter(m => m.dates.length > 2)
+    .map(m=>{
+      m.dates.sort();
+      const total=m.dates.length, lastRusak=m.dates[m.dates.length-1];
+      let avgInterval=null;
+      if(m.dates.length>=2){
+        let g=0;
+        for(let i=1;i<m.dates.length;i++)
+          g+=Math.round((new Date(m.dates[i]+'T00:00:00')-new Date(m.dates[i-1]+'T00:00:00'))/86400000);
+        avgInterval=Math.round(g/(m.dates.length-1));
+      }
+      const jenisTerbanyak=Object.entries(m.jenisCount).sort((a,b)=>b[1]-a[1])[0][0];
+      return {...m,total,lastRusak,avgInterval,jenisTerbanyak};
+    }).sort((a,b)=>b.total-a.total);
+
+  if(!ranked.length){
+    cards.style.display='none'; wrap.style.display='none';
+    empty.style.display='block'; summary.style.display='none';
+    empty.textContent='Tidak ada mesin yang rusak lebih dari 2× dalam periode ini.';
+    if(pgEl) pgEl.style.display='none';
+    tbody.innerHTML=''; cards.innerHTML=''; return;
+  }
+  empty.style.display='none';
+
+  // Pagination
+  const totalPages = Math.ceil(ranked.length / MR_PER_PAGE);
+  if(_mrPage > totalPages) _mrPage = 1;
+  const start  = (_mrPage-1) * MR_PER_PAGE;
+  const paged  = ranked.slice(start, start + MR_PER_PAGE);
+
+  summary.textContent=`${ranked.length} mesin (>2× rusak) · ${rows.length} total kejadian · hal. ${_mrPage}/${totalPages}`;
+  summary.style.display='block';
+
+  const rankColor=i=>i===0?'#F59E0B':i===1?'#9CA3AF':i===2?'#B45309':'var(--muted)';
+  const rankCls=i=>i===0?'r1':i===1?'r2':i===2?'r3':'';
+
+  cards.style.display = isMob ? 'flex' : 'none';
+  wrap.style.display  = isMob ? 'none' : 'block';
+
+  if(isMob){
+    cards.innerHTML = paged.map((m,i)=>`
+    <div class="mr-card" style="cursor:pointer" onclick="openMesinRusakDetail('${m.mesin.replace(/'/g,"\\'")}')">
+      <div class="mr-card-header">
+        <div class="mr-rank ${rankCls(start+i)}">#${start+i+1}</div>
+        <div class="mr-mesin">${m.mesin}</div>
+        <div class="mr-total-badge">${m.total}×</div>
+      </div>
+      <div class="mr-card-body">
+        <div class="mr-stat">
+          <span class="mr-stat-label">Terakhir Rusak</span>
+          <span class="mr-stat-val">📅 ${m.lastRusak||'—'}</span>
+        </div>
+        <div class="mr-stat">
+          <span class="mr-stat-label">Rata² Interval</span>
+          <span class="mr-stat-val">${m.avgInterval?m.avgInterval+' hari':'—'}</span>
+        </div>
+        <div class="mr-jenis">
+          <div class="mr-jenis-label">Jenis Terbanyak</div>
+          <div class="mr-jenis-val">${m.jenisTerbanyak}</div>
+        </div>
+      </div>
+    </div>`).join('');
+  }
+
+  tbody.innerHTML = paged.map((m,i)=>`<tr style="cursor:pointer" onclick="openMesinRusakDetail('${m.mesin.replace(/'/g,"\\'")}')">
+    <td style="font-family:var(--mono);font-weight:700;font-size:14px;text-align:center;color:${rankColor(start+i)}">#${start+i+1}</td>
+    <td style="font-weight:600;word-break:break-word">${m.mesin}</td>
+    <td style="font-family:var(--mono);font-size:13px;font-weight:700;color:#991B1B;text-align:center">${m.total}×</td>
+    <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${m.lastRusak||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${m.avgInterval?m.avgInterval+' hari':'—'}</td>
+    <td style="font-size:12px;word-break:break-word">${m.jenisTerbanyak}</td>
+  </tr>`).join('');
+
+  // Render pagination
+  if(pgEl){
+    if(totalPages <= 1){ pgEl.style.display='none'; return; }
+    pgEl.style.display='flex';
+    let h=`<button class="pg-btn" onclick="goMrPage(${_mrPage-1})" ${_mrPage===1?'disabled':''}>‹</button>`;
+    for(let p=1;p<=totalPages;p++){
+      if(totalPages>7 && Math.abs(p-_mrPage)>2 && p!==1 && p!==totalPages){
+        if(p===2||p===totalPages-1) h+=`<span style="padding:0 4px;font-family:var(--mono);font-size:12px">…</span>`;
+        continue;
+      }
+      h+=`<button class="pg-btn ${p===_mrPage?'active':''}" onclick="goMrPage(${p})">${p}</button>`;
+    }
+    h+=`<button class="pg-btn" onclick="goMrPage(${_mrPage+1})" ${_mrPage===totalPages?'disabled':''}>›</button>`;
+    pgEl.innerHTML=h;
+  }
+}
+
+function goMrPage(p){ _mrPage=p; renderMesinRusak(); }
+
+function resetMesinRusakFilter(){
+  _mrPage=1;
+  document.getElementById('mr-bulan').value=todayStr().slice(0,7);
+  renderMesinRusak();
+}
+
+// Drill-down: tampilkan semua kejadian rusak (tanggal + deskripsi pekerjaan) untuk 1 mesin
+function openMesinRusakDetail(mesinName){
+  const fbulan = document.getElementById('mr-bulan').value;
+  let rows = joblogDB.filter(r =>
+    (isPerbaikan(r.jenis) || isPerbaikan(r.jenis2)) && (r.mesin||'').trim() === mesinName
+  );
+  if(fbulan) rows = rows.filter(r => r.date && r.date.startsWith(fbulan));
+  rows = dedupSrRows(rows).sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.start||'').localeCompare(a.start||''));
+
+  document.getElementById('mr-detail-title').textContent = `📋 Riwayat Kerusakan — ${mesinName}`;
+  document.getElementById('mr-detail-count-badge').textContent = `${rows.length}×`;
+
+  const list = document.getElementById('mr-detail-list');
+  if(!rows.length){
+    list.innerHTML = '<div class="empty-state">Tidak ada data pada periode ini.</div>';
+  } else {
+    list.innerHTML = rows.map(r => `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">📅 ${r.date||'—'}</span>
+          <div>${jenisBadges(r)}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.5">${r.job||'—'}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px">Teknisi: ${r.nama||'—'}${r.sr?' · SR: '+r.sr:''}${r._mergedCount>1?' · digabung dari '+r._mergedCount+' input':''}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('modal-mr-detail').classList.add('show');
+}
+
+function exportMesinRusak(){
+  const rows=getMesinRusakRows();
+  if(!rows.length){toast('Tidak ada data untuk diekspor.','warn');return;}
+  const bulan=document.getElementById('mr-bulan').value||todayStr().slice(0,7);
+  const byMesin={};
+  rows.forEach(r=>{
+    const m=(r.mesin||'').trim();
+    if(!byMesin[m]) byMesin[m]={mesin:m,dates:[],jenisCount:{}};
+    byMesin[m].dates.push(r.date||'');
+    const j=r.jenis||'Perbaikan';
+    byMesin[m].jenisCount[j]=(byMesin[m].jenisCount[j]||0)+1;
+  });
+  const ranked=Object.values(byMesin).map(m=>{
+    m.dates.sort();
+    const total=m.dates.length,lastRusak=m.dates[m.dates.length-1];
+    let avgInterval=null;
+    if(m.dates.length>=2){let g=0;for(let i=1;i<m.dates.length;i++)g+=Math.round((new Date(m.dates[i]+'T00:00:00')-new Date(m.dates[i-1]+'T00:00:00'))/86400000);avgInterval=Math.round(g/(m.dates.length-1));}
+    const jenisTerbanyak=Object.entries(m.jenisCount).sort((a,b)=>b[1]-a[1])[0][0];
+    return {...m,total,lastRusak,avgInterval,jenisTerbanyak};
+  }).sort((a,b)=>b.total-a.total);
+  const data=[['#','Nama/Kode Mesin','Total Kerusakan','Terakhir Rusak','Rata-rata Interval (hari)','Jenis Terbanyak'],
+    ...ranked.map((m,i)=>[i+1,m.mesin,m.total,m.lastRusak||'',m.avgInterval||'',m.jenisTerbanyak])];
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[4,24,14,14,16,22].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Mesin Rusak');
+  XLSX.writeFile(wb,`MesinRusak_${bulan}_${todayStr()}.xlsx`);
+  toast('Export berhasil!');
+}
+
+// ── KELOLA KATA SIFAT KERUSAKAN (admin dashboard) ───────────────
+function renderKataSifatList(){
+  const el = document.getElementById('ks-list');
+  if(!el) return;
+  if(!kataSifatDB.length){
+    el.innerHTML = '<div class="empty-state">Belum ada kata. Tambahkan di atas.</div>';
+    return;
+  }
+  el.innerHTML = kataSifatDB.map(k => `
+    <span style="display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:6px 8px 6px 14px;font-size:13px">
+      ${k.kata}
+      <button onclick="deleteKataSifat('${k.id}','${(k.kata||'').replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1">✕</button>
+    </span>
+  `).join('');
+}
+
+async function addKataSifat(){
+  const input = document.getElementById('ks-input');
+  const kata = input.value.trim().toLowerCase();
+  if(!kata) return;
+  if(kataSifatDB.some(k => (k.kata||'').toLowerCase() === kata)){
+    toast('Kata itu sudah ada di daftar.','warn');
+    return;
+  }
+  try{
+    const {db,collection,addDoc} = window._fb;
+    await addDoc(collection(db,'kataSifat'), {kata});
+    input.value = '';
+    toast(`Kata "${kata}" ditambahkan.`);
+  }catch(e){ toast('Gagal menambahkan kata.','warn'); }
+}
+
+function deleteKataSifat(id, kata){
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Kata';
+  document.getElementById('confirm-delete-msg').innerHTML = `Hapus kata <strong>${kata}</strong> dari daftar deteksi kerusakan?`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try{
+      const {db,doc,deleteDoc} = window._fb;
+      await deleteDoc(doc(db,'kataSifat',id));
+      toast(`Kata "${kata}" dihapus.`);
+    }catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── Laporan 2: Kata Kerusakan ──────────────────────────────────
+const STOP_WORDS = new Set([
+  'dan','atau','yang','di','ke','dari','pada','untuk','dengan','adalah',
+  'ini','itu','tidak','ada','sudah','belum','akan','bisa','juga','saat',
+  'sehingga','karena','agar','oke','ok','nya','lah','kah','pun','ya',
+  'no','nr','sr','mesin','unit','line','part','spare','dilakukan','dilaksanakan',
+  'melakukan','perbaikan','penggantian','ganti','check','cek','pengecekan',
+  'setelah','sebelum','sampai','antara','dalam','luar','atas','bawah',
+  'kanan','kiri','depan','belakang','area','ruang','room','the','and','of',
+  'nbl','cepha','hormon'
+]);
+
+function tokenizeDesc(text){
+  return (text||'').toLowerCase()
+    .replace(/[^a-z0-9\s]/g,' ')
+    .split(/\s+/)
+    .filter(w=>w.length>=3 && !STOP_WORDS.has(w) && !/^\d+$/.test(w));
+}
+
+// Ekstrak frasa kerusakan (kata benda + kata sifat kondisi, atau sebaliknya) dari 1 deskripsi.
+// Contoh: "Lampu indikator mati" → "indikator mati". "Freon kurang, tekanan rendah" → "freon kurang", "tekanan rendah".
+// Kata sifat yang dicari berasal dari daftar kataSifatDB (dikelola di Dashboard Admin → Kata Kerusakan).
+function extractKerusakanPhrases(text){
+  const kataSifatSet = new Set(kataSifatDB.map(k => (k.kata||'').toLowerCase()).filter(Boolean));
+  if(!kataSifatSet.size) return [];
+
+  // Tokenize TANPA membuang stopword, supaya posisi kata tetangga tetap akurat
+  const rawTokens = (text||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);
+
+  const phrases = [];
+  for(let i=0;i<rawTokens.length;i++){
+    const w = rawTokens[i];
+    if(!kataSifatSet.has(w)) continue;
+
+    const isRealWord = (tok) => tok && tok.length>=3 && !STOP_WORDS.has(tok) && !kataSifatSet.has(tok) && !/^\d+$/.test(tok);
+
+    // Prioritaskan kata SEBELUM kata sifat (pola umum Bahasa Indonesia: "kata benda + kata sifat", mis. "lampu mati")
+    if(isRealWord(rawTokens[i-1])){
+      phrases.push(`${rawTokens[i-1]} ${w}`);
+    } else if(isRealWord(rawTokens[i+1])){
+      phrases.push(`${w} ${rawTokens[i+1]}`);
+    }
+  }
+  return phrases;
+}
+
+function buildMesinDropdown(){
+  const mesinSet=[...new Set(
+    joblogDB.filter(r=>(isPerbaikan(r.jenis)||isPerbaikan(r.jenis2))&&r.mesin).map(r=>r.mesin.trim())
+  )].sort();
+  const sel=document.getElementById('kk-mesin');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Semua Mesin</option>'+
+    mesinSet.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+let _kkPage = 1;
+let _kkPhraseRows = {}; // { frasa: [joblog rows] } — dipakai untuk drill-down klik frasa
+const KK_PER_PAGE = 10;
+
+function renderKataKerusakan(){
+  const fbulan=document.getElementById('kk-bulan').value;
+  const fmesin=document.getElementById('kk-mesin').value;
+  const empty=document.getElementById('kk-empty');
+  const result=document.getElementById('kk-result');
+  const summary=document.getElementById('kk-summary');
+  const pgEl=document.getElementById('kk-pagination');
+
+  let rows=joblogDB.filter(r=>isPerbaikan(r.jenis)||isPerbaikan(r.jenis2));
+  if(fbulan) rows=rows.filter(r=>r.date&&r.date.startsWith(fbulan));
+  if(fmesin) rows=rows.filter(r=>(r.mesin||'').trim()===fmesin);
+  rows = dedupSrRows(rows);
+
+  if(!rows.length){
+    empty.style.display='block';result.style.display='none';
+    summary.style.display='none';if(pgEl)pgEl.style.display='none';return;
+  }
+  empty.style.display='none';
+
+  const freq={};
+  _kkPhraseRows = {}; // reset setiap render — peta frasa → daftar joblog yang berkontribusi (untuk drill-down)
+  rows.forEach(r=>{
+    const phrases = extractKerusakanPhrases(r.job);
+    const seenThisRow = new Set();
+    phrases.forEach(p=>{
+      freq[p]=(freq[p]||0)+1;
+      if(!seenThisRow.has(p)){
+        (_kkPhraseRows[p]=_kkPhraseRows[p]||[]).push(r);
+        seenThisRow.add(p);
+      }
+    });
+  });
+
+  const allSorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  if(!allSorted.length){
+    empty.style.display='block';result.style.display='none';
+    empty.textContent='Tidak ada frasa kerusakan yang terdeteksi dari deskripsi pada filter ini. Coba tambah kata sifat di Dashboard Admin → Kata Kerusakan kalau istilahnya belum ada di daftar.';
+    if(pgEl)pgEl.style.display='none';return;
+  }
+
+  // Pagination
+  const totalPages=Math.ceil(allSorted.length/KK_PER_PAGE);
+  if(_kkPage>totalPages) _kkPage=1;
+  const start=(_kkPage-1)*KK_PER_PAGE;
+  const paged=allSorted.slice(start, start+KK_PER_PAGE);
+  const maxCount=allSorted[0][1]; // max dari seluruh data untuk bar proporsional
+
+  summary.textContent=`${rows.length} kejadian (SR unik) · ${allSorted.length} frasa unik${fmesin?' · '+fmesin:''} · hal. ${_kkPage}/${totalPages}`;
+  summary.style.display='block';
+  result.style.display='block';
+
+  document.getElementById('kk-bars').innerHTML=paged.map(([word,count],i)=>`
+  <div class="kk-bar-row" style="cursor:pointer" onclick="openKataKerusakanDetail('${word.replace(/'/g,"\\'")}')">
+    <span class="kk-rank">${start+i+1}</span>
+    <span class="kk-word">${word}</span>
+    <div class="kk-bar-wrap">
+      <div class="kk-bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div>
+    </div>
+    <span class="kk-count">${count}×</span>
+  </div>`).join('');
+
+  // Render pagination
+  if(pgEl){
+    if(totalPages<=1){pgEl.style.display='none';return;}
+    pgEl.style.display='flex';
+    let h=`<button class="pg-btn" onclick="goKkPage(${_kkPage-1})" ${_kkPage===1?'disabled':''}>‹</button>`;
+    for(let p=1;p<=totalPages;p++){
+      if(totalPages>7&&Math.abs(p-_kkPage)>2&&p!==1&&p!==totalPages){
+        if(p===2||p===totalPages-1) h+=`<span style="padding:0 4px;font-family:var(--mono);font-size:12px">…</span>`;
+        continue;
+      }
+      h+=`<button class="pg-btn ${p===_kkPage?'active':''}" onclick="goKkPage(${p})">${p}</button>`;
+    }
+    h+=`<button class="pg-btn" onclick="goKkPage(${_kkPage+1})" ${_kkPage===totalPages?'disabled':''}>›</button>`;
+    pgEl.innerHTML=h;
+  }
+}
+
+function goKkPage(p){ _kkPage=p; renderKataKerusakan(); }
+
+// Drill-down: tampilkan semua joblog (tanggal + mesin + deskripsi) yang mengandung 1 frasa kerusakan
+function openKataKerusakanDetail(phrase){
+  const rows = (_kkPhraseRows[phrase] || []).slice()
+    .sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.start||'').localeCompare(a.start||''));
+
+  document.getElementById('kk-detail-title').textContent = `🔤 Riwayat — "${phrase}"`;
+  document.getElementById('kk-detail-count-badge').textContent = `${rows.length}×`;
+
+  const list = document.getElementById('kk-detail-list');
+  if(!rows.length){
+    list.innerHTML = '<div class="empty-state">Tidak ada data untuk frasa ini.</div>';
+  } else {
+    list.innerHTML = rows.map(r => `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">📅 ${r.date||'—'}</span>
+          <div>${jenisBadges(r)}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.5">${r.job||'—'}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px">${r.mesin?'⚙ '+r.mesin+' · ':''}Teknisi: ${r.nama||'—'}${r.sr?' · SR: '+r.sr:''}${r._mergedCount>1?' · digabung dari '+r._mergedCount+' input':''}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('modal-kk-detail').classList.add('show');
+}
+
+function resetKataKerusakanFilter(){
+  _kkPage=1;
+  document.getElementById('kk-bulan').value=todayStr().slice(0,7);
+  document.getElementById('kk-mesin').value='';
+  renderKataKerusakan();
+}
+
 function toggleWipBar(){
   const body    = document.getElementById('wip-bar-body');
   const chevron = document.getElementById('wip-chevron');
@@ -2818,7 +3828,7 @@ function renderWipBar(){
       <div class="wip-item-meta">
         <span>📅 ${r.date}</span>
         ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
-        ${jenisBadge(r.jenis)}
+        ${jenisBadges(r)}
         <span>🕐 ${fmt24(r.start)}</span>
         ${statusBadgeHtml(r)}
       </div>
@@ -2900,7 +3910,7 @@ function renderSrBar(){
   list.innerHTML = rows.map(r => `
     <div class="srbar-item" id="srbar-item-${r._id}">
       <div class="srbar-item-top">
-        <div>${jenisBadge(r.jenis)}</div>
+        <div>${jenisBadges(r)}</div>
       </div>
       <div class="srbar-item-job">${r.job}</div>
       <div class="srbar-item-meta">
@@ -3332,6 +4342,287 @@ function confirmDeleteJenis(id, nama){
       const {db,doc,deleteDoc}=window._fb;
       await deleteDoc(doc(db,'jenis',id));
       toast(`Jenis "${nama}" dihapus.`);
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+// ── TAB PANDUAN TROUBLESHOOT (tampilan untuk semua teknisi, read-only) ──
+function renderTsGrid(){
+  const grid = document.getElementById('ts-grid');
+  if(!grid) return;
+
+  if(!tsCatDB.length){
+    grid.innerHTML = `<div class="ts-empty">Belum ada kategori panduan.</div>`;
+    return;
+  }
+  grid.innerHTML = tsCatDB.map(c => `
+    <div class="ts-tile" onclick="openTsCat('${c.id}')">
+      <div class="ts-tile-icon">${c.icon || '📄'}</div>
+      <div class="ts-tile-name">${c.nama}</div>
+      <div class="ts-tile-sub">Segera hadir</div>
+    </div>`).join('');
+}
+
+// ── KELOLA PANDUAN (admin dashboard) ────────────────────────────
+function renderPanduanManageList(){
+  const el = document.getElementById('panduan-manage-list');
+  if(!el) return;
+  if(!tsCatDB.length){
+    el.innerHTML = '<div class="empty-state">Belum ada kategori panduan. Klik "+ Tambah Kategori".</div>';
+    return;
+  }
+  el.innerHTML = tsCatDB.map((c,i)=>`
+    <div class="jenis-item" style="cursor:pointer" onclick="openPanduanItemsView('${c.id}','${(c.nama||'').replace(/'/g,"\\'")}','${(c.icon||'').replace(/'/g,"\\'")}')">
+      <div class="jenis-item-left">
+        <span class="jenis-idx">${String(i+1).padStart(2,'0')}</span>
+        <span style="font-size:18px">${c.icon || '📄'}</span>
+        <span class="jenis-name">${c.nama}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
+        <button class="btn btn-ghost btn-xs" onclick="openEditTsCat('${c.id}')">✏ Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteTsCat('${c.id}','${(c.nama||'').replace(/'/g,"\\'")}')">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+
+// Drill-down: tampilkan daftar kerusakan & cara mengatasi milik satu kategori
+function openPanduanItemsView(catId, catNama, catIcon){
+  _panduanActiveCatId = catId;
+  document.getElementById('panduan-cat-card').style.display = 'none';
+  document.getElementById('panduan-items-card').style.display = 'block';
+  document.getElementById('panduan-items-cat-title').textContent = `${catIcon || '📄'} ${catNama}`;
+  subscribeTsItems(catId, renderPanduanItemsManageList);
+}
+
+function closePanduanItemsView(){
+  document.getElementById('panduan-items-card').style.display = 'none';
+  document.getElementById('panduan-cat-card').style.display = 'block';
+  if(_tsItemsUnsub){ _tsItemsUnsub(); _tsItemsUnsub = null; }
+  _panduanActiveCatId = null;
+  tsItemsDB = [];
+}
+
+function renderPanduanItemsManageList(){
+  const el = document.getElementById('panduan-items-manage-list');
+  if(!el) return;
+  if(!tsItemsDB.length){
+    el.innerHTML = '<div class="empty-state">Belum ada kerusakan. Klik "+ Tambah Kerusakan".</div>';
+    return;
+  }
+  el.innerHTML = tsItemsDB.map((it,i)=>{
+    const isDraft = it.status === 'draft';
+    const badge = `<span style="font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;background:${isDraft?'var(--warn-light)':'var(--ok-light)'};color:${isDraft?'var(--warn)':'var(--ok)'}">${isDraft?'Draft':'Published'}</span>`;
+    return `
+    <div class="jenis-item">
+      <div class="jenis-item-left">
+        <span class="jenis-idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="jenis-name">${it.nama}</span>
+        ${badge}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-ghost btn-xs" onclick="openEditTsItem('${it.id}')">✏ Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteTsItem('${it.id}','${(it.nama||'').replace(/'/g,"\\'")}')">Hapus</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddTsItem(){
+  if(!_panduanActiveCatId) return;
+  _editTsItemId = null;
+  document.getElementById('ts-item-title').textContent = 'Tambah Kerusakan';
+  document.getElementById('ts-item-status-badge').style.display = 'none';
+  document.getElementById('ts-item-nama').value = '';
+  document.getElementById('ts-item-solusi').value = '';
+  document.getElementById('ts-item-error').style.display = 'none';
+  document.getElementById('ts-item-delete-btn').style.display = 'none';
+  document.getElementById('modal-ts-item').classList.add('show');
+  setTimeout(()=>document.getElementById('ts-item-nama').focus(),150);
+}
+
+function openEditTsItem(id){
+  const it = tsItemsDB.find(x=>x.id===id);
+  if(!it) return;
+  _editTsItemId = id;
+  const isDraft = it.status === 'draft';
+  document.getElementById('ts-item-title').textContent = 'Edit Kerusakan';
+  const badge = document.getElementById('ts-item-status-badge');
+  badge.textContent = isDraft ? 'Draft' : 'Published';
+  badge.style.background = isDraft ? 'var(--warn-light)' : 'var(--ok-light)';
+  badge.style.color = isDraft ? 'var(--warn)' : 'var(--ok)';
+  badge.style.display = 'inline-block';
+  document.getElementById('ts-item-nama').value = it.nama || '';
+  document.getElementById('ts-item-solusi').value = it.solusi || '';
+  document.getElementById('ts-item-error').style.display = 'none';
+  document.getElementById('ts-item-delete-btn').style.display = 'inline-flex';
+  document.getElementById('modal-ts-item').classList.add('show');
+  setTimeout(()=>document.getElementById('ts-item-nama').focus(),150);
+}
+
+// status: 'draft' atau 'published' — dipicu oleh tombol "Simpan Draft" / "Publish"
+async function saveTsItem(status){
+  if(!adminIn || !_panduanActiveCatId) return; // jaga-jaga: hanya admin yang boleh menyimpan
+  const nama   = document.getElementById('ts-item-nama').value.trim();
+  const solusi = document.getElementById('ts-item-solusi').value.trim();
+  const err    = document.getElementById('ts-item-error');
+  if(!nama){ err.style.display='block'; err.textContent='Nama kerusakan wajib diisi.'; return; }
+
+  try {
+    const {db,doc,setDoc,getDoc,collection,addDoc} = window._fb;
+    if(_editTsItemId){
+      const ref = doc(db,'troubleshootCats',_panduanActiveCatId,'items',_editTsItemId);
+      const snap = await getDoc(ref);
+      await setDoc(ref, {...(snap.exists()?snap.data():{}), nama, solusi, status});
+      toast(status==='draft' ? `Kerusakan "${nama}" disimpan sebagai draft.` : `Kerusakan "${nama}" berhasil dipublish!`);
+    } else {
+      const nextOrder = tsItemsDB.length ? Math.max(...tsItemsDB.map(x=>x.order||0))+1 : 1;
+      await addDoc(collection(db,'troubleshootCats',_panduanActiveCatId,'items'), {nama, solusi, status, order: nextOrder});
+      toast(status==='draft' ? `Kerusakan "${nama}" disimpan sebagai draft.` : `Kerusakan "${nama}" berhasil dipublish!`);
+    }
+    closeModal('modal-ts-item');
+  } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+}
+
+function confirmDeleteTsItem(id, nama){
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Kerusakan';
+  document.getElementById('confirm-delete-msg').innerHTML = `Hapus kerusakan <strong>${nama}</strong>?`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc} = window._fb;
+      await deleteDoc(doc(db,'troubleshootCats',_panduanActiveCatId,'items',id));
+      toast(`Kerusakan "${nama}" dihapus.`);
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
+function openTsCat(id){
+  const c = tsCatDB.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('ts-items-modal-title').textContent = `${c.icon || '📄'} ${c.nama}`;
+  document.getElementById('modal-ts-items').classList.add('show');
+  subscribeTsItems(id, renderTsItemsBrowse);
+}
+
+function renderTsItemsBrowse(){
+  const body = document.getElementById('ts-items-modal-body');
+  if(!body) return;
+  const published = tsItemsDB.filter(it => it.status !== 'draft');
+  if(!published.length){
+    body.innerHTML = '<div class="empty-state">Belum ada daftar kerusakan untuk kategori ini.</div>';
+    return;
+  }
+  body.innerHTML = `<div class="jenis-list">` + published.map(it => `
+    <div class="jenis-item" style="cursor:pointer" onclick="openTsItemDetail('${it.id}')">
+      <div class="jenis-item-left"><span class="jenis-name">${it.nama}</span></div>
+      <span style="color:var(--muted)">›</span>
+    </div>`).join('') + `</div>`;
+}
+
+function openTsItemDetail(itemId){
+  const it = tsItemsDB.find(x=>x.id===itemId);
+  if(!it) return;
+  const body = document.getElementById('ts-items-modal-body');
+  body.innerHTML = `
+    <button class="btn btn-ghost btn-xs" style="margin-bottom:10px" onclick="renderTsItemsBrowse()">← Kembali ke daftar</button>
+    <div style="font-weight:600;font-size:15px;margin-bottom:8px">${it.nama}</div>
+    <div style="white-space:pre-wrap;font-size:14px;line-height:1.6">${it.solusi ? it.solusi : 'Belum ada catatan cara mengatasi untuk kerusakan ini.'}</div>`;
+}
+
+function closeTsItemsModal(){
+  closeModal('modal-ts-items');
+  if(_tsItemsUnsub){ _tsItemsUnsub(); _tsItemsUnsub = null; }
+  tsItemsDB = [];
+}
+
+// Berlangganan subcollection troubleshootCats/{catId}/items secara real-time.
+// Selalu berhenti berlangganan listener sebelumnya agar tidak menumpuk.
+function subscribeTsItems(catId, cb){
+  if(_tsItemsUnsub){ _tsItemsUnsub(); _tsItemsUnsub = null; }
+  const {db,collection,onSnapshot} = window._fb;
+  _tsItemsUnsub = onSnapshot(collection(db,'troubleshootCats',catId,'items'), snap => {
+    tsItemsDB = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                        .sort((a,b) => (a.order||0)-(b.order||0) || (a.nama||'').localeCompare(b.nama||''));
+    cb();
+  }, err => { console.error('Gagal memuat daftar kerusakan:', err); });
+}
+
+function openAddTsCat(){
+  _editTsCatId = null;
+  document.getElementById('ts-cat-title').textContent = 'Tambah Kategori Panduan';
+  document.getElementById('ts-cat-save-btn').textContent = 'Tambah';
+  document.getElementById('ts-cat-icon').value = '';
+  document.getElementById('ts-cat-nama').value = '';
+  document.getElementById('ts-cat-error').style.display = 'none';
+  document.getElementById('ts-cat-delete-btn').style.display = 'none';
+  document.getElementById('modal-ts-cat').classList.add('show');
+  setTimeout(()=>document.getElementById('ts-cat-nama').focus(),150);
+}
+
+function openEditTsCat(id){
+  const c = tsCatDB.find(x=>x.id===id);
+  if(!c) return;
+  _editTsCatId = id;
+  document.getElementById('ts-cat-title').textContent = 'Edit Kategori Panduan';
+  document.getElementById('ts-cat-save-btn').textContent = 'Simpan';
+  document.getElementById('ts-cat-icon').value = c.icon || '';
+  document.getElementById('ts-cat-nama').value = c.nama || '';
+  document.getElementById('ts-cat-error').style.display = 'none';
+  document.getElementById('ts-cat-delete-btn').style.display = 'inline-flex';
+  document.getElementById('modal-ts-cat').classList.add('show');
+  setTimeout(()=>document.getElementById('ts-cat-nama').focus(),150);
+}
+
+async function saveTsCat(){
+  if(!adminIn) return; // jaga-jaga: hanya admin yang boleh menyimpan
+  const nama = document.getElementById('ts-cat-nama').value.trim();
+  const icon = document.getElementById('ts-cat-icon').value.trim();
+  const err  = document.getElementById('ts-cat-error');
+  if(!nama){ err.style.display='block'; err.textContent='Nama wajib diisi.'; return; }
+
+  const isDuplicate = tsCatDB.some(c =>
+    c.nama.trim().toLowerCase() === nama.toLowerCase() && c.id !== _editTsCatId
+  );
+  if(isDuplicate){
+    err.style.display='block';
+    err.textContent=`Kategori "${nama}" sudah ada dalam daftar.`;
+    return;
+  }
+
+  try {
+    const {db,doc,setDoc,getDoc,collection,addDoc} = window._fb;
+    if(_editTsCatId){
+      const ref = doc(db,'troubleshootCats',_editTsCatId);
+      const snap = await getDoc(ref);
+      await setDoc(ref, {...(snap.exists()?snap.data():{}), nama, icon});
+      toast(`Kategori "${nama}" berhasil diubah!`);
+    } else {
+      const nextOrder = tsCatDB.length ? Math.max(...tsCatDB.map(c=>c.order||0))+1 : 1;
+      await addDoc(collection(db,'troubleshootCats'), {nama, icon, order: nextOrder});
+      toast(`Kategori "${nama}" berhasil ditambahkan!`);
+    }
+    closeModal('modal-ts-cat');
+  } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+}
+
+function confirmDeleteTsCat(id, nama){
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Kategori Panduan';
+  document.getElementById('confirm-delete-msg').innerHTML = `Hapus kategori <strong>${nama}</strong>? Semua daftar kerusakan di dalamnya juga akan ikut terhapus.`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc,collection,getDocs,writeBatch} = window._fb;
+      const itemsSnap = await getDocs(collection(db,'troubleshootCats',id,'items'));
+      if(!itemsSnap.empty){
+        const batch = writeBatch(db);
+        itemsSnap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
+      await deleteDoc(doc(db,'troubleshootCats',id));
+      if(_panduanActiveCatId === id) closePanduanItemsView();
+      toast(`Kategori "${nama}" dihapus.`);
     } catch(e){ toast('Gagal menghapus.','warn'); }
   };
   document.getElementById('modal-confirm-delete').classList.add('show');
@@ -3819,12 +5110,17 @@ function buildPerfCard(nama, data){
   const total = data.length;
 
   // ── 1. REKAP JENIS + rata-rata durasi per jenis ──────────────
+  // Catatan: entri Lembur yang punya Jenis Pekerjaan Tambahan (mis. Lembur + Perbaikan)
+  // dihitung di KEDUA kategori, supaya statistik per-jenis pekerjaan tetap akurat.
   const jenisMap = {}; // { nama: { count, totalDur, durCount } }
-  data.forEach(r => {
-    const j = r.jenis || 'Lainnya';
+  function tallyJenis(j, r){
     if(!jenisMap[j]) jenisMap[j] = {count:0, totalDur:0, durCount:0};
     jenisMap[j].count++;
     if(r.dur && r.dur > 0){ jenisMap[j].totalDur += r.dur; jenisMap[j].durCount++; }
+  }
+  data.forEach(r => {
+    tallyJenis(r.jenis || 'Lainnya', r);
+    if(r.jenis2) tallyJenis(r.jenis2, r);
   });
   const maxCount = Math.max(...Object.values(jenisMap).map(v=>v.count), 1);
   const jenisRows = Object.entries(jenisMap)
@@ -3913,7 +5209,7 @@ function buildPerfCard(nama, data){
   const TARGET_JENIS = ['Perbaikan','Penggantian Part'];
   const srHtml = (() => {
     const items = TARGET_JENIS.map(jenisNama => {
-      const subset   = data.filter(r => r.jenis === jenisNama);
+      const subset   = data.filter(r => r.jenis === jenisNama || r.jenis2 === jenisNama);
       if(!subset.length) return null;
       const withSr   = subset.filter(r => hasSrAngka(r.sr));
       const pctSr    = Math.round((withSr.length / subset.length) * 100);
@@ -4085,21 +5381,21 @@ function exportExcelRange(){
 
 function _doExport(rows, label){
   const wb=XLSX.utils.book_new();
-  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Input','Jam Input']];
+  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Jenis Pekerjaan Tambahan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Input','Jam Input']];
   rows.forEach((r,i)=>{
     const rn=i+2;
     wsData.push([
-      r.nama, r.date, r.sr, r.mesin||'', r.jenis||'', r.job,
+      r.nama, r.date, r.sr, r.mesin||'', r.jenis||'', r.jenis2||'', r.job,
       r.start?fmt24(r.start):'',
       r.end?fmt24(r.end):'',
-      r.end&&r.start?{f:`IF(H${rn}<>"",IFERROR((TIMEVALUE(H${rn})-TIMEVALUE(G${rn}))*24*60,""),"")`}:'',
+      r.end&&r.start?{f:`IF(I${rn}<>"",IFERROR((TIMEVALUE(I${rn})-TIMEVALUE(H${rn}))*24*60,""),"")`}:'',
       statusLabel(r),
       fmtSubmitDate(r.submittedAt),
       fmtSubmitTimeOnly(r.submittedAt)
     ]);
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[18,13,14,16,18,38,12,12,14,13,13,10].map(w=>({wch:w}));
+  ws['!cols']=[18,13,14,16,18,22,38,12,12,14,13,13,10].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'Joblog');
   XLSX.writeFile(wb,`Joblog_${label}.xlsx`);
   toast(`Joblog_${label}.xlsx diunduh`);
@@ -4116,6 +5412,13 @@ function jenisBadge(j){
   // Fallback untuk data lama dengan jenis statis
   const map={'Perbaikan':'badge-perbaikan','Penggantian Part':'badge-part','Project':'badge-project'};
   return `<span class="badge ${map[j]||'badge-wip'}">${j}</span>`;
+}
+// Badge gabungan: Jenis Pekerjaan utama + Jenis Pekerjaan Tambahan (khusus Lembur), jika ada
+function jenisBadges(r){
+  if(!r) return '';
+  let html = jenisBadge(r.jenis);
+  if(r.jenis2) html += ' ' + jenisBadge(r.jenis2);
+  return html;
 }
 function fmtSubmitDate(ts){
   if(!ts)return '—';
@@ -4149,6 +5452,84 @@ function getTimeVal(id){
 function fmt24(t){if(!t)return '';const[h,m]=t.split(':');return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;}
 function durMins(s,e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);return(eh*60+em)-(sh*60+sm);}
 function fmtDur(m){if(!m&&m!==0)return '—';const h=Math.floor(m/60),mn=m%60;return h>0?`${h}j ${mn}m`:`${mn}m`;}
+
+// ── BATAS JAM KERJA HARIAN (cegah input "standby/lembur" menutupi total jam) ──
+// Senin–Minggu = 7 jam (420 menit), Sabtu = 5 jam (300 menit).
+// Jenis Pekerjaan "Lembur" dikecualikan sepenuhnya dari batas ini.
+const LEMBUR_RE_CAP  = /lembur/i;
+const STANDBY_RE_CAP = /standby/i;
+function getDailyCapMinutes(dateStr){
+  const day = new Date(dateStr + 'T00:00:00').getDay(); // 0=Minggu … 6=Sabtu
+  return day === 6 ? 300 : 420;
+}
+// Mengembalikan salah satu:
+//   {type:'ok'}                          → boleh disimpan
+//   {type:'block', title, message}       → wajib ditolak, tidak bisa dilanjutkan
+//   {type:'confirm', title, message}     → perlu konfirmasi user dulu sebelum disimpan
+function checkJamKerjaCap({ jenis, dur, date, nama, bypassConfirm }){
+  if(LEMBUR_RE_CAP.test(jenis || '')) return { type:'ok' }; // Lembur bebas dari batas jam kerja
+
+  const capMenit = getDailyCapMinutes(date);
+
+  // Semua input (selain Lembur) yang SUDAH tersimpan untuk teknisi & tanggal ini
+  const dayRows = joblogDB.filter(r =>
+    r.nama === nama && r.date === date && typeof r.dur === 'number' && !LEMBUR_RE_CAP.test(r.jenis || '')
+  );
+  const existingTotal = dayRows.reduce((sum, r) => sum + r.dur, 0);
+
+  const isStandbyFullDay = STANDBY_RE_CAP.test(jenis || '') && dur >= capMenit;
+
+  // Guard konfirmasi: HANYA relevan kalau ini benar-benar entri PERTAMA hari itu
+  // (belum ada input lain sama sekali). Kalau sudah ada input lain sebelumnya,
+  // pertanyaan "apakah 1 shift ini hanya standby?" jadi tidak relevan — langsung
+  // ke guard total di bawah supaya pesannya soal sisa jam, bukan konfirmasi standby.
+  if(isStandbyFullDay && existingTotal === 0){
+    if(bypassConfirm) return { type:'ok' }; // sudah dikonfirmasi user → izinkan walau dur >= capMenit
+    return {
+      type:'confirm',
+      title:'Konfirmasi Standby',
+      message:`Durasi Standby ini (${fmtDur(dur)}) mencakup seluruh jam kerja (${fmtDur(capMenit)}) dalam 1 shift. Apakah memang 1 shift ini hanya standby?`
+    };
+  }
+
+  // Guard keras: total (existing + baru) tidak boleh melebihi jam kerja hari itu — selalu dicek,
+  // termasuk untuk entri SETELAH standby 1 shift penuh sudah dikonfirmasi & tersimpan (existingTotal
+  // saat itu otomatis sudah mencakup dur standby tsb), sehingga input tambahan di hari yang sama
+  // otomatis ikut tertolak dengan pesan "jam kerja sudah habis".
+  if(existingTotal + dur > capMenit){
+    const sisa = Math.max(0, capMenit - existingTotal);
+    if(sisa <= 0){
+      const habisKarenaStandby = dayRows.some(r => STANDBY_RE_CAP.test(r.jenis || '') && r.dur >= capMenit);
+      return {
+        type:'block',
+        title:'Jam Kerja Sudah Penuh',
+        message: habisKarenaStandby
+          ? `Jam kerja Anda hari ini sudah habis terpakai di Standby (1 shift penuh). Tidak bisa menambah input lain lagi kecuali pilih Jenis Pekerjaan "Lembur".`
+          : `Jam kerja hari ini (${fmtDur(capMenit)}) sudah terpakai penuh dari input sebelumnya. Pilih Jenis Pekerjaan "Lembur" jika pekerjaan ini di luar jam kerja.`
+      };
+    }
+    return {
+      type:'block',
+      title:'Jam Kerja Sudah Penuh',
+      message:`Total input hari ini sudah ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja. Sisa waktu yang bisa diinput hanya ${fmtDur(sisa)}. Perpendek durasi, atau pilih Jenis Pekerjaan "Lembur" jika ini di luar jam kerja.`
+    };
+  }
+
+  return { type:'ok' };
+}
+
+// Tampilkan popup konfirmasi "Apakah memang 1 shift hanya standby?".
+// Jika user pilih "Ya, Benar", submitJob() dipanggil ulang dengan bypass sekali-pakai.
+function confirmStandbyFullDay(message){
+  document.getElementById('confirm-standby-msg').textContent = message;
+  document.getElementById('confirm-standby-yes-btn').onclick = () => {
+    closeModal('modal-confirm-standby');
+    _bypassStandbyConfirm = true;
+    submitJob();
+  };
+  document.getElementById('modal-confirm-standby').classList.add('show');
+}
+
 function toast(msg,type){
   const el=document.getElementById('toast');
   el.className=type==='warn'?'toast-warn':'toast-ok';
@@ -4189,6 +5570,34 @@ function closeNotif(){
   clearTimeout(_notifTimer);
   document.getElementById('notif-popup').style.display = 'none';
 }
+
+// ── CEK VERSI BARU (khusus deployment Vercel) ──────────────────
+// Tidak perlu maintain nomor versi manual: kita bandingkan header
+// ETag/Last-Modified file HTML ini (otomatis disediakan Vercel per
+// deploy) dengan yang tercatat saat halaman pertama dibuka. Kalau
+// beda, berarti sudah ada deploy baru → tampilkan banner refresh.
+let _pageVersionTag = null;
+async function checkForNewVersion(){
+  try {
+    const res = await fetch(location.pathname + location.search, { method:'HEAD', cache:'no-store' });
+    const tag = res.headers.get('etag') || res.headers.get('last-modified');
+    if(!tag) return; // header tidak tersedia (mis. dibuka dari file lokal) — diam saja
+    if(_pageVersionTag === null){
+      _pageVersionTag = tag; // catat versi awal saat halaman ini dimuat
+      return;
+    }
+    if(tag !== _pageVersionTag){
+      document.getElementById('version-banner').style.display = 'flex';
+    }
+  } catch(e){ /* gagal cek (offline dll) — diamkan, jangan ganggu pengguna */ }
+}
+window.addEventListener('load', () => {
+  checkForNewVersion();
+  setInterval(checkForNewVersion, 5 * 60 * 1000); // cek tiap 5 menit
+});
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') checkForNewVersion();
+});
 </script>
 </body>
 </html>
