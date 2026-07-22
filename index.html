@@ -767,6 +767,27 @@ tbody tr:hover td{background:#FAFAF8}
   </div>
 </div>
 
+<!-- MODAL: LOGIN EDIT & VIEW JOBLOG (akun Teknisi individu) -->
+<div class="overlay" id="modal-login-editview">
+  <div class="modal">
+    <div class="modal-logo">JOBLOG<span>.</span>EDIT</div>
+    <div class="modal-sub">Login dengan nama dan password Anda sendiri untuk melihat & mengedit seluruh data joblog. Edit yang Anda lakukan akan tercatat atas nama Anda.</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Nama</label>
+      <select id="ev-login-nama"></select>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="ev-login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLoginEditView()">
+      <div class="pw-error" id="ev-login-error">Nama atau password salah.</div>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="doLoginEditView()">Masuk</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-login-editview')">Batal</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: EDIT PASSWORD TEKNISI -->
 <div class="overlay" id="modal-edit-pw">
   <div class="modal">
@@ -1038,6 +1059,10 @@ tbody tr:hover td{background:#FAFAF8}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
     Panduan
   </button>
+  <button class="tab-btn" id="desk-tab-editview" onclick="tryEditView(this,'desk')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit & View
+  </button>
   <button class="tab-btn" id="desk-tab-admin" onclick="tryAdmin(this,'desk')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Dashboard Admin
@@ -1184,6 +1209,88 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- EDIT & VIEW JOBLOG TAB (login individu, akun Teknisi) -->
+<div id="tab-editview" class="container" style="display:none">
+  <div class="card">
+    <div class="card-title">
+      <span>🔐 Edit & View Joblog</span>
+      <span style="font-size:11px;background:#DCFCE7;color:#166534;border-radius:999px;padding:3px 10px;white-space:nowrap" id="ev-tab-who"></span>
+    </div>
+    <!-- Search bar -->
+    <div class="filter-group g2" style="margin-bottom:8px">
+      <div class="search-bar" style="margin-bottom:0">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="ev-sr" placeholder="Cari No. SR..." oninput="applyEditViewFilter()" autocomplete="off" style="width:100%">
+      </div>
+      <div class="search-bar" style="margin-bottom:0">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="ev-mesin" placeholder="Cari nama mesin..." oninput="applyEditViewFilter()" autocomplete="off" style="width:100%">
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group g2">
+        <div class="filter-label-wrap">
+          <label>Teknisi</label>
+          <select id="ev-nama" onchange="applyEditViewFilter()"><option value="">Semua Teknisi</option></select>
+        </div>
+        <div class="filter-label-wrap">
+          <label>Jenis</label>
+          <select id="ev-jenis" onchange="applyEditViewFilter()"><option value="">Semua Jenis</option></select>
+        </div>
+      </div>
+      <div class="filter-group g2">
+        <div class="filter-label-wrap">
+          <label>Status</label>
+          <select id="ev-status" onchange="applyEditViewFilter()">
+            <option value="">Semua Status</option>
+            <option value="_selesai_group">✅ Selesai (semua)</option>
+            <option value="_progress_group">⏳ On Progress (semua)</option>
+            <option value="selesai">✅ Selesai</option>
+            <option value="berkelanjutan">🔄 Berkelanjutan</option>
+            <option value="lanjut">⏳ Butuh Dilanjutkan</option>
+            <option value="part">📦 Tunggu Part</option>
+            <option value="bengkel">🔧 Bengkel Luar</option>
+          </select>
+        </div>
+        <div class="filter-label-wrap">
+          <label>Tgl Kerja</label>
+          <input type="date" id="ev-date" onchange="applyEditViewFilter()">
+        </div>
+      </div>
+      <div class="filter-group g2">
+        <div class="filter-label-wrap" style="justify-content:flex-end">
+          <label style="opacity:0">–</label>
+          <button class="btn btn-ghost btn-sm" onclick="clearEditViewFilter()" style="width:100%">✕ Reset Filter</button>
+        </div>
+        <div class="filter-label-wrap" style="justify-content:flex-end">
+          <label style="opacity:0">–</label>
+          <button class="btn btn-ghost btn-sm" onclick="logoutEditView()" style="width:100%">Keluar Sesi</button>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile: Kartu -->
+    <div class="jl-cards" id="ev-cards"></div>
+    <!-- Desktop: Tabel -->
+    <div class="table-wrap" id="ev-table-wrap">
+      <table>
+        <thead><tr>
+          <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
+          <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th><th>Edit</th>
+        </tr></thead>
+        <tbody id="ev-tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="ev-empty" style="display:none">Tidak ada data untuk filter ini.</div>
+    <div class="pagination-bar" id="ev-pagination" style="display:none">
+      <span class="pagination-info" id="ev-pagination-info"></span>
+      <div class="pagination-btns">
+        <button class="btn btn-ghost btn-sm" id="ev-page-prev" onclick="evChangePage(-1)">‹ Sebelumnya</button>
+        <button class="btn btn-ghost btn-sm" id="ev-page-next" onclick="evChangePage(1)">Berikutnya ›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN TAB -->
 <div id="tab-admin" class="container" style="display:none">
   <!-- GROUP NAV: 3 kelompok dropdown -->
@@ -1253,7 +1360,10 @@ service cloud.firestore {
       <div class="metric-card"><div class="metric-label">SR Selesai</div><div class="metric-value" id="m-sr">0</div><div class="metric-sub">on progress: <span id="m-wip">0</span></div></div>
     </div>
     <div class="card">
-      <div class="card-title">Semua Data Joblog</div>
+      <div class="card-title">
+        <span>Semua Data Joblog</span>
+        <span id="ev-status-badge"></span>
+      </div>
       <!-- Search bar selalu tampil -->
       <div class="filter-group g2" style="margin-bottom:8px">
         <div class="search-bar" style="margin-bottom:0">
@@ -1708,6 +1818,10 @@ service cloud.firestore {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
     Panduan
   </button>
+  <button class="nav-btn" id="mob-tab-editview" onclick="tryEditView(this,'mob')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit&View
+  </button>
   <button class="nav-btn" id="mob-tab-admin" onclick="tryAdmin(this,'mob')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Admin
@@ -1821,6 +1935,14 @@ let _selectedColor= '#3730A3';
 
 function todayStr(){ return new Date().toISOString().split('T')[0]; }
 function nowTs()   { return new Date().toISOString(); }
+
+// ── AUDIT EDIT (siapa & kapan) ───────────────────────────────────
+// Nama editor diambil dari sesi login individu tab "Edit dan View Joblog" kalau
+// sedang aktif; kalau tidak, dicatat generik sebagai "Admin".
+let _editViewUser = null; // {id, nama} — teknisi yang login individu di tab Edit dan View Joblog
+function auditPatch(){
+  return { lastEditedBy: (_editViewUser ? _editViewUser.nama : 'Admin'), lastEditedAt: nowTs() };
+}
 
 // ── FIREBASE INIT ──────────────────────────────────────────────
 let _teknisiLoaded = false;
@@ -2049,6 +2171,54 @@ function buildLoginDropdown(){
     }
   }
 }
+
+// ── LOGIN INDIVIDU TAB "EDIT & VIEW JOBLOG" ─────────────────────
+// Reuse akun Teknisi yang sama (Kelola Teknisi) — supaya tidak perlu kelola akun terpisah.
+let _pendingEditViewEl, _pendingEditViewType;
+
+// Dipakai oleh link teks (bukan tombol tab asli) yang perlu membawa user ke tab Edit & View Joblog
+function goToEditViewTab(){
+  const mob = window.innerWidth < 640;
+  tryEditView(document.getElementById(mob?'mob-tab-editview':'desk-tab-editview'), mob?'mob':'desk');
+}
+
+function tryEditView(el, type){
+  if(_editViewUser){ switchTab('editview', el, type); return; }
+  _pendingEditViewEl = el; _pendingEditViewType = type;
+  const sel = document.getElementById('ev-login-nama');
+  sel.innerHTML = teknisisDB.length === 0
+    ? '<option value="">-- Belum ada teknisi --</option>'
+    : '<option value="">-- Pilih Nama --</option>' + teknisisDB.map(t=>`<option value="${t.id}">${t.nama}</option>`).join('');
+  document.getElementById('ev-login-pw').value = '';
+  document.getElementById('ev-login-error').style.display = 'none';
+  document.getElementById('modal-login-editview').classList.add('show');
+  setTimeout(()=>sel.focus(), 150);
+}
+
+function doLoginEditView(){
+  const selId = document.getElementById('ev-login-nama').value;
+  const pw    = document.getElementById('ev-login-pw').value;
+  const user  = teknisisDB.find(t => t.id === selId);
+  const err   = document.getElementById('ev-login-error');
+  if(!user || user.password !== pw){
+    err.style.display = 'block';
+    err.textContent = 'Nama atau password salah.';
+    document.getElementById('ev-login-pw').value = '';
+    return;
+  }
+  _editViewUser = { id: user.id, nama: user.nama };
+  document.getElementById('modal-login-editview').classList.remove('show');
+  toast(`Login berhasil sebagai ${user.nama}. Edit Anda sekarang tercatat atas nama sendiri.`);
+  switchTab('editview', _pendingEditViewEl, _pendingEditViewType);
+}
+
+function logoutEditView(){
+  _editViewUser = null;
+  toast('Logout dari sesi Edit & View Joblog. Edit selanjutnya tercatat sebagai "Admin".');
+  const mob=window.innerWidth<640;
+  switchTab('input',document.getElementById(mob?'mob-tab-input':'desk-tab-input'),mob?'mob':'desk');
+}
+
 function buildFilterDropdown(){
   const opts = '<option value="">Semua teknisi</option>' +
     teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
@@ -2061,6 +2231,14 @@ function buildFilterDropdown(){
   const pmOpts = '<option value="">Semua Teknisi</option>' +
     teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
   document.getElementById('pm-nama').innerHTML = pmOpts;
+
+  const evNamaEl = document.getElementById('ev-nama');
+  if(evNamaEl){
+    const prevEv = evNamaEl.value;
+    evNamaEl.innerHTML = '<option value="">Semua Teknisi</option>' +
+      teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+    if(prevEv) evNamaEl.value = prevEv;
+  }
 }
 
 // ── BUILD JENIS DROPDOWNS ──────────────────────────────────────
@@ -2093,6 +2271,15 @@ function buildJenisDropdowns(){
   ffJenis.innerHTML = '<option value="">Semua jenis</option>' +
     opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
   if(prevFF) ffJenis.value = prevFF;
+
+  // Dropdown filter tab Edit & View Joblog
+  const evJenis = document.getElementById('ev-jenis');
+  if(evJenis){
+    const prevEvJ = evJenis.value;
+    evJenis.innerHTML = '<option value="">Semua Jenis</option>' +
+      opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
+    if(prevEvJ) evJenis.value = prevEvJ;
+  }
 }
 
 // ── LOGIN TEKNISI ──────────────────────────────────────────────
@@ -2191,12 +2378,14 @@ function doLoginAdmin(){
     switchTab('admin',_pendingAdminEl,_pendingAdminType);
   } else {
     document.getElementById('pw-admin-error').style.display='block';
+    document.getElementById('pw-admin-error').textContent='Password salah.';
     document.getElementById('pw-admin-input').value='';
     document.getElementById('pw-admin-input').focus();
   }
 }
 function logoutAdmin(){
   adminIn=false;
+  _editViewUser=null;
   document.getElementById('btn-admin-logout').style.display='none';
   const mob=window.innerWidth<640;
   switchTab('input',document.getElementById(mob?'mob-tab-input':'desk-tab-input'),mob?'mob':'desk');
@@ -2256,6 +2445,8 @@ function renderActiveView(){
 function switchTab(t,el,type){
   // Tab Panduan wajib login teknisi — jaga-jaga jika switchTab dipanggil langsung
   if(t==='panduan' && !currentUser){ tryPanduan(el,type); return; }
+  // Tab Edit & View Joblog wajib login individu — jaga-jaga jika switchTab dipanggil langsung
+  if(t==='editview' && !_editViewUser){ tryEditView(el,type); return; }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
@@ -2265,6 +2456,7 @@ function switchTab(t,el,type){
   if(mirror) mirror.classList.add('active');
   document.getElementById('tab-input').style.display=t==='input'?'block':'none';
   document.getElementById('tab-panduan').style.display=t==='panduan'?'block':'none';
+  document.getElementById('tab-editview').style.display=t==='editview'?'block':'none';
   document.getElementById('tab-admin').style.display=t==='admin'?'block':'none';
   if(t==='admin'){
     // Aktifkan panel terakhir yang aktif, atau default ke 'data'
@@ -2272,6 +2464,10 @@ function switchTab(t,el,type){
     renderUserList();
   } else if(t==='panduan'){
     renderTsGrid();
+  } else if(t==='editview'){
+    const badge = document.getElementById('ev-tab-who');
+    if(badge) badge.textContent = `🔓 Login: ${_editViewUser.nama}`;
+    renderEditView();
   } else {
     renderMyLogs(); renderWipBar(); renderSrBar(); updateUnknownBanner(); updateSisaJamBanner();
   }
@@ -2569,7 +2765,106 @@ function isSelesai(r){
 const ADMIN_PAGE_SIZE = 50;
 let _adminCurrentPage = 1;
 
+// Bangun 1 baris <tr> tabel desktop untuk 1 joblog — dipakai bersama oleh renderAdmin()
+// (panel Data di Dashboard Admin) dan renderEditView() (tab top-level Edit & View Joblog).
+function buildAdminRowHtml(r, fsr){
+  const srHtml = highlightSR(r.sr, fsr||'');
+  return `<tr>
+    <td class="nama-cell">${r.nama}${r.lastEditedBy?` <span title="Diedit oleh ${r.lastEditedBy} · ${fmtSubmitDateTime(r.lastEditedAt)}" style="cursor:help;font-size:11px;background:#FEF3C7;color:#92400E;border-radius:999px;padding:2px 7px;margin-left:4px;white-space:nowrap">✏ diedit</span>`:''}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
+    <td class="sr-code">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></td>
+    <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
+    <td>${jenisBadges(r)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
+    <td>${r.job}<button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></td>
+    <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${fmtDur(r.dur)}</td>
+    <td>
+      ${statusBadgeHtml(r)}
+      <select class="status-select-admin" onchange="changeStatusAdmin('${r._id}', this.value, this)" title="Ubah status">
+        ${Object.entries(STATUS_MAP).filter(([k])=>k!=='progress').map(([k,v])=>
+          `<option value="${k}" ${ (r.status||(r.end?'selesai':'lanjut'))===k ? 'selected':''}>${v.icon} ${v.label}</option>`
+        ).join('')}
+      </select>
+    </td>
+    <td>
+      <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
+        ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
+      </button>
+    </td>
+    <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
+    <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
+    <td><button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button></td>
+  </tr>`;
+}
+
+// Bangun 1 kartu mobile untuk 1 joblog — dipakai bersama juga.
+function buildAdminCardHtml(r, fsr){
+  const srHtml  = highlightSR(r.sr, fsr||'');
+  const info    = getStatusInfo(r);
+  const jam     = r.start ? fmt24(r.start) + (r.end ? ' → '+fmt24(r.end) : '') : '—';
+  const dur     = r.dur   ? fmtDur(r.dur) : '—';
+  const tglInput= r.submittedAt ? fmtSubmitDateTime(r.submittedAt) : '—';
+  return `
+    <div class="jl-card">
+      <div class="jl-card-top">
+        <div class="jl-card-top-left">
+          <div class="jl-card-sr">${srHtml}${r.checked===true?' ✅':''}</div>
+          <div class="jl-card-nama">👤 ${r.nama}</div>
+        </div>
+        <span class="badge ${info.badgeClass}" style="flex-shrink:0;font-size:10px;white-space:nowrap;max-width:45%;text-align:center">${info.icon} ${info.label}</span>
+      </div>
+      <div class="jl-card-job">${r.job}</div>
+      <div class="jl-card-divider"></div>
+      <div class="jl-card-meta">
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Tanggal Kerja</span>
+          <span class="jl-card-meta-val">📅 ${r.date||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Mesin</span>
+          <span class="jl-card-meta-val">⚙ ${r.mesin||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Jam Kerja</span>
+          <span class="jl-card-meta-val">🕐 ${jam}</span>
+        </div>
+        <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Durasi</span>
+          <span class="jl-card-meta-val">⏱ ${dur}</span>
+        </div>
+        <div class="jl-card-meta-item" style="grid-column:span 2">
+          <span class="jl-card-meta-label">Jenis</span>
+          <span class="jl-card-meta-val">${r.jenis||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item" style="grid-column:span 2">
+          <span class="jl-card-meta-label">Tgl Input</span>
+          <span class="jl-card-meta-val" style="font-size:11px">${tglInput}</span>
+        </div>
+        ${r.lastEditedBy?`
+        <div class="jl-card-meta-item" style="grid-column:span 2">
+          <span class="jl-card-meta-label">✏ Terakhir Diedit</span>
+          <span class="jl-card-meta-val" style="font-size:11px">${r.lastEditedBy} · ${fmtSubmitDateTime(r.lastEditedAt)}</span>
+        </div>`:''}
+      </div>
+      <div class="jl-card-footer">
+        <div class="jl-card-footer-left">
+          <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
+          <button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button>
+        </div>
+        <button class="btn-detail" onclick="openDetailJoblog('${r._id}')">Detail ›</button>
+      </div>
+    </div>`;
+}
+
 function renderAdmin(){
+  const evBadge = document.getElementById('ev-status-badge');
+  if(evBadge){
+    evBadge.innerHTML = _editViewUser
+      ? `<span style="font-size:11px;background:#DCFCE7;color:#166534;border-radius:999px;padding:3px 10px;white-space:nowrap">🔓 Login: ${_editViewUser.nama} <a href="javascript:void(0)" onclick="logoutEditView()" style="color:#166534;text-decoration:underline;margin-left:4px">Keluar</a></span>`
+      : `<span style="font-size:11px;background:#F1F5F9;color:#475569;border-radius:999px;padding:3px 10px;white-space:nowrap">Edit tercatat sebagai "Admin" · <a href="javascript:void(0)" onclick="goToEditViewTab()" style="color:#2563EB;text-decoration:underline">Login individu</a></span>`;
+  }
+
   const fn  = document.getElementById('ff-nama').value;
   const fd  = document.getElementById('ff-date').value;
   const fj  = document.getElementById('ff-jenis').value;
@@ -2631,91 +2926,10 @@ function renderAdmin(){
     pagBar.style.display = 'none';
   }
 
-  document.getElementById('admin-tbody').innerHTML=pageRows.map(r=>{
-    const selesai = isSelesai(r);
-    const srHtml  = highlightSR(r.sr, fsr);
-    return `<tr>
-    <td class="nama-cell">${r.nama}</td>
-    <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
-    <td class="sr-code">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></td>
-    <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
-    <td>${jenisBadges(r)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
-    <td>${r.job}<button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></td>
-    <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
-    <td style="font-family:var(--mono);font-size:12px">${r.end?fmt24(r.end):'—'}</td>
-    <td style="font-family:var(--mono);font-size:12px">${fmtDur(r.dur)}</td>
-    <td>
-      ${statusBadgeHtml(r)}
-      <select class="status-select-admin" onchange="changeStatusAdmin('${r._id}', this.value)" title="Ubah status">
-        ${Object.entries(STATUS_MAP).filter(([k])=>k!=='progress').map(([k,v])=>
-          `<option value="${k}" ${ (r.status||(r.end?'selesai':'lanjut'))===k ? 'selected':''}>${v.icon} ${v.label}</option>`
-        ).join('')}
-      </select>
-    </td>
-    <td>
-      <button class="btn-checked-toggle ${r.checked===true?'is-checked':''}" onclick="toggleChecked('${r._id}', ${r.checked===true})">
-        ${r.checked===true ? '✅ Diperiksa' : '⬜ Tandai'}
-      </button>
-    </td>
-    <td><span class="submit-date">${fmtSubmitDateTime(r.submittedAt)}</span></td>
-    <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button></td>
-    <td><button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button></td>
-  </tr>`;
-  }).join('');
+  document.getElementById('admin-tbody').innerHTML=pageRows.map(r => buildAdminRowHtml(r, fsr)).join('');
 
   // Render kartu mobile (CSS yang mengontrol visibility via breakpoint, bukan JS)
-  document.getElementById('admin-cards').innerHTML=pageRows.map(r=>{
-    const srHtml  = highlightSR(r.sr, fsr);
-    const info    = getStatusInfo(r);
-    const jam     = r.start ? fmt24(r.start) + (r.end ? ' → '+fmt24(r.end) : '') : '—';
-    const dur     = r.dur   ? fmtDur(r.dur) : '—';
-    const tglInput= r.submittedAt ? fmtSubmitDateTime(r.submittedAt) : '—';
-    return `
-    <div class="jl-card">
-      <div class="jl-card-top">
-        <div class="jl-card-top-left">
-          <div class="jl-card-sr">${srHtml}${r.checked===true?' ✅':''}</div>
-          <div class="jl-card-nama">👤 ${r.nama}</div>
-        </div>
-        <span class="badge ${info.badgeClass}" style="flex-shrink:0;font-size:10px;white-space:nowrap;max-width:45%;text-align:center">${info.icon} ${info.label}</span>
-      </div>
-      <div class="jl-card-job">${r.job}</div>
-      <div class="jl-card-divider"></div>
-      <div class="jl-card-meta">
-        <div class="jl-card-meta-item">
-          <span class="jl-card-meta-label">Tanggal Kerja</span>
-          <span class="jl-card-meta-val">📅 ${r.date||'—'}</span>
-        </div>
-        <div class="jl-card-meta-item">
-          <span class="jl-card-meta-label">Mesin</span>
-          <span class="jl-card-meta-val">⚙ ${r.mesin||'—'}</span>
-        </div>
-        <div class="jl-card-meta-item">
-          <span class="jl-card-meta-label">Jam Kerja</span>
-          <span class="jl-card-meta-val">🕐 ${jam}</span>
-        </div>
-        <div class="jl-card-meta-item">
-          <span class="jl-card-meta-label">Durasi</span>
-          <span class="jl-card-meta-val">⏱ ${dur}</span>
-        </div>
-        <div class="jl-card-meta-item" style="grid-column:span 2">
-          <span class="jl-card-meta-label">Jenis</span>
-          <span class="jl-card-meta-val">${r.jenis||'—'}</span>
-        </div>
-        <div class="jl-card-meta-item" style="grid-column:span 2">
-          <span class="jl-card-meta-label">Tgl Input</span>
-          <span class="jl-card-meta-val" style="font-size:11px">${tglInput}</span>
-        </div>
-      </div>
-      <div class="jl-card-footer">
-        <div class="jl-card-footer-left">
-          <button class="btn btn-danger btn-xs" onclick="confirmDeleteOne('${r._id}','${r.nama} - ${r.sr}')">Hapus</button>
-          <button class="btn btn-xs" style="background:#EEF2FF;color:#3730A3;border-color:#C7D2FE" onclick="openEditJoblog('${r._id}')">✏ Edit</button>
-        </div>
-        <button class="btn-detail" onclick="openDetailJoblog('${r._id}')">Detail ›</button>
-      </div>
-    </div>`;
-  }).join('');
+  document.getElementById('admin-cards').innerHTML=pageRows.map(r => buildAdminCardHtml(r, fsr)).join('');
 }
 // Dipanggil dari setiap input filter ff-*: reset ke halaman 1 lalu render,
 // supaya ganti filter tidak nyangkut di halaman pagination yang lama.
@@ -2774,6 +2988,85 @@ function clearFilter(){
   if(chv){ chv.classList.remove('open'); }
   _adminCurrentPage = 1;
   renderAdmin();
+}
+
+// ── TAB EDIT & VIEW JOBLOG (login individu) ─────────────────────
+const EV_PAGE_SIZE = 50;
+let _evCurrentPage = 1;
+
+function renderEditView(){
+  if(!_editViewUser) return;
+  const fn  = document.getElementById('ev-nama').value;
+  const fj  = document.getElementById('ev-jenis').value;
+  const fsr = document.getElementById('ev-sr').value.trim().toLowerCase();
+  const fms = document.getElementById('ev-mesin').value.trim().toLowerCase();
+  const fst = document.getElementById('ev-status').value;
+  const fd  = document.getElementById('ev-date').value;
+
+  let rows = [...joblogDB];
+  if(fn)  rows = rows.filter(r=>r.nama===fn);
+  if(fj)  rows = rows.filter(r=>r.jenis===fj || r.jenis2===fj);
+  if(fsr) rows = rows.filter(r=>(r.sr||'').toLowerCase().includes(fsr));
+  if(fms) rows = rows.filter(r=>(r.mesin||'').toLowerCase().includes(fms));
+  if(fd)  rows = rows.filter(r=>r.date===fd);
+  if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
+  else if(fst === '_progress_group') rows = rows.filter(r=>!isSelesai(r));
+  else if(fst) rows = rows.filter(r=> (r.status||(r.end?'selesai':'lanjut')) === fst);
+
+  const empty = document.getElementById('ev-empty');
+  const pagBar = document.getElementById('ev-pagination');
+  const isMob  = window.innerWidth < 640;
+  const tableWrap = document.getElementById('ev-table-wrap');
+  const cardsEl   = document.getElementById('ev-cards');
+  if(tableWrap) tableWrap.style.display = isMob ? 'none' : 'block';
+  if(cardsEl)   cardsEl.style.display   = isMob ? 'flex'  : 'none';
+
+  if(!rows.length){
+    document.getElementById('ev-tbody').innerHTML='';
+    if(cardsEl) cardsEl.innerHTML='';
+    empty.style.display='block';
+    pagBar.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / EV_PAGE_SIZE));
+  if(_evCurrentPage > totalPages) _evCurrentPage = totalPages;
+  if(_evCurrentPage < 1) _evCurrentPage = 1;
+
+  const startIdx = (_evCurrentPage - 1) * EV_PAGE_SIZE;
+  const pageRows = rows.slice(startIdx, startIdx + EV_PAGE_SIZE);
+
+  if(rows.length > EV_PAGE_SIZE){
+    pagBar.style.display = 'flex';
+    document.getElementById('ev-pagination-info').textContent =
+      `Menampilkan ${startIdx+1}–${Math.min(startIdx+EV_PAGE_SIZE, rows.length)} dari ${rows.length} data (hal. ${_evCurrentPage}/${totalPages})`;
+    document.getElementById('ev-page-prev').disabled = _evCurrentPage <= 1;
+    document.getElementById('ev-page-next').disabled = _evCurrentPage >= totalPages;
+  } else {
+    pagBar.style.display = 'none';
+  }
+
+  document.getElementById('ev-tbody').innerHTML = pageRows.map(r => buildAdminRowHtml(r, fsr)).join('');
+  if(cardsEl) cardsEl.innerHTML = pageRows.map(r => buildAdminCardHtml(r, fsr)).join('');
+}
+
+function applyEditViewFilter(){
+  _evCurrentPage = 1;
+  renderEditView();
+}
+
+function clearEditViewFilter(){
+  ['ev-nama','ev-jenis','ev-status','ev-date'].forEach(id=>document.getElementById(id).value='');
+  ['ev-sr','ev-mesin'].forEach(id=>document.getElementById(id).value='');
+  _evCurrentPage = 1;
+  renderEditView();
+}
+
+function evChangePage(direction){
+  _evCurrentPage += direction;
+  renderEditView();
+  document.getElementById('ev-pagination').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 // ── BANNER JAM UNKNOWN ─────────────────────────────────────────
@@ -2905,6 +3198,11 @@ function openDetailJoblog(joblogId){
       ${row('Status', statusBadgeHtml(r))}
       ${row('Input (Tgl & Jam)', fmtSubmitDateTime(r.submittedAt), true)}
     </div>
+    ${r.lastEditedBy ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${row('✏ Terakhir Diedit Oleh', r.lastEditedBy)}
+      ${row('Waktu Edit', fmtSubmitDateTime(r.lastEditedAt), true)}
+    </div>` : ''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;border-top:1px solid var(--border)">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',null),100)">✏ Edit SR</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-detail-joblog');setTimeout(()=>openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${(r.sr||'').replace(/'/g,"\\'")}'),100)">✏ Edit Jenis</button>
@@ -2920,11 +3218,12 @@ function openDetailJoblog(joblogId){
   document.getElementById('modal-detail-joblog').classList.add('show');
 }
 
-async function changeStatusAdmin(joblogId, newStatus){
+async function changeStatusAdmin(joblogId, newStatus, selectEl){
   const info = STATUS_MAP[newStatus];
+  const prevValue = joblogDB.find(x => x._id === joblogId)?.status || null;
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',joblogId), { status: newStatus });
+    await updateDoc(doc(db,'joblogs',joblogId), { status: newStatus, ...auditPatch() });
     toast(`Status diubah ke "${info ? info.label : newStatus}".`);
   } catch(e){
     toast(
@@ -2933,6 +3232,7 @@ async function changeStatusAdmin(joblogId, newStatus){
         : `Gagal mengubah status: ${e.message||e.code||'error'}`,
       'warn'
     );
+    if(selectEl && prevValue) selectEl.value = prevValue;
   }
 }
 
@@ -2972,7 +3272,7 @@ async function saveEditJob(){
   if(!_editJobId) return;
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',_editJobId), { job: newJob });
+    await updateDoc(doc(db,'joblogs',_editJobId), { job: newJob, ...auditPatch() });
     closeModal('modal-edit-job');
     toast('Deskripsi pekerjaan berhasil diubah.');
   } catch(e){
@@ -3069,7 +3369,7 @@ async function saveEditJoblog(){
 
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',_editJoblogId), updates);
+    await updateDoc(doc(db,'joblogs',_editJoblogId), { ...updates, ...auditPatch() });
     closeModal('modal-edit-joblog');
     toast('Joblog berhasil diperbarui.');
   } catch(e){
@@ -3943,7 +4243,7 @@ async function submitFillSr(joblogId){
 
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',joblogId), { sr: newSr });
+    await updateDoc(doc(db,'joblogs',joblogId), { sr: newSr, lastEditedBy: currentUser?currentUser.nama:'Teknisi', lastEditedAt: nowTs() });
     toast(`No. SR berhasil disimpan: ${newSr}`);
     // renderSrBar akan otomatis terpanggil ulang lewat onSnapshot
   } catch(e){
@@ -4008,7 +4308,7 @@ async function submitLanjut(refId, sr, mesin, jenis){
     // joblog asal otomatis ditandai selesai juga — tanpa mengubah field lain (termasuk 'end').
     if(status === 'selesai'){
       try {
-        await updateDoc(doc(db,'joblogs',refId), { status: 'selesai' });
+        await updateDoc(doc(db,'joblogs',refId), { status: 'selesai', lastEditedBy: currentUser.nama, lastEditedAt: nowTs() });
       } catch(eAuto){
         console.warn('Gagal auto-selesaikan joblog asal:', eAuto);
       }
@@ -4039,7 +4339,7 @@ async function saveEditSr(){
   if(!_editSrId) return;
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',_editSrId), { sr: newSr });
+    await updateDoc(doc(db,'joblogs',_editSrId), { sr: newSr, ...auditPatch() });
     closeModal('modal-edit-sr');
     toast('No. SR berhasil diubah.');
   } catch(e){
@@ -4070,7 +4370,7 @@ async function saveEditJenisJoblog(){
   if(!_editJenisJoblogId){ return; }
   try {
     const { db, doc, updateDoc } = window._fb;
-    await updateDoc(doc(db,'joblogs',_editJenisJoblogId), { jenis: newJenis });
+    await updateDoc(doc(db,'joblogs',_editJenisJoblogId), { jenis: newJenis, ...auditPatch() });
     closeModal('modal-edit-jenis-joblog');
     toast(`Jenis pekerjaan diubah ke "${newJenis}"`);
   } catch(e){
