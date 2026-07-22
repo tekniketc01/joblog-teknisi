@@ -1576,15 +1576,41 @@ service cloud.firestore {
         <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPerformaFilter()">✕ Reset</button>
       </div>
     </div>
-    <button class="btn-peringkat" onclick="togglePeringkat()" id="btn-peringkat" style="display:none">
-      <span class="btn-peringkat-icon">🏆</span>
-      <span class="btn-peringkat-label">Lihat Peringkat Teknisi</span>
-      <span class="btn-peringkat-chevron" id="peringkat-chevron">▼</span>
-    </button>
-    <div class="peringkat-wrap" id="peringkat-wrap">
+
+    <!-- Inner tabs: Peringkat | Kinerja | Per Jenis Pekerjaan -->
+    <div class="pm-inner-tabs">
+      <button class="pm-inner-tab active" id="perf-tab-peringkat" onclick="switchPerformaInner('peringkat',this)">🏆 Peringkat Teknisi</button>
+      <button class="pm-inner-tab" id="perf-tab-kinerja" onclick="switchPerformaInner('kinerja',this)">📋 Kinerja Teknisi</button>
+      <button class="pm-inner-tab" id="perf-tab-jenis" onclick="switchPerformaInner('jenis',this)">🔧 Per Jenis Pekerjaan</button>
+    </div>
+
+    <!-- Konten: Peringkat Teknisi -->
+    <div id="perf-inner-peringkat">
       <div id="perf-rekap"></div>
     </div>
-    <div id="perf-cards"></div>
+
+    <!-- Konten: Kinerja Teknisi (tanpa peringkat) -->
+    <div id="perf-inner-kinerja" style="display:none">
+      <div id="perf-cards"></div>
+    </div>
+
+    <!-- Konten: Per Jenis Pekerjaan -->
+    <div id="perf-inner-jenis" style="display:none">
+      <div class="card">
+        <div class="card-title">
+          <span>🔧 Peringkat per Jenis Pekerjaan</span>
+        </div>
+        <div class="filter-date-field" style="margin-bottom:12px">
+          <label class="filter-date-label">Jenis Pekerjaan</label>
+          <select id="pfj-jenis" onchange="renderPerformaJenis()">
+            <option value="">-- Pilih Jenis Pekerjaan --</option>
+          </select>
+        </div>
+        <div id="perf-jenis-table"></div>
+        <div class="empty-state" id="perf-jenis-empty">Pilih Jenis Pekerjaan di atas untuk melihat ranking teknisi.</div>
+      </div>
+    </div>
+
     <div class="empty-state" id="perf-empty" style="display:none">Tidak ada data untuk periode ini.</div>
   </div>
 
@@ -2279,6 +2305,15 @@ function buildJenisDropdowns(){
     evJenis.innerHTML = '<option value="">Semua Jenis</option>' +
       opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
     if(prevEvJ) evJenis.value = prevEvJ;
+  }
+
+  // Dropdown filter tab Performa → Per Jenis Pekerjaan
+  const pfjJenis = document.getElementById('pfj-jenis');
+  if(pfjJenis){
+    const prevPfj = pfjJenis.value;
+    pfjJenis.innerHTML = '<option value="">-- Pilih Jenis Pekerjaan --</option>' +
+      opts.map(j=>`<option value="${j.nama}">${j.nama}</option>`).join('');
+    if(prevPfj) pfjJenis.value = prevPfj;
   }
 }
 
@@ -3418,6 +3453,12 @@ function last4Digits(sr){
   return digits.slice(-4);
 }
 
+// Normalisasi nama mesin untuk keperluan pencocokan (bukan tampilan): huruf kecil semua,
+// buang semua spasi/tanda baca — supaya "NBL 2" dan "nbl2" dianggap mesin yang sama.
+function normMesinKey(nama){
+  return (nama||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+
 // Gabungkan baris joblog Perbaikan/Penggantian Part (termasuk Lembur+Perbaikan) yang merupakan
 // SR yang SAMA (4 digit terakhir No. SR sama), mesin yang sama, dan bulan yang sama — supaya 1
 // kejadian kerusakan yang diinput bertahap (diagnosa → lanjut → selesai) dihitung sebagai 1 kejadian,
@@ -3427,11 +3468,11 @@ function dedupSrRows(rows){
   const groups = {};
   const order  = [];
   rows.forEach(r => {
-    const mesin = (r.mesin||'').trim();
+    const mesinKey = normMesinKey(r.mesin);
     const last4 = last4Digits(r.sr);
     const bulan = (r.date||'').slice(0,7);
     // SR tanpa 4 digit angka yang jelas: jangan digabung dengan apapun, berdiri sendiri
-    const key = last4 ? `${mesin}|||${last4}|||${bulan}` : `__solo__${r._id}`;
+    const key = last4 ? `${mesinKey}|||${last4}|||${bulan}` : `__solo__${r._id}`;
     if(!groups[key]){ groups[key]=[]; order.push(key); }
     groups[key].push(r);
   });
@@ -3707,11 +3748,12 @@ function renderMesinRusak(){
 
   const byMesin = {};
   rows.forEach(r => {
-    const m = (r.mesin||'').trim();
-    if(!byMesin[m]) byMesin[m] = {mesin:m,dates:[],jenisCount:{}};
-    byMesin[m].dates.push(r.date||'');
+    const key = normMesinKey(r.mesin);
+    if(!key) return; // lewati kalau nama mesin kosong
+    if(!byMesin[key]) byMesin[key] = {mesin:(r.mesin||'').trim(), dates:[], jenisCount:{}};
+    byMesin[key].dates.push(r.date||'');
     const j=r.jenis||'Perbaikan';
-    byMesin[m].jenisCount[j]=(byMesin[m].jenisCount[j]||0)+1;
+    byMesin[key].jenisCount[j]=(byMesin[key].jenisCount[j]||0)+1;
   });
 
   // Hanya tampilkan mesin yang rusak LEBIH DARI 2x (≥3x)
@@ -3817,8 +3859,9 @@ function resetMesinRusakFilter(){
 // Drill-down: tampilkan semua kejadian rusak (tanggal + deskripsi pekerjaan) untuk 1 mesin
 function openMesinRusakDetail(mesinName){
   const fbulan = document.getElementById('mr-bulan').value;
+  const key = normMesinKey(mesinName);
   let rows = joblogDB.filter(r =>
-    (isPerbaikan(r.jenis) || isPerbaikan(r.jenis2)) && (r.mesin||'').trim() === mesinName
+    (isPerbaikan(r.jenis) || isPerbaikan(r.jenis2)) && normMesinKey(r.mesin) === key
   );
   if(fbulan) rows = rows.filter(r => r.date && r.date.startsWith(fbulan));
   rows = dedupSrRows(rows).sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.start||'').localeCompare(a.start||''));
@@ -3967,13 +4010,18 @@ function extractKerusakanPhrases(text){
 }
 
 function buildMesinDropdown(){
-  const mesinSet=[...new Set(
-    joblogDB.filter(r=>(isPerbaikan(r.jenis)||isPerbaikan(r.jenis2))&&r.mesin).map(r=>r.mesin.trim())
-  )].sort();
+  const seen = new Map(); // normMesinKey → nama tampilan representatif
+  joblogDB
+    .filter(r=>(isPerbaikan(r.jenis)||isPerbaikan(r.jenis2))&&r.mesin)
+    .forEach(r=>{
+      const key = normMesinKey(r.mesin);
+      if(key && !seen.has(key)) seen.set(key, r.mesin.trim());
+    });
+  const mesinList = [...seen.values()].sort();
   const sel=document.getElementById('kk-mesin');
   if(!sel) return;
   sel.innerHTML='<option value="">Semua Mesin</option>'+
-    mesinSet.map(m=>`<option value="${m}">${m}</option>`).join('');
+    mesinList.map(m=>`<option value="${m}">${m}</option>`).join('');
 }
 
 let _kkPage = 1;
@@ -3990,7 +4038,7 @@ function renderKataKerusakan(){
 
   let rows=joblogDB.filter(r=>isPerbaikan(r.jenis)||isPerbaikan(r.jenis2));
   if(fbulan) rows=rows.filter(r=>r.date&&r.date.startsWith(fbulan));
-  if(fmesin) rows=rows.filter(r=>(r.mesin||'').trim()===fmesin);
+  if(fmesin) rows=rows.filter(r=>normMesinKey(r.mesin)===normMesinKey(fmesin));
   rows = dedupSrRows(rows);
 
   if(!rows.length){
@@ -4002,14 +4050,12 @@ function renderKataKerusakan(){
   const freq={};
   _kkPhraseRows = {}; // reset setiap render — peta frasa → daftar joblog yang berkontribusi (untuk drill-down)
   rows.forEach(r=>{
-    const phrases = extractKerusakanPhrases(r.job);
-    const seenThisRow = new Set();
-    phrases.forEach(p=>{
+    // Kalau 1 deskripsi menyebut frasa yang sama lebih dari sekali, tetap dihitung 1x saja per
+    // input — supaya angka total (badge & bar) selalu sama persis dengan jumlah kartu di drill-down.
+    const uniquePhrases = [...new Set(extractKerusakanPhrases(r.job))];
+    uniquePhrases.forEach(p=>{
       freq[p]=(freq[p]||0)+1;
-      if(!seenThisRow.has(p)){
-        (_kkPhraseRows[p]=_kkPhraseRows[p]||[]).push(r);
-        seenThisRow.add(p);
-      }
+      (_kkPhraseRows[p]=_kkPhraseRows[p]||[]).push(r);
     });
   });
 
@@ -5267,13 +5313,16 @@ function fmtMenit(m){
   return h>0 ? `${h}j${mn>0?' '+mn+'m':''}` : `${mn}m`;
 }
 
-function togglePeringkat(){
-  const wrap    = document.getElementById('peringkat-wrap');
-  const chevron = document.getElementById('peringkat-chevron');
-  const open    = wrap.classList.toggle('open');
-  chevron.classList.toggle('open', open);
-  if(open) document.getElementById('btn-peringkat').querySelector('.btn-peringkat-label').textContent = 'Sembunyikan Peringkat';
-  else     document.getElementById('btn-peringkat').querySelector('.btn-peringkat-label').textContent = 'Lihat Peringkat Teknisi';
+// Inner tabs Performa: Peringkat | Kinerja | Per Jenis Pekerjaan
+let _activePerfInner = 'peringkat';
+function switchPerformaInner(tab, el){
+  document.querySelectorAll('.pm-inner-tab[id^="perf-tab"]').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  _activePerfInner = tab;
+  document.getElementById('perf-inner-peringkat').style.display = tab==='peringkat' ? 'block' : 'none';
+  document.getElementById('perf-inner-kinerja').style.display   = tab==='kinerja'   ? 'block' : 'none';
+  document.getElementById('perf-inner-jenis').style.display     = tab==='jenis'     ? 'block' : 'none';
+  renderPerforma();
 }
 
 function buildRekapTable(allRows, filterBulan){
@@ -5374,36 +5423,103 @@ function renderPerforma(){
   let allRows = [...joblogDB];
   if(filterBulan) allRows = allRows.filter(r => r.date && r.date.startsWith(filterBulan));
 
-  const empty    = document.getElementById('perf-empty');
-  const cont     = document.getElementById('perf-cards');
-  const rekapEl  = document.getElementById('perf-rekap');
-  const btnEl    = document.getElementById('btn-peringkat');
+  const empty = document.getElementById('perf-empty');
 
   if(!allRows.length){
     empty.style.display='block';
-    cont.innerHTML='';
-    rekapEl.innerHTML='';
-    btnEl.style.display='none';
+    document.getElementById('perf-cards').innerHTML='';
+    document.getElementById('perf-rekap').innerHTML='';
     return;
   }
   empty.style.display='none';
 
-  // Render tabel peringkat (tersembunyi sampai diklik)
-  rekapEl.innerHTML = buildRekapTable(allRows, filterBulan);
-  btnEl.style.display = 'flex';
+  if(_activePerfInner === 'peringkat'){
+    document.getElementById('perf-rekap').innerHTML = buildRekapTable(allRows, filterBulan);
+  } else if(_activePerfInner === 'kinerja'){
+    const namaList = filterNama
+      ? [filterNama]
+      : [...new Set(allRows.map(r=>r.nama))].sort();
+    const html = '<div class="perf-grid">' + namaList.map(nama => {
+      const data = allRows.filter(r => r.nama === nama);
+      if(!data.length) return '';
+      return buildPerfCard(nama, data);
+    }).filter(Boolean).join('') + '</div>';
+    document.getElementById('perf-cards').innerHTML = html;
+  } else if(_activePerfInner === 'jenis'){
+    renderPerformaJenis();
+  }
+}
 
-  // Kartu detail — ikut filter nama
-  const namaList = filterNama
-    ? [filterNama]
-    : [...new Set(allRows.map(r=>r.nama))].sort();
+// ── PER JENIS PEKERJAAN: ranking total joblog & total jam per teknisi ──
+// Entri Lembur dengan Jenis Pekerjaan Tambahan (mis. Lembur + Perbaikan) ikut dihitung
+// kalau jenis yang dipilih cocok dengan salah satu dari jenis utama ATAU jenis tambahan.
+function renderPerformaJenis(){
+  const filterBulan = document.getElementById('pf-bulan').value;
+  const fjenis = document.getElementById('pfj-jenis').value;
+  const tableEl = document.getElementById('perf-jenis-table');
+  const emptyEl = document.getElementById('perf-jenis-empty');
+  if(!tableEl || !emptyEl) return;
 
-  const html = '<div class="perf-grid">' + namaList.map(nama => {
-    const data = allRows.filter(r => r.nama === nama);
-    if(!data.length) return '';
-    return buildPerfCard(nama, data);
-  }).filter(Boolean).join('') + '</div>';
+  if(!fjenis){
+    tableEl.innerHTML = '';
+    emptyEl.textContent = 'Pilih Jenis Pekerjaan di atas untuk melihat ranking teknisi.';
+    emptyEl.style.display = 'block';
+    return;
+  }
 
-  cont.innerHTML = html;
+  let rows = joblogDB.filter(r => r.jenis===fjenis || r.jenis2===fjenis);
+  if(filterBulan) rows = rows.filter(r => r.date && r.date.startsWith(filterBulan));
+
+  if(!rows.length){
+    tableEl.innerHTML = '';
+    emptyEl.textContent = `Belum ada data untuk Jenis Pekerjaan "${fjenis}" pada periode ini.`;
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const byNama = {};
+  rows.forEach(r => {
+    const n = r.nama || 'Tidak diketahui';
+    if(!byNama[n]) byNama[n] = { nama:n, total:0, jam:0 };
+    byNama[n].total++;
+    if(typeof r.dur === 'number') byNama[n].jam += r.dur;
+  });
+
+  const stats = Object.values(byNama).sort((a,b) => b.total - a.total || b.jam - a.jam);
+  const maxTotal = stats[0]?.total || 1;
+
+  const bulanLabel = filterBulan
+    ? new Date(filterBulan+'-01').toLocaleDateString('id-ID',{month:'long',year:'numeric'})
+    : 'Semua Periode';
+
+  const rowsHtml = stats.map((s,i) => {
+    const rank = i+1;
+    const rankClass = rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+    const barW = Math.round((s.total/maxTotal)*100);
+    return `<tr>
+      <td><span class="rekap-rank ${rankClass}">${rank}</span></td>
+      <td>
+        <div class="rekap-nama">${s.nama}</div>
+        <div class="rekap-skor-bar-wrap"><div class="rekap-skor-bar" style="width:${barW}%"></div></div>
+      </td>
+      <td class="num"><span class="rekap-skor-pill">${s.total}</span></td>
+      <td class="num"><span class="rekap-pct-pill kerja">${fmtMenit(s.jam)}</span></td>
+    </tr>`;
+  }).join('');
+
+  tableEl.innerHTML = `
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px">
+      Jenis Pekerjaan: <strong>${fjenis}</strong> · ${bulanLabel}
+    </div>
+    <div class="rekap-table-wrap">
+      <table class="rekap-table">
+        <thead><tr>
+          <th>#</th><th>Teknisi</th><th class="num">Total Joblog</th><th class="num">Total Jam</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
 }
 
 function buildPerfCard(nama, data){
