@@ -858,6 +858,23 @@ tbody tr:hover td{background:#FAFAF8}
   </div>
 </div>
 
+<!-- MODAL: TAMBAH/EDIT LOKASI PEKERJAAN (admin only) -->
+<div class="overlay" id="modal-lokasi">
+  <div class="modal">
+    <div class="modal-title" id="lokasi-title">Tambah Lokasi Pekerjaan</div>
+    <div class="field" style="margin-bottom:4px">
+      <label>Nama Lokasi</label>
+      <input type="text" id="lokasi-nama" placeholder="Contoh: Produksi Line 1" onkeydown="if(event.key==='Enter')saveLokasi()">
+    </div>
+    <div class="pw-error" id="lokasi-error" style="margin-top:8px">Nama wajib diisi atau sudah ada.</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" id="lokasi-save-btn" onclick="saveLokasi()">Tambah</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-lokasi')">Batal</button>
+      <button class="btn btn-danger" id="lokasi-delete-btn" style="display:none" onclick="closeModal('modal-lokasi');confirmDeleteLokasi(_editLokasiId, document.getElementById('lokasi-nama').value.trim())">Hapus</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: TAMBAH/EDIT KATEGORI PANDUAN TROUBLESHOOT (admin only) -->
 <div class="overlay" id="modal-ts-cat">
   <div class="modal">
@@ -997,6 +1014,10 @@ tbody tr:hover td{background:#FAFAF8}
         <select id="ej-jenis2"></select>
       </div>
       <div class="field">
+        <label>Lokasi Pekerjaan</label>
+        <select id="ej-lokasi"></select>
+      </div>
+      <div class="field">
         <label>Deskripsi Pekerjaan</label>
         <input type="text" id="ej-job" placeholder="Deskripsi pekerjaan">
       </div>
@@ -1125,6 +1146,12 @@ service cloud.firestore {
       <label>Jenis Pekerjaan Tambahan (Lembur) *</label>
       <select id="f-jenis2">
         <option value="">-- Pilih Jenis Pekerjaan Sebenarnya --</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Lokasi Pekerjaan *</label>
+      <select id="f-lokasi">
+        <option value="">-- Pilih Lokasi --</option>
       </select>
     </div>
     <div class="field" style="margin-bottom:12px">
@@ -1258,6 +1285,12 @@ service cloud.firestore {
         </div>
       </div>
       <div class="filter-group g2">
+        <div class="filter-label-wrap">
+          <label>Lokasi</label>
+          <select id="ev-lokasi" onchange="applyEditViewFilter()"><option value="">Semua Lokasi</option></select>
+        </div>
+      </div>
+      <div class="filter-group g2">
         <div class="filter-label-wrap" style="justify-content:flex-end">
           <label style="opacity:0">–</label>
           <button class="btn btn-ghost btn-sm" onclick="clearEditViewFilter()" style="width:100%">✕ Reset Filter</button>
@@ -1274,7 +1307,7 @@ service cloud.firestore {
     <div class="table-wrap" id="ev-table-wrap">
       <table>
         <thead><tr>
-          <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
+          <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Lokasi</th><th>Jenis</th>
           <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th><th>Edit</th>
         </tr></thead>
         <tbody id="ev-tbody"></tbody>
@@ -1338,6 +1371,9 @@ service cloud.firestore {
         <div class="group-dropdown-item" id="gitem-jenis" onclick="switchGroupItem('jenis')">
           <span class="group-dropdown-item-dot"></span>Jenis Pekerjaan
         </div>
+        <div class="group-dropdown-item" id="gitem-lokasi" onclick="switchGroupItem('lokasi')">
+          <span class="group-dropdown-item-dot"></span>Lokasi Pekerjaan
+        </div>
         <div class="group-dropdown-item" id="gitem-panduan" onclick="switchGroupItem('panduan')">
           <span class="group-dropdown-item-dot"></span>Kelola Panduan
         </div>
@@ -1391,6 +1427,13 @@ service cloud.firestore {
             <div class="filter-label-wrap">
               <label>Jenis</label>
               <select id="ff-jenis" onchange="applyAdminFilter()"><option value="">Semua Jenis</option></select>
+            </div>
+          </div>
+          <!-- Lokasi -->
+          <div class="filter-group g2">
+            <div class="filter-label-wrap">
+              <label>Lokasi</label>
+              <select id="ff-lokasi" onchange="applyAdminFilter()"><option value="">Semua Lokasi</option></select>
             </div>
           </div>
           <!-- Status Periksa + Status -->
@@ -1465,7 +1508,7 @@ service cloud.firestore {
       <div class="table-wrap" id="admin-table-wrap">
         <table>
           <thead><tr>
-            <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Jenis</th>
+            <th>Teknisi</th><th>Tgl Kerja</th><th>No. SR</th><th>Mesin</th><th>Lokasi</th><th>Jenis</th>
             <th>Pekerjaan</th><th>Mulai</th><th>Selesai</th><th>Durasi</th><th>Status</th><th>Periksa</th><th>Input (Tgl & Jam)</th><th>Hapus</th><th>Edit</th>
           </tr></thead>
           <tbody id="admin-tbody"></tbody>
@@ -1513,6 +1556,18 @@ service cloud.firestore {
       </div>
       <div class="jenis-list" id="jenis-list"><div class="empty-state">Memuat...</div></div>
       <p style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Jenis pekerjaan akan tersedia di dropdown saat input joblog dan filter data.</p>
+    </div>
+  </div>
+
+  <!-- SUB: KELOLA LOKASI PEKERJAAN -->
+  <div id="sub-lokasi" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>Lokasi Pekerjaan</span>
+        <button class="btn btn-primary btn-sm" onclick="openAddLokasi()">+ Tambah Lokasi</button>
+      </div>
+      <div class="jenis-list" id="lokasi-list"><div class="empty-state">Memuat...</div></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Lokasi pekerjaan akan tersedia di dropdown saat input joblog dan filter data.</p>
     </div>
   </div>
 
@@ -1572,6 +1627,12 @@ service cloud.firestore {
         <div class="filter-date-field" style="flex:1">
           <label class="filter-date-label">Bulan</label>
           <input type="month" id="pf-bulan" onchange="renderPerforma()">
+        </div>
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Lokasi</label>
+          <select id="pf-lokasi" onchange="renderPerforma()">
+            <option value="">Semua Lokasi</option>
+          </select>
         </div>
         <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetPerformaFilter()">✕ Reset</button>
       </div>
@@ -1831,6 +1892,39 @@ service cloud.firestore {
       <div class="card-title">Ubah Password Saya (Teknisi)</div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Untuk mengubah password login teknisi, gunakan menu <strong>Teknisi</strong> di atas.</p>
     </div>
+    <div class="card" style="margin-top:0" id="rc-settings-card">
+      <div class="card-title">🏆 Formula Peringkat Teknisi</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;font-family:var(--mono);line-height:1.6">
+        Skor = (% &lt;target durasi × bobot1) + (% SR Lengkap × bobot2) + (% Disiplin × bobot3).
+        Total ketiga bobot harus <strong>100%</strong>.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field">
+          <label>Bobot % &lt;Target Durasi</label>
+          <input type="number" id="rc-bobot1jam" min="0" max="100" step="1">
+        </div>
+        <div class="field">
+          <label>Bobot % SR Lengkap</label>
+          <input type="number" id="rc-bobotSr" min="0" max="100" step="1">
+        </div>
+        <div class="field">
+          <label>Bobot % Disiplin</label>
+          <input type="number" id="rc-bobotDisiplin" min="0" max="100" step="1">
+        </div>
+        <div class="field">
+          <label>Target Durasi Perbaikan/Penggantian Part (menit)</label>
+          <input type="number" id="rc-targetMenit" min="1" step="1">
+          <p style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono)">Contoh: 60 = target selesai di bawah 1 jam.</p>
+        </div>
+        <div class="field">
+          <label>Toleransi Keterlambatan Input Joblog (hari)</label>
+          <input type="number" id="rc-toleransiHari" min="0" step="1">
+          <p style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono)">0 = wajib input di hari yang sama. 1 = boleh telat maks H+1. Dst.</p>
+        </div>
+      </div>
+      <div class="pw-error" id="rc-settings-error">Total bobot harus 100%.</div>
+      <div class="btn-row"><button class="btn btn-primary btn-block" onclick="saveRankingConfig()">Simpan Formula</button></div>
+    </div>
   </div>
 </div>
 
@@ -1937,6 +2031,7 @@ service cloud.firestore {
 let joblogDB   = [];
 let teknisisDB = [];   // [{id, nama, password}] dari Firestore
 let jenisDB    = [];   // [{id, nama, bg, color}] dari Firestore — jenis pekerjaan
+let lokasiDB   = [];   // [{id, nama}] dari Firestore — lokasi pekerjaan
 let kataSifatDB = [];  // [{id, kata}] dari Firestore — kata sifat kondisi rusak (untuk deteksi frasa kerusakan)
 let tsCatDB    = [];   // [{id, nama, icon, order}] dari Firestore — kategori Panduan Troubleshoot
 let _editTsCatId = null;
@@ -1945,6 +2040,8 @@ let _tsItemsUnsub = null;
 let _editTsItemId = null;
 let _panduanActiveCatId = null; // id kategori yang sedang dikelola di admin "Kelola Panduan"
 let adminPw    = 'admin123';
+// Konfigurasi Peringkat Teknisi — bisa diubah admin di Settings, disimpan di settings/ranking
+let rankingConfig = { bobot1jam:50, bobotSr:30, bobotDisiplin:20, targetMenit:60, toleransiHari:0 };
 let adminIn    = false;
 let currentUser = null;  // {id, nama} teknisi yang sedang login
 let fbConfigOk  = false;
@@ -1991,6 +2088,19 @@ window.addEventListener('fb-ready', async () => {
   try {
     const s = await getDoc(doc(db,'settings','admin'));
     if(s.exists() && s.data().password) adminPw = s.data().password;
+  } catch(e){}
+
+  // Load konfigurasi Peringkat Teknisi (bobot skor, target durasi, toleransi keterlambatan input)
+  try {
+    const rc = await getDoc(doc(db,'settings','ranking'));
+    if(rc.exists()){
+      const d = rc.data();
+      if(typeof d.bobot1jam     === 'number') rankingConfig.bobot1jam     = d.bobot1jam;
+      if(typeof d.bobotSr       === 'number') rankingConfig.bobotSr       = d.bobotSr;
+      if(typeof d.bobotDisiplin === 'number') rankingConfig.bobotDisiplin = d.bobotDisiplin;
+      if(typeof d.targetMenit   === 'number') rankingConfig.targetMenit   = d.targetMenit;
+      if(typeof d.toleransiHari === 'number') rankingConfig.toleransiHari = d.toleransiHari;
+    }
   } catch(e){}
 
   // Seed kategori Panduan Troubleshoot default (sekali saja, kalau koleksi masih kosong)
@@ -2099,6 +2209,43 @@ window.addEventListener('fb-ready', async () => {
     }
   }, err => {
     console.error('Gagal memuat jenis:', err);
+  });
+
+  // Listen: lokasi pekerjaan (real-time)
+  let _lokasiSeedDone = false;
+  onSnapshot(query(collection(db,'lokasiKerja'), orderBy('nama','asc')), async snap => {
+    lokasiDB = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Dedup case-insensitive, sama seperti jenis
+    const seenLok = {};
+    const dupLokIds = [];
+    for(const l of lokasiDB){
+      const key = (l.nama||'').trim().toLowerCase();
+      if(seenLok[key]) dupLokIds.push(l.id); else seenLok[key] = true;
+    }
+    if(dupLokIds.length){
+      try{
+        const {db:fdb, doc:fdoc, deleteDoc:fdel} = window._fb;
+        for(const did of dupLokIds) await fdel(fdoc(fdb,'lokasiKerja',did));
+      }catch(e){ console.warn('Gagal hapus duplikat lokasi:',e); }
+      return;
+    }
+
+    buildLokasiDropdowns();
+    renderLokasiList();
+
+    if(!_lokasiSeedDone && lokasiDB.length === 0){
+      _lokasiSeedDone = true;
+      const defaults = [{nama:'Produksi'},{nama:'Gudang'},{nama:'Office'},{nama:'Utility'}];
+      try{
+        const {db:fdb, collection:fcol, addDoc:fadd} = window._fb;
+        for(const d of defaults) await fadd(fcol(fdb,'lokasiKerja'), d);
+      }catch(e){}
+    } else {
+      _lokasiSeedDone = true;
+    }
+  }, err => {
+    console.error('Gagal memuat lokasi:', err);
   });
 
   // Listen: kata sifat kerusakan (real-time) — untuk deteksi frasa "Kata Kerusakan"
@@ -2317,6 +2464,56 @@ function buildJenisDropdowns(){
   }
 }
 
+// ── BUILD LOKASI DROPDOWNS ─────────────────────────────────────
+function buildLokasiDropdowns(){
+  const opts = lokasiDB; // tidak ada fallback default — wajib dikelola admin dulu di Kelola Lokasi
+
+  // Dropdown form input (wajib diisi)
+  const fLokasi = document.getElementById('f-lokasi');
+  if(fLokasi){
+    const prevF = fLokasi.value;
+    fLokasi.innerHTML = '<option value="">-- Pilih Lokasi --</option>' +
+      opts.map(l=>`<option value="${l.nama}">${l.nama}</option>`).join('');
+    if(prevF) fLokasi.value = prevF;
+  }
+
+  // Dropdown edit lengkap (admin)
+  const ejLokasi = document.getElementById('ej-lokasi');
+  if(ejLokasi){
+    const prevEj = ejLokasi.value;
+    ejLokasi.innerHTML = '<option value="">-- Pilih Lokasi --</option>' +
+      opts.map(l=>`<option value="${l.nama}">${l.nama}</option>`).join('');
+    if(prevEj) ejLokasi.value = prevEj;
+  }
+
+  // Dropdown filter Data Joblog (admin)
+  const ffLokasi = document.getElementById('ff-lokasi');
+  if(ffLokasi){
+    const prevFF = ffLokasi.value;
+    ffLokasi.innerHTML = '<option value="">Semua Lokasi</option>' +
+      opts.map(l=>`<option value="${l.nama}">${l.nama}</option>`).join('');
+    if(prevFF) ffLokasi.value = prevFF;
+  }
+
+  // Dropdown filter tab Edit & View Joblog
+  const evLokasi = document.getElementById('ev-lokasi');
+  if(evLokasi){
+    const prevEv = evLokasi.value;
+    evLokasi.innerHTML = '<option value="">Semua Lokasi</option>' +
+      opts.map(l=>`<option value="${l.nama}">${l.nama}</option>`).join('');
+    if(prevEv) evLokasi.value = prevEv;
+  }
+
+  // Dropdown filter Performa
+  const pfLokasi = document.getElementById('pf-lokasi');
+  if(pfLokasi){
+    const prevPf = pfLokasi.value;
+    pfLokasi.innerHTML = '<option value="">Semua Lokasi</option>' +
+      opts.map(l=>`<option value="${l.nama}">${l.nama}</option>`).join('');
+    if(prevPf) pfLokasi.value = prevPf;
+  }
+}
+
 // ── LOGIN TEKNISI ──────────────────────────────────────────────
 // ── AKSES TAB PANDUAN (wajib login teknisi) ─────────────────────
 function tryPanduan(el, type){
@@ -2443,7 +2640,71 @@ async function changeAdminPassword(){
     }catch(e){}
   }
   ['pw-old','pw-new','pw-confirm'].forEach(id=>document.getElementById(id).value='');
-  toast('Password admin berhasil diubah!');
+  switchGroupItem('data'); // kembali ke menu awal, tidak menetap di halaman Settings
+  showNotif('success', 'Berhasil Disimpan', 'Password admin berhasil diubah.');
+}
+
+// ── FORMULA PERINGKAT TEKNISI (Settings) ────────────────────────
+function populateRankingConfigForm(){
+  const ids = {
+    'rc-bobot1jam': rankingConfig.bobot1jam,
+    'rc-bobotSr': rankingConfig.bobotSr,
+    'rc-bobotDisiplin': rankingConfig.bobotDisiplin,
+    'rc-targetMenit': rankingConfig.targetMenit,
+    'rc-toleransiHari': rankingConfig.toleransiHari
+  };
+  Object.entries(ids).forEach(([id,val])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = val;
+  });
+  const err = document.getElementById('rc-settings-error');
+  if(err) err.style.display = 'none';
+}
+
+async function saveRankingConfig(){
+  const bobot1jam     = Number(document.getElementById('rc-bobot1jam').value);
+  const bobotSr       = Number(document.getElementById('rc-bobotSr').value);
+  const bobotDisiplin = Number(document.getElementById('rc-bobotDisiplin').value);
+  const targetMenit   = Number(document.getElementById('rc-targetMenit').value);
+  const toleransiHari = Number(document.getElementById('rc-toleransiHari').value);
+  const err = document.getElementById('rc-settings-error');
+
+  if([bobot1jam,bobotSr,bobotDisiplin,targetMenit,toleransiHari].some(n=>Number.isNaN(n) || n<0)){
+    err.style.display='block';
+    err.textContent='Semua kolom wajib diisi angka, tidak boleh negatif.';
+    return;
+  }
+  if(bobot1jam+bobotSr+bobotDisiplin !== 100){
+    err.style.display='block';
+    err.textContent=`Total bobot saat ini ${bobot1jam+bobotSr+bobotDisiplin}%. Harus tepat 100%.`;
+    return;
+  }
+  if(targetMenit < 1){
+    err.style.display='block';
+    err.textContent='Target durasi minimal 1 menit.';
+    return;
+  }
+  err.style.display='none';
+
+  rankingConfig = { bobot1jam, bobotSr, bobotDisiplin, targetMenit, toleransiHari };
+  try{
+    const {db,doc,setDoc}=window._fb;
+    await setDoc(doc(db,'settings','ranking'), rankingConfig);
+    switchGroupItem('data'); // kembali ke menu awal, tidak menetap di halaman Settings
+    showNotif('success', 'Berhasil Disimpan', 'Formula Peringkat Teknisi berhasil diubah.');
+  }catch(e){
+    err.style.display='block';
+    err.textContent='Gagal menyimpan ke server. Cek koneksi.';
+  }
+}
+
+// Dipanggil dari link "Ubah formula" di tabel Peringkat Teknisi
+function goToRankingSettings(){
+  switchGroupItem('settings');
+  setTimeout(()=>{
+    const card = document.getElementById('rc-settings-card');
+    if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
 }
 
 // ── TABS ───────────────────────────────────────────────────────
@@ -2509,12 +2770,12 @@ function switchTab(t,el,type){
 }
 // ── GROUP NAV ──────────────────────────────────────────────────
 // Semua sub-panel yang ada
-const ALL_PANELS = ['data','teknisi','jenis','performa','pm','postpm','mesin','settings','panduan','katasifat'];
+const ALL_PANELS = ['data','teknisi','jenis','lokasi','performa','pm','postpm','mesin','settings','panduan','katasifat'];
 // Mapping: item → kelompok dropdown mana yang punya item itu
 const ITEM_GROUP = {
   data:'data', pm:'data', postpm:'data', mesin:'data',
   performa:null,  // langsung, tidak dalam dropdown
-  teknisi:'admin', jenis:'admin', settings:'admin', panduan:'admin', katasifat:'admin'
+  teknisi:'admin', jenis:'admin', lokasi:'admin', settings:'admin', panduan:'admin', katasifat:'admin'
 };
 // State aktif
 let _activeItem  = 'data';
@@ -2598,6 +2859,8 @@ function switchGroupItem(s){
   if(s==='mesin')    renderPerformaMesin();
   if(s==='panduan')  renderPanduanManageList();
   if(s==='katasifat') renderKataSifatList();
+  if(s==='lokasi') renderLokasiList();
+  if(s==='settings') populateRankingConfigForm();
 }
 
 // ── SWITCH PM INNER TAB (PM | Interval) ───────────────────────
@@ -2625,6 +2888,7 @@ async function submitJob(){
   const jenis  = document.getElementById('f-jenis').value;
   const isLemburJenis = /lembur/i.test(jenis || '');
   const jenis2 = isLemburJenis ? document.getElementById('f-jenis2').value : '';
+  const lokasi = document.getElementById('f-lokasi').value;
   const job    = document.getElementById('f-job').value.trim();
   const start  = getTimeVal('f-start');
   const date   = document.getElementById('f-date').value;
@@ -2649,6 +2913,7 @@ async function submitJob(){
   if(!mesin){ showNotif('error','Validasi Gagal','Nama/Kode Mesin wajib diisi.'); return; }
   if(!jenis){ showNotif('error','Validasi Gagal','Jenis Pekerjaan wajib dipilih.'); return; }
   if(isLemburJenis && !jenis2){ showNotif('error','Validasi Gagal','Jenis Pekerjaan Tambahan wajib dipilih untuk Lembur.'); return; }
+  if(!lokasi){ showNotif('error','Validasi Gagal','Lokasi Pekerjaan wajib dipilih.'); return; }
   if(!job)  { showNotif('error','Validasi Gagal','Deskripsi Pekerjaan wajib diisi.'); return; }
   if(start === null){ showNotif('error','Format Waktu Salah','Waktu mulai tidak valid. Gunakan format HH:MM (contoh: 08:30).'); return; }
   if(!start){ showNotif('error','Validasi Gagal','Waktu Mulai wajib diisi.'); return; }
@@ -2674,7 +2939,7 @@ async function submitJob(){
   }
 
   const record = {
-    nama:currentUser.nama, sr, mesin, jenis, jenis2: jenis2 || null, job, start, end, date,
+    nama:currentUser.nama, sr, mesin, jenis, jenis2: jenis2 || null, lokasi, job, start, end, date,
     status, // salah satu: selesai | berkelanjutan | lanjut | part | bengkel
     dur,
     submittedAt:nowTs()
@@ -2708,7 +2973,7 @@ async function submitJob(){
   }
 }
 function resetForm(){
-  ['f-sr','f-mesin','f-jenis','f-jenis2','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
+  ['f-sr','f-mesin','f-jenis','f-jenis2','f-lokasi','f-job','f-start','f-end'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-date').value=todayStr();
   document.getElementById('f-status').value='lanjut';
   toggleJenis2Field();
@@ -2756,6 +3021,7 @@ function renderMyLogs(){
       <div class="log-job">${r.job}</div>
       <div class="log-meta">
         ${r.mesin?`<span>⚙ ${r.mesin}</span>`:''}
+        ${r.lokasi?`<span>📍 ${r.lokasi}</span>`:''}
         <span>📅 ${isToday?'Hari ini':r.date}</span>
         <span>🕐 ${fmt24(r.start)} — ${r.end?fmt24(r.end):'...'}</span>
         <span>⏱ ${fmtDur(r.dur)}</span>
@@ -2809,6 +3075,7 @@ function buildAdminRowHtml(r, fsr){
     <td style="font-family:var(--mono);font-size:12px">${r.date}</td>
     <td class="sr-code">${srHtml}<button class="btn-edit-job" onclick="openEditSr('${r._id}','${(r.sr||'').replace(/'/g,"\\'")}',this)" title="Edit No. SR">✏</button></td>
     <td style="font-family:var(--mono);font-size:12px">${r.mesin||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${r.lokasi||'—'}</td>
     <td>${jenisBadges(r)} <button class="btn-edit-jenis" onclick="openEditJenisJoblog('${r._id}','${(r.jenis||'').replace(/'/g,"\\'")}','${r.sr}')">✏</button></td>
     <td>${r.job}<button class="btn-edit-job" onclick="openEditJob('${r._id}','${r.sr}',this)" title="Edit deskripsi">✏</button></td>
     <td style="font-family:var(--mono);font-size:12px">${fmt24(r.start)}</td>
@@ -2861,6 +3128,10 @@ function buildAdminCardHtml(r, fsr){
           <span class="jl-card-meta-val">⚙ ${r.mesin||'—'}</span>
         </div>
         <div class="jl-card-meta-item">
+          <span class="jl-card-meta-label">Lokasi</span>
+          <span class="jl-card-meta-val">📍 ${r.lokasi||'—'}</span>
+        </div>
+        <div class="jl-card-meta-item">
           <span class="jl-card-meta-label">Jam Kerja</span>
           <span class="jl-card-meta-val">🕐 ${jam}</span>
         </div>
@@ -2903,6 +3174,7 @@ function renderAdmin(){
   const fn  = document.getElementById('ff-nama').value;
   const fd  = document.getElementById('ff-date').value;
   const fj  = document.getElementById('ff-jenis').value;
+  const flk = document.getElementById('ff-lokasi')?.value || '';
   const fsr = document.getElementById('ff-sr').value.trim().toLowerCase();
   const fms = document.getElementById('ff-mesin')?.value.trim().toLowerCase()||'';
   const fst = document.getElementById('ff-status').value;
@@ -2913,6 +3185,7 @@ function renderAdmin(){
   if(fn)  rows = rows.filter(r=>r.nama===fn);
   if(fd)  rows = rows.filter(r=>r.date===fd);
   if(fj)  rows = rows.filter(r=>r.jenis===fj || r.jenis2===fj);
+  if(flk) rows = rows.filter(r=>r.lokasi===flk);
   if(fsr) rows = rows.filter(r=>(r.sr||'').toLowerCase().includes(fsr));
   if(fms) rows = rows.filter(r=>(r.mesin||'').toLowerCase().includes(fms));
   if(fst === '_selesai_group')  rows = rows.filter(r=> isSelesai(r));
@@ -3012,7 +3285,7 @@ function updateFilterToggleState(){
 }
 
 function clearFilter(){
-  ['ff-nama','ff-jenis','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'].forEach(id=>document.getElementById(id).value='');
+  ['ff-nama','ff-jenis','ff-lokasi','ff-date','ff-status','ff-input-from','ff-input-to','ff-checked'].forEach(id=>document.getElementById(id).value='');
   ['ff-sr','ff-mesin'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   // Reset toggle state
   const btn = document.getElementById('filter-toggle-btn');
@@ -3033,6 +3306,7 @@ function renderEditView(){
   if(!_editViewUser) return;
   const fn  = document.getElementById('ev-nama').value;
   const fj  = document.getElementById('ev-jenis').value;
+  const flk = document.getElementById('ev-lokasi')?.value || '';
   const fsr = document.getElementById('ev-sr').value.trim().toLowerCase();
   const fms = document.getElementById('ev-mesin').value.trim().toLowerCase();
   const fst = document.getElementById('ev-status').value;
@@ -3041,6 +3315,7 @@ function renderEditView(){
   let rows = [...joblogDB];
   if(fn)  rows = rows.filter(r=>r.nama===fn);
   if(fj)  rows = rows.filter(r=>r.jenis===fj || r.jenis2===fj);
+  if(flk) rows = rows.filter(r=>r.lokasi===flk);
   if(fsr) rows = rows.filter(r=>(r.sr||'').toLowerCase().includes(fsr));
   if(fms) rows = rows.filter(r=>(r.mesin||'').toLowerCase().includes(fms));
   if(fd)  rows = rows.filter(r=>r.date===fd);
@@ -3092,7 +3367,7 @@ function applyEditViewFilter(){
 }
 
 function clearEditViewFilter(){
-  ['ev-nama','ev-jenis','ev-status','ev-date'].forEach(id=>document.getElementById(id).value='');
+  ['ev-nama','ev-jenis','ev-lokasi','ev-status','ev-date'].forEach(id=>document.getElementById(id).value='');
   ['ev-sr','ev-mesin'].forEach(id=>document.getElementById(id).value='');
   _evCurrentPage = 1;
   renderEditView();
@@ -3220,6 +3495,7 @@ function openDetailJoblog(joblogId){
       ${row('Teknisi', r.nama)}
       ${row('Tanggal Kerja', r.date, true)}
       ${row('Nama Mesin', r.mesin)}
+      ${row('Lokasi Pekerjaan', r.lokasi)}
       ${row('Jam Mulai', fmt24(r.start), true)}
       ${row('Jam Selesai', r.end ? fmt24(r.end) : '—', true)}
       ${row('Durasi', fmtDur(r.dur), true)}
@@ -3339,6 +3615,13 @@ function openEditJoblog(joblogId){
   document.getElementById('ej-end').value    = r.end   || '';
   document.getElementById('ej-status').value = r.status || (r.end ? 'selesai' : 'lanjut');
 
+  // Isi dropdown lokasi dari lokasiDB
+  const selLok = document.getElementById('ej-lokasi');
+  if(selLok){
+    selLok.innerHTML = '<option value="">-- Pilih Lokasi --</option>' +
+      lokasiDB.map(l => `<option value="${l.nama}" ${l.nama===r.lokasi?'selected':''}>${l.nama}</option>`).join('');
+  }
+
   // Isi dropdown jenis dari jenisDB
   const sel = document.getElementById('ej-jenis');
   sel.innerHTML = '<option value="">-- Pilih Jenis --</option>' +
@@ -3370,6 +3653,7 @@ async function saveEditJoblog(){
 
   const sr    = document.getElementById('ej-sr').value.trim();
   const mesin = document.getElementById('ej-mesin').value.trim();
+  const lokasi= document.getElementById('ej-lokasi') ? document.getElementById('ej-lokasi').value : '';
   const jenis = document.getElementById('ej-jenis').value;
   const isLemburJenis = /lembur/i.test(jenis || '');
   const jenis2 = isLemburJenis ? document.getElementById('ej-jenis2').value : '';
@@ -3382,6 +3666,11 @@ async function saveEditJoblog(){
   if(!job || !date || !start){
     err.style.display='block';
     err.textContent = 'Deskripsi, tanggal, dan waktu mulai wajib diisi.';
+    return;
+  }
+  if(!lokasi){
+    err.style.display='block';
+    err.textContent = 'Lokasi Pekerjaan wajib dipilih.';
     return;
   }
   if(isLemburJenis && !jenis2){
@@ -3399,7 +3688,7 @@ async function saveEditJoblog(){
     if(d > 0) dur = d;
   }
 
-  const updates = { sr, mesin, jenis, jenis2: jenis2 || null, job, date, start, end, status };
+  const updates = { sr, mesin, lokasi, jenis, jenis2: jenis2 || null, job, date, start, end, status };
   if(dur !== null) updates.dur = dur; else updates.dur = null;
 
   try {
@@ -4233,7 +4522,7 @@ function toggleSrBar(){
   chevron.classList.toggle('open', open);
 }
 
-function hasValidSr(sr){ return /\d{3,}/.test(sr||''); }
+function hasValidSr(sr){ return /\d{4,}/.test(sr||''); }
 
 function renderSrBar(){
   const bar  = document.getElementById('srbar');
@@ -4245,7 +4534,7 @@ function renderSrBar(){
   const TARGET_JENIS = /perbaikan|penggantian part|project/i;
   const rows = joblogDB.filter(r =>
     r.nama === currentUser.nama &&
-    TARGET_JENIS.test(r.jenis||'') &&
+    (TARGET_JENIS.test(r.jenis||'') || TARGET_JENIS.test(r.jenis2||'')) &&
     !hasValidSr(r.sr)
   );
 
@@ -4282,7 +4571,7 @@ async function submitFillSr(joblogId){
   if(!newSr){ err.style.display='block'; err.textContent='No. SR tidak boleh kosong.'; return; }
   if(!hasValidSr(newSr)){
     err.style.display='block';
-    err.textContent='No. SR harus mengandung minimal 3 digit angka berturut-turut.';
+    err.textContent='No. SR harus mengandung minimal 4 digit angka berturut-turut.';
     return;
   }
   err.style.display='none';
@@ -4693,6 +4982,102 @@ function confirmDeleteJenis(id, nama){
   document.getElementById('modal-confirm-delete').classList.add('show');
 }
 
+// ── KELOLA LOKASI PEKERJAAN (admin dashboard) ───────────────────
+let _editLokasiId = null;
+
+function renderLokasiList(){
+  const el = document.getElementById('lokasi-list');
+  if(!el) return;
+  if(!lokasiDB.length){
+    el.innerHTML='<div class="empty-state">Belum ada lokasi. Klik "+ Tambah Lokasi".</div>';
+    return;
+  }
+  el.innerHTML = lokasiDB.map((l,i)=>`
+    <div class="jenis-item">
+      <div class="jenis-item-left">
+        <span class="jenis-idx">${String(i+1).padStart(2,'0')}</span>
+        <span class="jenis-name">${l.nama}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-ghost btn-xs" onclick="openEditLokasi('${l.id}','${(l.nama||'').replace(/'/g,"\\'")}')">✏ Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteLokasi('${l.id}','${(l.nama||'').replace(/'/g,"\\'")}')">Hapus</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddLokasi(){
+  _editLokasiId = null;
+  document.getElementById('lokasi-title').textContent = 'Tambah Lokasi Pekerjaan';
+  document.getElementById('lokasi-save-btn').textContent = 'Tambah';
+  document.getElementById('lokasi-nama').value = '';
+  document.getElementById('lokasi-error').style.display = 'none';
+  document.getElementById('lokasi-delete-btn').style.display = 'none';
+  document.getElementById('modal-lokasi').classList.add('show');
+  setTimeout(()=>document.getElementById('lokasi-nama').focus(),150);
+}
+
+function openEditLokasi(id, nama){
+  _editLokasiId = id;
+  document.getElementById('lokasi-title').textContent = 'Edit Lokasi Pekerjaan';
+  document.getElementById('lokasi-save-btn').textContent = 'Simpan';
+  document.getElementById('lokasi-nama').value = nama;
+  document.getElementById('lokasi-error').style.display = 'none';
+  document.getElementById('lokasi-delete-btn').style.display = 'inline-flex';
+  document.getElementById('modal-lokasi').classList.add('show');
+  setTimeout(()=>document.getElementById('lokasi-nama').focus(),150);
+}
+
+async function saveLokasi(){
+  const nama = document.getElementById('lokasi-nama').value.trim();
+  const err  = document.getElementById('lokasi-error');
+  if(!nama){ err.style.display='block'; err.textContent='Nama wajib diisi.'; return; }
+
+  const isDuplicate = lokasiDB.some(l =>
+    (l.nama||'').trim().toLowerCase() === nama.toLowerCase() && l.id !== _editLokasiId
+  );
+  if(isDuplicate){
+    err.style.display='block';
+    err.textContent=`Lokasi "${nama}" sudah ada dalam daftar.`;
+    return;
+  }
+
+  if(_editLokasiId){
+    try {
+      const {db,doc,setDoc,getDoc}=window._fb;
+      const ref = doc(db,'lokasiKerja',_editLokasiId);
+      const snap = await getDoc(ref);
+      await setDoc(ref,{...( snap.exists()?snap.data():{} ), nama});
+      closeModal('modal-lokasi');
+      toast(`Lokasi "${nama}" berhasil diubah!`);
+    } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+  } else {
+    try {
+      const {db,collection,addDoc}=window._fb;
+      await addDoc(collection(db,'lokasiKerja'),{nama});
+      closeModal('modal-lokasi');
+      toast(`Lokasi "${nama}" berhasil ditambahkan!`);
+    } catch(e){ err.style.display='block'; err.textContent='Gagal menyimpan. Cek koneksi.'; }
+  }
+}
+
+function confirmDeleteLokasi(id, nama){
+  const inUse = joblogDB.some(r=>r.lokasi===nama);
+  document.getElementById('confirm-delete-title').textContent = 'Hapus Lokasi Pekerjaan';
+  document.getElementById('confirm-delete-msg').innerHTML =
+    `Hapus lokasi <strong>${nama}</strong>?${inUse
+      ? ' <span style="color:var(--warn)">Lokasi ini digunakan di beberapa joblog yang akan tetap tersimpan.</span>'
+      : ''}`;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    closeModal('modal-confirm-delete');
+    try {
+      const {db,doc,deleteDoc}=window._fb;
+      await deleteDoc(doc(db,'lokasiKerja',id));
+      toast(`Lokasi "${nama}" dihapus.`);
+    } catch(e){ toast('Gagal menghapus.','warn'); }
+  };
+  document.getElementById('modal-confirm-delete').classList.add('show');
+}
+
 // ── TAB PANDUAN TROUBLESHOOT (tampilan untuk semua teknisi, read-only) ──
 function renderTsGrid(){
   const grid = document.getElementById('ts-grid');
@@ -4978,6 +5363,7 @@ function confirmDeleteTsCat(id, nama){
 function resetPerformaFilter(){
   document.getElementById('pf-nama').value  = '';
   document.getElementById('pf-bulan').value = '';
+  const lok = document.getElementById('pf-lokasi'); if(lok) lok.value = '';
   renderPerforma();
 }
 
@@ -5291,7 +5677,7 @@ function calcPerfStats(nama, data){
   const selesaiCount = data.filter(r=>isSelesai(r)).length;
   const pctSelesai   = data.length ? Math.round(selesaiCount/data.length*100) : 0;
 
-  // Disiplin input
+  // Disiplin input — toleransi keterlambatan (hari) bisa diatur admin di Settings
   let tepatHari=0, totalWithTs=0;
   data.forEach(r=>{
     if(!r.submittedAt||!r.date) return;
@@ -5299,7 +5685,7 @@ function calcPerfStats(nama, data){
     const kerja  = new Date(r.date+'T00:00:00');
     const sub    = new Date(r.submittedAt);
     const subDay = new Date(sub.getFullYear(),sub.getMonth(),sub.getDate());
-    if(Math.round((subDay-kerja)/86400000)<=0) tepatHari++;
+    if(Math.round((subDay-kerja)/86400000) <= rankingConfig.toleransiHari) tepatHari++;
   });
   const pctDisiplin = totalWithTs ? Math.round(tepatHari/totalWithTs*100) : null;
 
@@ -5327,26 +5713,29 @@ function switchPerformaInner(tab, el){
 
 function buildRekapTable(allRows, filterBulan){
   const PERBAIKAN_RE = /perbaikan|penggantian part/i;
+  const { bobot1jam, bobotSr, bobotDisiplin, targetMenit } = rankingConfig;
 
   const namaAll = [...new Set(allRows.map(r=>r.nama))];
   const stats   = namaAll.map(nama => {
     const data = allRows.filter(r=>r.nama===nama);
     const base = calcPerfStats(nama, data);
 
-    // Komponen 1 (bobot 50): % Perbaikan & Penggantian Part < 1 jam
+    // Komponen 1: % Perbaikan & Penggantian Part di bawah target durasi (menit, bisa diatur admin)
     const subsetTarget  = data.filter(r => PERBAIKAN_RE.test(r.jenis||''));
-    const dibawah1jam   = subsetTarget.filter(r => r.dur && r.dur>0 && r.dur<60).length;
-    const pct1jam       = subsetTarget.length ? Math.round(dibawah1jam/subsetTarget.length*100) : 0;
+    const dibawahTarget = subsetTarget.filter(r => r.dur && r.dur>0 && r.dur<targetMenit).length;
+    const pct1jam       = subsetTarget.length ? Math.round(dibawahTarget/subsetTarget.length*100) : 0;
 
-    // Komponen 2 (bobot 30): % SR bernomor (dari Perbaikan & Penggantian Part)
+    // Komponen 2: % SR bernomor (dari Perbaikan & Penggantian Part)
     const withSr        = subsetTarget.filter(r => /\d{4,}/.test(r.sr||'')).length;
     const pctSr         = subsetTarget.length ? Math.round(withSr/subsetTarget.length*100) : 0;
 
-    // Komponen 3 (bobot 20): % Kedisiplinan input
+    // Komponen 3: % Kedisiplinan input
     const pctDisiplin   = base.pctDisiplin ?? 0;
 
-    // Skor akhir
-    const skor = Math.round(pct1jam*0.5 + pctSr*0.3 + pctDisiplin*0.2);
+    // Skor akhir — bobot ketiganya bisa diatur admin (default 50/30/20), dijumlah lalu dibagi 100
+    const skor = Math.round(
+      (pct1jam*bobot1jam + pctSr*bobotSr + pctDisiplin*bobotDisiplin) / 100
+    );
 
     return { ...base, pct1jam, pctSr, skor, jmlTarget: subsetTarget.length };
   });
@@ -5391,13 +5780,18 @@ function buildRekapTable(allRows, filterBulan){
     </tr>`;
   }).join('');
 
+  const targetLabel = rankingConfig.targetMenit % 60 === 0
+    ? `${rankingConfig.targetMenit/60} jam`
+    : `${rankingConfig.targetMenit} menit`;
+
   return `<div class="card">
     <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <span>🏆 Peringkat Teknisi</span>
       <span style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400">${bulanLabel}</span>
     </div>
     <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:10px">
-      Skor = (% &lt;1jam × 50%) + (% SR × 30%) + (% Disiplin × 20%)
+      Skor = (% &lt;${targetLabel} × ${rankingConfig.bobot1jam}%) + (% SR × ${rankingConfig.bobotSr}%) + (% Disiplin × ${rankingConfig.bobotDisiplin}%)
+      <a href="javascript:void(0)" onclick="goToRankingSettings()" style="color:var(--accent);text-decoration:underline;margin-left:6px">Ubah formula</a>
     </div>
     <div class="rekap-table-wrap">
       <table class="rekap-table">
@@ -5405,9 +5799,9 @@ function buildRekapTable(allRows, filterBulan){
           <th>#</th>
           <th>Teknisi</th>
           <th class="num">Skor</th>
-          <th class="num">% &lt;1 Jam <span style="font-weight:400;opacity:.7">(×50%)</span></th>
-          <th class="num">% SR Lengkap <span style="font-weight:400;opacity:.7">(×30%)</span></th>
-          <th class="num">Disiplin <span style="font-weight:400;opacity:.7">(×20%)</span></th>
+          <th class="num">% &lt;${targetLabel} <span style="font-weight:400;opacity:.7">(×${rankingConfig.bobot1jam}%)</span></th>
+          <th class="num">% SR Lengkap <span style="font-weight:400;opacity:.7">(×${rankingConfig.bobotSr}%)</span></th>
+          <th class="num">Disiplin <span style="font-weight:400;opacity:.7">(×${rankingConfig.bobotDisiplin}%)</span></th>
           <th class="num">% Kerja <span style="font-weight:400;opacity:.7">info</span></th>
         </tr></thead>
         <tbody>${tableRows}</tbody>
@@ -5419,9 +5813,11 @@ function buildRekapTable(allRows, filterBulan){
 function renderPerforma(){
   const filterNama  = document.getElementById('pf-nama').value;
   const filterBulan = document.getElementById('pf-bulan').value;
+  const filterLokasi = document.getElementById('pf-lokasi')?.value || '';
 
   let allRows = [...joblogDB];
   if(filterBulan) allRows = allRows.filter(r => r.date && r.date.startsWith(filterBulan));
+  if(filterLokasi) allRows = allRows.filter(r => r.lokasi === filterLokasi);
 
   const empty = document.getElementById('perf-empty');
 
@@ -5469,6 +5865,8 @@ function renderPerformaJenis(){
 
   let rows = joblogDB.filter(r => r.jenis===fjenis || r.jenis2===fjenis);
   if(filterBulan) rows = rows.filter(r => r.date && r.date.startsWith(filterBulan));
+  const filterLokasi = document.getElementById('pf-lokasi')?.value || '';
+  if(filterLokasi) rows = rows.filter(r => r.lokasi === filterLokasi);
 
   if(!rows.length){
     tableEl.innerHTML = '';
@@ -5797,21 +6195,21 @@ function exportExcelRange(){
 
 function _doExport(rows, label){
   const wb=XLSX.utils.book_new();
-  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Jenis Pekerjaan','Jenis Pekerjaan Tambahan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Input','Jam Input']];
+  const wsData=[['Nama Teknisi','Tanggal Kerja','No. SR','Nama/Kode Mesin','Lokasi Pekerjaan','Jenis Pekerjaan','Jenis Pekerjaan Tambahan','Pekerjaan','Waktu Mulai','Waktu Selesai','Durasi (menit)','Status','Tgl Input','Jam Input']];
   rows.forEach((r,i)=>{
     const rn=i+2;
     wsData.push([
-      r.nama, r.date, r.sr, r.mesin||'', r.jenis||'', r.jenis2||'', r.job,
+      r.nama, r.date, r.sr, r.mesin||'', r.lokasi||'', r.jenis||'', r.jenis2||'', r.job,
       r.start?fmt24(r.start):'',
       r.end?fmt24(r.end):'',
-      r.end&&r.start?{f:`IF(I${rn}<>"",IFERROR((TIMEVALUE(I${rn})-TIMEVALUE(H${rn}))*24*60,""),"")`}:'',
+      r.end&&r.start?{f:`IF(J${rn}<>"",IFERROR((TIMEVALUE(J${rn})-TIMEVALUE(I${rn}))*24*60,""),"")`}:'',
       statusLabel(r),
       fmtSubmitDate(r.submittedAt),
       fmtSubmitTimeOnly(r.submittedAt)
     ]);
   });
   const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[18,13,14,16,18,22,38,12,12,14,13,13,10].map(w=>({wch:w}));
+  ws['!cols']=[18,13,14,16,18,18,22,38,12,12,14,13,13,10].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'Joblog');
   XLSX.writeFile(wb,`Joblog_${label}.xlsx`);
   toast(`Joblog_${label}.xlsx diunduh`);
