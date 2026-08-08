@@ -1137,16 +1137,21 @@ service cloud.firestore {
       <div class="field"><label>Nama/Kode Mesin *</label><input type="text" id="f-mesin" placeholder="Contoh: CNC-01"></div>
       <div class="field">
         <label>Jenis Pekerjaan *</label>
-        <select id="f-jenis" onchange="toggleJenis2Field()">
+        <select id="f-jenis" onchange="toggleJenis2Field();togglePartsField()">
           <option value="">-- Pilih Jenis --</option>
         </select>
       </div>
     </div>
     <div class="field" id="field-jenis2" style="display:none;margin-bottom:12px">
       <label>Jenis Pekerjaan Tambahan (Lembur) *</label>
-      <select id="f-jenis2">
+      <select id="f-jenis2" onchange="togglePartsField()">
         <option value="">-- Pilih Jenis Pekerjaan Sebenarnya --</option>
       </select>
+    </div>
+    <div class="field" id="field-parts" style="display:none;margin-bottom:12px">
+      <label>Daftar Part yang Diganti *</label>
+      <div id="parts-rows"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="addPartRow()">+ Tambah Part</button>
     </div>
     <div class="field" style="margin-bottom:12px">
       <label>Lokasi Pekerjaan *</label>
@@ -1175,7 +1180,7 @@ service cloud.firestore {
       </div>
     </div>
     <div class="form-row cols2" id="row-waktu">
-      <div class="field"><label>Waktu Mulai *</label><input type="text" id="f-start" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
+      <div class="field"><label>Waktu Mulai *</label><input type="text" id="f-start" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this);updateSisaJamBanner()"></div>
       <div class="field" id="field-end"><label>Waktu Selesai</label><input type="text" id="f-end" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off" oninput="formatTimeInput(this)"></div>
     </div>
     <div class="btn-row">
@@ -1347,6 +1352,9 @@ service cloud.firestore {
         </div>
         <div class="group-dropdown-item" id="gitem-mesin" onclick="switchGroupItem('mesin')">
           <span class="group-dropdown-item-dot"></span>🏭 Performa Mesin
+        </div>
+        <div class="group-dropdown-item" id="gitem-part" onclick="switchGroupItem('part')">
+          <span class="group-dropdown-item-dot"></span>📦 Rekap Part
         </div>
       </div>
     </div>
@@ -1874,6 +1882,57 @@ service cloud.firestore {
       </div>
       <div class="empty-state" id="kk-empty" style="display:none">Tidak ada data untuk filter ini.</div>
       <div id="kk-pagination" style="display:none;padding:12px 0;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+
+  <!-- SUB: REKAP PART -->
+  <div id="sub-part" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span>📦 Rekap Part yang Diambil</span>
+        <button class="btn btn-export btn-sm" onclick="exportRekapPart()">↓ Excel</button>
+      </div>
+      <div class="perf-filter-row">
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Bulan</label>
+          <input type="month" id="rp-bulan" onchange="renderRekapPart()">
+        </div>
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Teknisi</label>
+          <select id="rp-nama" onchange="renderRekapPart()"><option value="">Semua Teknisi</option></select>
+        </div>
+        <div class="filter-date-field" style="flex:1">
+          <label class="filter-date-label">Sumber</label>
+          <select id="rp-sumber" onchange="renderRekapPart()">
+            <option value="">Semua Sumber</option>
+            <option value="Stok Teknik">Stok Teknik</option>
+            <option value="Stok User">Stok User</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="resetRekapPartFilter()">✕ Reset</button>
+      </div>
+      <div class="search-bar" style="margin-bottom:14px">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="rp-search" placeholder="Cari nama part..." oninput="renderRekapPart()" autocomplete="off" style="width:100%">
+      </div>
+      <div id="rp-summary" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px"></div>
+      <div class="jl-cards" id="rp-cards"></div>
+      <div class="table-wrap" id="rp-table-wrap">
+        <table>
+          <thead><tr>
+            <th>Nama Part</th><th>Jumlah</th><th>Sumber</th><th>Teknisi</th><th>Tgl Diambil</th><th>Detail</th>
+          </tr></thead>
+          <tbody id="rp-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="rp-empty" style="display:none">Belum ada data part untuk filter ini.</div>
+      <div class="pagination-bar" id="rp-pagination" style="display:none">
+        <span class="pagination-info" id="rp-pagination-info"></span>
+        <div class="pagination-btns">
+          <button class="btn btn-ghost btn-sm" id="rp-page-prev" onclick="rpChangePage(-1)">‹ Sebelumnya</button>
+          <button class="btn btn-ghost btn-sm" id="rp-page-next" onclick="rpChangePage(1)">Berikutnya ›</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2412,6 +2471,14 @@ function buildFilterDropdown(){
       teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
     if(prevEv) evNamaEl.value = prevEv;
   }
+
+  const rpNamaEl = document.getElementById('rp-nama');
+  if(rpNamaEl){
+    const prevRp = rpNamaEl.value;
+    rpNamaEl.innerHTML = '<option value="">Semua Teknisi</option>' +
+      teknisisDB.map(t=>`<option value="${t.nama}">${t.nama}</option>`).join('');
+    if(prevRp) rpNamaEl.value = prevRp;
+  }
 }
 
 // ── BUILD JENIS DROPDOWNS ──────────────────────────────────────
@@ -2770,10 +2837,10 @@ function switchTab(t,el,type){
 }
 // ── GROUP NAV ──────────────────────────────────────────────────
 // Semua sub-panel yang ada
-const ALL_PANELS = ['data','teknisi','jenis','lokasi','performa','pm','postpm','mesin','settings','panduan','katasifat'];
+const ALL_PANELS = ['data','teknisi','jenis','lokasi','performa','pm','postpm','mesin','part','settings','panduan','katasifat'];
 // Mapping: item → kelompok dropdown mana yang punya item itu
 const ITEM_GROUP = {
-  data:'data', pm:'data', postpm:'data', mesin:'data',
+  data:'data', pm:'data', postpm:'data', mesin:'data', part:'data',
   performa:null,  // langsung, tidak dalam dropdown
   teknisi:'admin', jenis:'admin', lokasi:'admin', settings:'admin', panduan:'admin', katasifat:'admin'
 };
@@ -2860,6 +2927,7 @@ function switchGroupItem(s){
   if(s==='panduan')  renderPanduanManageList();
   if(s==='katasifat') renderKataSifatList();
   if(s==='lokasi') renderLokasiList();
+  if(s==='part') renderRekapPart();
   if(s==='settings') populateRankingConfigForm();
 }
 
@@ -2893,6 +2961,8 @@ async function submitJob(){
   const start  = getTimeVal('f-start');
   const date   = document.getElementById('f-date').value;
   const status = document.getElementById('f-status').value; // salah satu key STATUS_MAP
+  const isPartJenis = PENGGANTIAN_PART_RE.test(jenis || '') || PENGGANTIAN_PART_RE.test(jenis2 || '');
+  const parts  = isPartJenis ? collectPartsFromForm() : [];
 
   // Waktu selesai wajib diisi jika status dianggap "selesai" (selesai / berkelanjutan)
   let end = '';
@@ -2914,6 +2984,7 @@ async function submitJob(){
   if(!jenis){ showNotif('error','Validasi Gagal','Jenis Pekerjaan wajib dipilih.'); return; }
   if(isLemburJenis && !jenis2){ showNotif('error','Validasi Gagal','Jenis Pekerjaan Tambahan wajib dipilih untuk Lembur.'); return; }
   if(!lokasi){ showNotif('error','Validasi Gagal','Lokasi Pekerjaan wajib dipilih.'); return; }
+  if(isPartJenis && !parts.length){ showNotif('error','Validasi Gagal','Isi minimal 1 Nama Part dan Jumlahnya untuk Jenis Pekerjaan Penggantian Part.'); return; }
   if(!job)  { showNotif('error','Validasi Gagal','Deskripsi Pekerjaan wajib diisi.'); return; }
   if(start === null){ showNotif('error','Format Waktu Salah','Waktu mulai tidak valid. Gunakan format HH:MM (contoh: 08:30).'); return; }
   if(!start){ showNotif('error','Validasi Gagal','Waktu Mulai wajib diisi.'); return; }
@@ -2926,7 +2997,7 @@ async function submitJob(){
   // Total input joblog per teknisi per hari dibatasi sesuai jam kerja (7 jam,
   // Sabtu 5 jam). Jenis Pekerjaan "Lembur" dikecualikan dari batas ini.
   if(dur !== null && dur > 0){
-    const capCheck = checkJamKerjaCap({ jenis, dur, date, nama: currentUser.nama, bypassConfirm:_bypassStandbyConfirm });
+    const capCheck = checkJamKerjaCap({ jenis, dur, date, start, nama: currentUser.nama, bypassConfirm:_bypassStandbyConfirm });
     _bypassStandbyConfirm = false; // konsumsi sekali pakai, apapun hasilnya
     if(capCheck.type === 'block'){
       showNotif('error', capCheck.title, capCheck.message);
@@ -2942,6 +3013,7 @@ async function submitJob(){
     nama:currentUser.nama, sr, mesin, jenis, jenis2: jenis2 || null, lokasi, job, start, end, date,
     status, // salah satu: selesai | berkelanjutan | lanjut | part | bengkel
     dur,
+    parts: parts.length ? parts : null,
     submittedAt:nowTs()
   };
 
@@ -2977,6 +3049,7 @@ function resetForm(){
   document.getElementById('f-date').value=todayStr();
   document.getElementById('f-status').value='lanjut';
   toggleJenis2Field();
+  resetPartsRows();
   updateEndFieldVisibility();
   updateSisaJamBanner();
 }
@@ -2996,6 +3069,64 @@ function toggleJenis2Field(){
   const isLembur = /lembur/i.test(jenisVal || '');
   wrap.style.display = isLembur ? 'block' : 'none';
   if(!isLembur) document.getElementById('f-jenis2').value = '';
+}
+
+// ── DAFTAR PART (khusus Jenis Pekerjaan "Penggantian Part") ─────
+const PENGGANTIAN_PART_RE = /penggantian\s*part/i;
+let _partRowSeq = 0;
+
+function togglePartsField(){
+  const jenisVal  = document.getElementById('f-jenis').value;
+  const jenis2Val = document.getElementById('f-jenis2').value;
+  const wrap = document.getElementById('field-parts');
+  const isPart = PENGGANTIAN_PART_RE.test(jenisVal || '') || PENGGANTIAN_PART_RE.test(jenis2Val || '');
+  wrap.style.display = isPart ? 'block' : 'none';
+  const rowsEl = document.getElementById('parts-rows');
+  if(isPart){
+    if(!rowsEl.children.length) addPartRow(); // mulai dengan 1 baris kosong
+  } else {
+    rowsEl.innerHTML = ''; // kosongkan kalau jenis bukan Penggantian Part lagi
+  }
+}
+
+function addPartRow(){
+  const rowsEl = document.getElementById('parts-rows');
+  const id = 'part-row-' + (_partRowSeq++);
+  const div = document.createElement('div');
+  div.className = 'part-row';
+  div.id = id;
+  div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px';
+  div.innerHTML = `
+    <select class="part-sumber" style="flex:1;min-width:110px;padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px">
+      <option value="Stok Teknik">Stok Teknik</option>
+      <option value="Stok User">Stok User</option>
+    </select>
+    <input type="text" class="part-nama" placeholder="Nama Part" style="flex:2;min-width:130px;padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px">
+    <input type="number" class="part-jumlah" placeholder="Jml" min="1" value="1" style="width:70px;padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px">
+    <button type="button" class="btn btn-ghost btn-xs" onclick="removePartRow('${id}')">✕</button>
+  `;
+  rowsEl.appendChild(div);
+}
+
+function removePartRow(id){
+  const rowsEl = document.getElementById('parts-rows');
+  const row = document.getElementById(id);
+  if(row) row.remove();
+  if(!rowsEl.children.length) addPartRow(); // selalu sisakan minimal 1 baris selama field ini aktif
+}
+
+function resetPartsRows(){
+  document.getElementById('parts-rows').innerHTML = '';
+  document.getElementById('field-parts').style.display = 'none';
+}
+
+// Ambil daftar part yang terisi lengkap (nama + jumlah > 0) dari form
+function collectPartsFromForm(){
+  return [...document.querySelectorAll('#parts-rows .part-row')].map(row => ({
+    sumber: row.querySelector('.part-sumber').value,
+    nama:   row.querySelector('.part-nama').value.trim(),
+    jumlah: Number(row.querySelector('.part-jumlah').value) || 0
+  })).filter(p => p.nama && p.jumlah > 0);
 }
 
 // ── RENDER MY LOGS ─────────────────────────────────────────────
@@ -3429,22 +3560,43 @@ function updateSisaJamBanner(){
   if(!banner) return;
   if(!currentUser){ banner.classList.remove('show'); return; }
 
-  const dateEl = document.getElementById('f-date');
-  const date = dateEl ? dateEl.value : '';
+  const dateEl  = document.getElementById('f-date');
+  const startEl = document.getElementById('f-start');
+  const date    = dateEl  ? dateEl.value  : '';
+  const start   = startEl ? startEl.value : '';
   if(!date){ banner.classList.remove('show'); return; }
 
-  const capMenit = getDailyCapMinutes(date);
-  const dayRows = joblogDB.filter(r =>
-    r.nama === currentUser.nama && r.date === date && typeof r.dur === 'number' && !LEMBUR_RE_CAP.test(r.jenis || '')
-  );
+  // Tanggal efektif: jam 00:00–06:15 dihitung sebagai hari sebelumnya
+  const effDate  = getEffectiveDate(date, start);
+  const capMenit = getDailyCapMinutes(effDate);
+
+  // Hitung nextDate untuk akumulasi shift malam
+  const nextDate = (() => {
+    const d = new Date(effDate+'T00:00:00');
+    d.setDate(d.getDate()+1);
+    return d.toISOString().slice(0,10);
+  })();
+
+  const dayRows = joblogDB.filter(r => {
+    if(r.nama !== currentUser.nama) return false;
+    if(LEMBUR_RE_CAP.test(r.jenis||'')) return false;
+    if(typeof r.dur !== 'number') return false;
+    if(r.date === effDate) return true;
+    if(r.date === nextDate && r.start && (r.start+'').slice(0,5) <= SHIFT_CUTOFF) return true;
+    return false;
+  });
   const existingTotal = dayRows.reduce((sum, r) => sum + r.dur, 0);
 
-  // Belum ada input di tanggal ini — belum ada yang perlu ditunjukkan
   if(existingTotal <= 0){ banner.classList.remove('show'); return; }
 
-  const sisa = Math.max(0, capMenit - existingTotal);
-  const habisKarenaStandby = dayRows.some(r => STANDBY_RE_CAP.test(r.jenis || '') && r.dur >= capMenit);
-  const tglLabel = new Date(date + 'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  const sisa              = Math.max(0, capMenit - existingTotal);
+  const habisKarenaStandby= dayRows.some(r => STANDBY_RE_CAP.test(r.jenis||'') && r.dur >= capMenit);
+
+  // Label: jika tanggal efektif berbeda (shift malam), tunjukkan konteks
+  const effLabel = effDate !== date
+    ? new Date(effDate+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'})
+    : new Date(date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  const tglLabel = effDate !== date ? `${effLabel} (shift malam)` : effLabel;
 
   const icon  = document.getElementById('sisa-jam-icon');
   const value = document.getElementById('sisa-jam-value');
@@ -3452,25 +3604,25 @@ function updateSisaJamBanner(){
   const sub   = document.getElementById('sisa-jam-sub');
 
   if(sisa <= 0){
-    banner.style.background = 'linear-gradient(135deg,#FEF2F2,#FEE2E2)';
+    banner.style.background  = 'linear-gradient(135deg,#FEF2F2,#FEE2E2)';
     banner.style.borderColor = '#EF4444';
-    icon.textContent = '🔒';
+    icon.textContent  = '🔒';
     value.textContent = '0 menit';
     value.style.color = '#B91C1C';
     label.textContent = habisKarenaStandby ? 'Jam Kerja Sudah Habis di Standby' : 'Jam Kerja Hari Ini Sudah Habis';
     label.style.color = '#991B1B';
-    sub.textContent = `${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
-    sub.style.color = '#B91C1C';
+    sub.textContent   = `${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
+    sub.style.color   = '#B91C1C';
   } else {
-    banner.style.background = 'linear-gradient(135deg,#EFF6FF,#DBEAFE)';
+    banner.style.background  = 'linear-gradient(135deg,#EFF6FF,#DBEAFE)';
     banner.style.borderColor = '#3B82F6';
-    icon.textContent = '⏱️';
+    icon.textContent  = '⏱️';
     value.textContent = fmtDur(sisa);
     value.style.color = '#1D4ED8';
     label.textContent = 'Sisa Jam Kerja Hari Ini';
     label.style.color = '#1E40AF';
-    sub.textContent = `sudah terpakai ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
-    sub.style.color = '#1D4ED8';
+    sub.textContent   = `sudah terpakai ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja · ${tglLabel}`;
+    sub.style.color   = '#1D4ED8';
   }
 
   banner.classList.add('show');
@@ -5078,6 +5230,169 @@ function confirmDeleteLokasi(id, nama){
   document.getElementById('modal-confirm-delete').classList.add('show');
 }
 
+// ── REKAP PART (admin dashboard) ────────────────────────────────
+// Ratakan array `parts` dari tiap joblog jadi 1 baris per item part, supaya bisa
+// direkap/difilter/dicari seperti data biasa.
+function getFlattenedParts(){
+  const items = [];
+  joblogDB.forEach(r => {
+    if(!Array.isArray(r.parts)) return;
+    r.parts.forEach((p, idx) => {
+      items.push({
+        sumber: p.sumber, nama: p.nama, jumlah: p.jumlah,
+        _joblogId: r._id, _partIdx: idx,
+        teknisi: r.nama, date: r.date, mesin: r.mesin, lokasi: r.lokasi, sr: r.sr, job: r.job
+      });
+    });
+  });
+  return items;
+}
+
+let _rpPage = 1;
+const RP_PAGE_SIZE = 50;
+
+function renderRekapPart(){
+  const fbulan  = document.getElementById('rp-bulan').value;
+  const fnama   = document.getElementById('rp-nama').value;
+  const fsumber = document.getElementById('rp-sumber').value;
+  const fsearch = document.getElementById('rp-search').value.trim().toLowerCase();
+
+  let items = getFlattenedParts();
+  if(fbulan)  items = items.filter(p => p.date && p.date.startsWith(fbulan));
+  if(fnama)   items = items.filter(p => p.teknisi === fnama);
+  if(fsumber) items = items.filter(p => p.sumber === fsumber);
+  if(fsearch) items = items.filter(p => (p.nama||'').toLowerCase().includes(fsearch));
+
+  items.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  const empty     = document.getElementById('rp-empty');
+  const pagBar    = document.getElementById('rp-pagination');
+  const isMob     = window.innerWidth < 640;
+  const tableWrap = document.getElementById('rp-table-wrap');
+  const cardsEl   = document.getElementById('rp-cards');
+  if(tableWrap) tableWrap.style.display = isMob ? 'none' : 'block';
+  if(cardsEl)   cardsEl.style.display   = isMob ? 'flex'  : 'none';
+
+  const totalJumlah = items.reduce((s,p) => s + (p.jumlah||0), 0);
+  document.getElementById('rp-summary').textContent = items.length
+    ? `${items.length} item part · total ${totalJumlah} pcs`
+    : '';
+
+  if(!items.length){
+    document.getElementById('rp-tbody').innerHTML='';
+    if(cardsEl) cardsEl.innerHTML='';
+    empty.style.display='block';
+    pagBar.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+
+  const totalPages = Math.max(1, Math.ceil(items.length / RP_PAGE_SIZE));
+  if(_rpPage > totalPages) _rpPage = totalPages;
+  if(_rpPage < 1) _rpPage = 1;
+  const startIdx = (_rpPage-1) * RP_PAGE_SIZE;
+  const pageItems = items.slice(startIdx, startIdx + RP_PAGE_SIZE);
+
+  if(items.length > RP_PAGE_SIZE){
+    pagBar.style.display = 'flex';
+    document.getElementById('rp-pagination-info').textContent =
+      `Menampilkan ${startIdx+1}–${Math.min(startIdx+RP_PAGE_SIZE, items.length)} dari ${items.length} (hal. ${_rpPage}/${totalPages})`;
+    document.getElementById('rp-page-prev').disabled = _rpPage <= 1;
+    document.getElementById('rp-page-next').disabled = _rpPage >= totalPages;
+  } else {
+    pagBar.style.display = 'none';
+  }
+
+  const sumberBadge = s => `<span class="badge ${s==='Stok Teknik'?'badge-perbaikan':'badge-part'}">${s}</span>`;
+
+  document.getElementById('rp-tbody').innerHTML = pageItems.map(p => `
+    <tr>
+      <td style="font-weight:600">${p.nama}</td>
+      <td style="text-align:center;font-family:var(--mono)">${p.jumlah}</td>
+      <td>${sumberBadge(p.sumber)}</td>
+      <td>${p.teknisi}</td>
+      <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${p.date||'—'}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="openPartDetail('${p._joblogId}')">Lihat</button></td>
+    </tr>
+  `).join('');
+
+  if(cardsEl){
+    cardsEl.innerHTML = pageItems.map(p => `
+      <div class="jl-card">
+        <div class="jl-card-top">
+          <div class="jl-card-top-left">
+            <div class="jl-card-nama">📦 ${p.nama}</div>
+          </div>
+          ${sumberBadge(p.sumber)}
+        </div>
+        <div class="jl-card-divider"></div>
+        <div class="jl-card-meta">
+          <div class="jl-card-meta-item">
+            <span class="jl-card-meta-label">Jumlah</span>
+            <span class="jl-card-meta-val">${p.jumlah} pcs</span>
+          </div>
+          <div class="jl-card-meta-item">
+            <span class="jl-card-meta-label">Teknisi</span>
+            <span class="jl-card-meta-val">👤 ${p.teknisi}</span>
+          </div>
+          <div class="jl-card-meta-item" style="grid-column:span 2">
+            <span class="jl-card-meta-label">Tgl Diambil</span>
+            <span class="jl-card-meta-val">📅 ${p.date||'—'}</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px" onclick="openPartDetail('${p._joblogId}')">Lihat Detail Pekerjaan</button>
+      </div>
+    `).join('');
+  }
+}
+
+function rpChangePage(direction){
+  _rpPage += direction;
+  renderRekapPart();
+  document.getElementById('rp-pagination').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function resetRekapPartFilter(){
+  ['rp-bulan','rp-nama','rp-sumber','rp-search'].forEach(id=>document.getElementById(id).value='');
+  _rpPage = 1;
+  renderRekapPart();
+}
+
+// Export Excel — ikut filter Bulan/Teknisi/Sumber/pencarian yang sedang aktif
+function exportRekapPart(){
+  const fbulan  = document.getElementById('rp-bulan').value;
+  const fnama   = document.getElementById('rp-nama').value;
+  const fsumber = document.getElementById('rp-sumber').value;
+  const fsearch = document.getElementById('rp-search').value.trim().toLowerCase();
+
+  let items = getFlattenedParts();
+  if(fbulan)  items = items.filter(p => p.date && p.date.startsWith(fbulan));
+  if(fnama)   items = items.filter(p => p.teknisi === fnama);
+  if(fsumber) items = items.filter(p => p.sumber === fsumber);
+  if(fsearch) items = items.filter(p => (p.nama||'').toLowerCase().includes(fsearch));
+
+  if(!items.length){ toast('Tidak ada data untuk diekspor.','warn'); return; }
+
+  items.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  const label = fbulan || 'SemuaPeriode';
+  const data = [
+    ['Tanggal Diambil','Nama Part','Jumlah','Sumber','Teknisi','Mesin','Lokasi','No. SR','Deskripsi Pekerjaan'],
+    ...items.map(p => [p.date||'', p.nama||'', p.jumlah||0, p.sumber||'', p.teknisi||'', p.mesin||'', p.lokasi||'', p.sr||'', p.job||''])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [14,24,10,14,18,16,16,14,40].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Rekap Part');
+  XLSX.writeFile(wb,`RekapPart_${label}_${todayStr()}.xlsx`);
+  toast('Export berhasil!');
+}
+
+// Tampilkan detail pekerjaan tempat part ini diambil (mesin, SR, deskripsi, dst)
+function openPartDetail(joblogId){
+  openDetailJoblog(joblogId);
+}
+
 // ── TAB PANDUAN TROUBLESHOOT (tampilan untuk semua teknisi, read-only) ──
 function renderTsGrid(){
   const grid = document.getElementById('ts-grid');
@@ -6268,6 +6583,25 @@ function durMins(s,e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':')
 function fmtDur(m){if(!m&&m!==0)return '—';const h=Math.floor(m/60),mn=m%60;return h>0?`${h}j ${mn}m`:`${mn}m`;}
 
 // ── BATAS JAM KERJA HARIAN (cegah input "standby/lembur" menutupi total jam) ──
+// ── TANGGAL EFEKTIF & CAP JAM KERJA ───────────────────────────
+// Jam 00:00–06:15 dianggap lanjutan shift hari sebelumnya.
+// Fungsi ini mengembalikan tanggal efektif (YYYY-MM-DD) untuk
+// keperluan perhitungan cap & akumulasi — data Firestore tetap
+// menyimpan tanggal asli yang dipilih teknisi.
+const SHIFT_CUTOFF = '06:15'; // batas atas shift malam (inklusif)
+
+function getEffectiveDate(dateStr, startTime){
+  if(!dateStr || !startTime) return dateStr;
+  // Normalkan startTime ke HH:MM (ambil 5 karakter pertama)
+  const hhmm = (startTime + '').trim().slice(0,5);
+  if(hhmm <= SHIFT_CUTOFF){ // '00:00' s/d '06:15' → hari sebelumnya
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0,10);
+  }
+  return dateStr;
+}
+
 // Senin–Minggu = 7 jam (420 menit), Sabtu = 5 jam (300 menit).
 // Jenis Pekerjaan "Lembur" dikecualikan sepenuhnya dari batas ini.
 const LEMBUR_RE_CAP  = /lembur/i;
@@ -6280,25 +6614,37 @@ function getDailyCapMinutes(dateStr){
 //   {type:'ok'}                          → boleh disimpan
 //   {type:'block', title, message}       → wajib ditolak, tidak bisa dilanjutkan
 //   {type:'confirm', title, message}     → perlu konfirmasi user dulu sebelum disimpan
-function checkJamKerjaCap({ jenis, dur, date, nama, bypassConfirm }){
+function checkJamKerjaCap({ jenis, dur, date, start, nama, bypassConfirm }){
   if(LEMBUR_RE_CAP.test(jenis || '')) return { type:'ok' }; // Lembur bebas dari batas jam kerja
 
-  const capMenit = getDailyCapMinutes(date);
+  // Tanggal efektif: jam 00:00–06:15 dihitung sebagai hari sebelumnya
+  const effDate  = getEffectiveDate(date, start);
+  const capMenit = getDailyCapMinutes(effDate);
 
-  // Semua input (selain Lembur) yang SUDAH tersimpan untuk teknisi & tanggal ini
-  const dayRows = joblogDB.filter(r =>
-    r.nama === nama && r.date === date && typeof r.dur === 'number' && !LEMBUR_RE_CAP.test(r.jenis || '')
-  );
+  // Akumulasi dihitung dari tanggal EFEKTIF — mencakup joblog yang tanggal aslinya
+  // = effDate (normal) ATAU tanggal berikutnya dengan jam 00:00–06:15 (shift malam)
+  const nextDate = (() => {
+    const d = new Date(effDate + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0,10);
+  })();
+
+  const dayRows = joblogDB.filter(r => {
+    if(r.nama !== nama) return false;
+    if(LEMBUR_RE_CAP.test(r.jenis || '')) return false;
+    if(typeof r.dur !== 'number') return false;
+    // Joblog dengan tanggal asli = effDate
+    if(r.date === effDate) return true;
+    // Joblog dengan tanggal asli = hari berikutnya, jam 00:00–06:15 (shift malam)
+    if(r.date === nextDate && r.start && (r.start+'').slice(0,5) <= SHIFT_CUTOFF) return true;
+    return false;
+  });
   const existingTotal = dayRows.reduce((sum, r) => sum + r.dur, 0);
 
   const isStandbyFullDay = STANDBY_RE_CAP.test(jenis || '') && dur >= capMenit;
 
-  // Guard konfirmasi: HANYA relevan kalau ini benar-benar entri PERTAMA hari itu
-  // (belum ada input lain sama sekali). Kalau sudah ada input lain sebelumnya,
-  // pertanyaan "apakah 1 shift ini hanya standby?" jadi tidak relevan — langsung
-  // ke guard total di bawah supaya pesannya soal sisa jam, bukan konfirmasi standby.
   if(isStandbyFullDay && existingTotal === 0){
-    if(bypassConfirm) return { type:'ok' }; // sudah dikonfirmasi user → izinkan walau dur >= capMenit
+    if(bypassConfirm) return { type:'ok' };
     return {
       type:'confirm',
       title:'Konfirmasi Standby',
@@ -6306,26 +6652,26 @@ function checkJamKerjaCap({ jenis, dur, date, nama, bypassConfirm }){
     };
   }
 
-  // Guard keras: total (existing + baru) tidak boleh melebihi jam kerja hari itu — selalu dicek,
-  // termasuk untuk entri SETELAH standby 1 shift penuh sudah dikonfirmasi & tersimpan (existingTotal
-  // saat itu otomatis sudah mencakup dur standby tsb), sehingga input tambahan di hari yang sama
-  // otomatis ikut tertolak dengan pesan "jam kerja sudah habis".
   if(existingTotal + dur > capMenit){
     const sisa = Math.max(0, capMenit - existingTotal);
+    // Label tanggal efektif untuk pesan error
+    const effLabel = effDate !== date
+      ? ` (dihitung sebagai ${new Date(effDate+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'})})`
+      : '';
     if(sisa <= 0){
       const habisKarenaStandby = dayRows.some(r => STANDBY_RE_CAP.test(r.jenis || '') && r.dur >= capMenit);
       return {
         type:'block',
         title:'Jam Kerja Sudah Penuh',
         message: habisKarenaStandby
-          ? `Jam kerja Anda hari ini sudah habis terpakai di Standby (1 shift penuh). Tidak bisa menambah input lain lagi kecuali pilih Jenis Pekerjaan "Lembur".`
-          : `Jam kerja hari ini (${fmtDur(capMenit)}) sudah terpakai penuh dari input sebelumnya. Pilih Jenis Pekerjaan "Lembur" jika pekerjaan ini di luar jam kerja.`
+          ? `Jam kerja Anda${effLabel} sudah habis terpakai di Standby (1 shift penuh). Tidak bisa menambah input lain lagi kecuali pilih Jenis Pekerjaan "Lembur".`
+          : `Jam kerja${effLabel} (${fmtDur(capMenit)}) sudah terpakai penuh dari input sebelumnya. Pilih Jenis Pekerjaan "Lembur" jika pekerjaan ini di luar jam kerja.`
       };
     }
     return {
       type:'block',
       title:'Jam Kerja Sudah Penuh',
-      message:`Total input hari ini sudah ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja. Sisa waktu yang bisa diinput hanya ${fmtDur(sisa)}. Perpendek durasi, atau pilih Jenis Pekerjaan "Lembur" jika ini di luar jam kerja.`
+      message:`Total input${effLabel} sudah ${fmtDur(existingTotal)} dari ${fmtDur(capMenit)} jam kerja. Sisa waktu yang bisa diinput hanya ${fmtDur(sisa)}. Perpendek durasi, atau pilih Jenis Pekerjaan "Lembur" jika ini di luar jam kerja.`
     };
   }
 
